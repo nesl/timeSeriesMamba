@@ -6,7 +6,7 @@ from torch import optim
 from torch.optim import lr_scheduler
 
 from data_provider.m4 import M4Meta
-from models import Autoformer, DLinear, TimeLLM
+from models import Autoformer, DLinear, mambaTimeLLM
 
 from data_provider.data_factory import data_provider
 import time
@@ -141,7 +141,7 @@ for ii in range(args.itr):
     elif args.model == 'DLinear':
         model = DLinear.Model(args).float()
     else:
-        model = TimeLLM.Model(args).float()
+        model = mambaTimeLLM.Model(args).float()
 
     path = os.path.join(args.checkpoints,
                         setting + '-' + args.model_comment)  # unique checkpoint saving path

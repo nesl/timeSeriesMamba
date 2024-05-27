@@ -78,7 +78,7 @@ parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 parser.add_argument('--stride', type=int, default=8, help='stride')
 parser.add_argument('--prompt_domain', type=int, default=0, help='')
 parser.add_argument('--llm_model', type=str, default='LLAMA', help='LLM model') # LLAMA, GPT2, BERT
-parser.add_argument('--llm_dim', type=int, default='4096', help='LLM model dimension')# LLama7b:4096; GPT2-small:768; BERT-base:768
+parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
 
 
 # optimization
@@ -95,8 +95,11 @@ parser.add_argument('--loss', type=str, default='MSE', help='loss function')
 parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
 parser.add_argument('--pct_start', type=float, default=0.2, help='pct_start')
 parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
+#parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
+
+#parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
@@ -122,6 +125,8 @@ for ii in range(args.itr):
         args.factor,
         args.embed,
         args.des, ii)
+    #print("arg tim starts")
+    #startTime = time.time()
 
     train_data, train_loader = data_provider(args, 'train')
     vali_data, vali_loader = data_provider(args, 'val')
@@ -141,10 +146,12 @@ for ii in range(args.itr):
         os.makedirs(path)
 
     time_now = time.time()
-
+    #train_loader = train_loader[0:120]#try this to shorten
     train_steps = len(train_loader)
-    early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience)
+    #train_steps = 120
 
+    early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience)
+    
     trained_parameters = []
     for p in model.parameters():
         if p.requires_grad is True:
@@ -164,19 +171,29 @@ for ii in range(args.itr):
     criterion = nn.MSELoss()
     mae_metric = nn.L1Loss()
 
+    
     train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(
         train_loader, vali_loader, test_loader, model, model_optim, scheduler)
 
     if args.use_amp:
         scaler = torch.cuda.amp.GradScaler()
-
+    
+    #for param_tensor in model.state_dict():
+    #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
+    #trainStartTime = time.time()
+    #print("time prior to epoch runs: ", time.time()-startTime)
     for epoch in range(args.train_epochs):
+        #epochStartTime = time.time()
         iter_count = 0
         train_loss = []
 
         model.train()
         epoch_time = time.time()
+        #iterStartTime = time.time()
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
+            #for testing purposes
+            #if iter_count > 10:
+            #    break
             iter_count += 1
             model_optim.zero_grad()
 
@@ -184,15 +201,17 @@ for ii in range(args.itr):
             batch_y = batch_y.float().to(accelerator.device)
             batch_x_mark = batch_x_mark.float().to(accelerator.device)
             batch_y_mark = batch_y_mark.float().to(accelerator.device)
-
+            
             # decoder input
             dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float().to(
                 accelerator.device)
             dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(
                 accelerator.device)
 
+
             # encoder - decoder
             if args.use_amp:
+                print("using amp")
                 with torch.cuda.amp.autocast():
                     if args.output_attention:
                         outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
@@ -205,25 +224,33 @@ for ii in range(args.itr):
                     loss = criterion(outputs, batch_y)
                     train_loss.append(loss.item())
             else:
+                print("no amp")
                 if args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                 else:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-
                 f_dim = -1 if args.features == 'MS' else 0
                 outputs = outputs[:, -args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -args.pred_len:, f_dim:]
                 loss = criterion(outputs, batch_y)
                 train_loss.append(loss.item())
-
-            if (i + 1) % 100 == 0:
+                if iter_count == 1:
+                  print("batch_x [0]", batch_x[0][0])
+                  print("outputs[0]: ", outputs[0][0])
+                  print("loss: ", loss.item())
+            
+            n = 5
+            if (i + 1) % n == 0:
+            #if (i + 1) % 100 == 0:
+                #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
                 accelerator.print(
                     "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                 speed = (time.time() - time_now) / iter_count
                 left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
                 accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                 iter_count = 0
-                time_now = time.time()
+                break #testing purposes
+                #time_now = time.time()
 
             if args.use_amp:
                 scaler.scale(loss).backward()
@@ -236,6 +263,7 @@ for ii in range(args.itr):
             if args.lradj == 'TST':
                 adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=False)
                 scheduler.step()
+            #break
 
         accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
         train_loss = np.average(train_loss)
@@ -244,7 +272,9 @@ for ii in range(args.itr):
         accelerator.print(
             "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
-
+        
+        #for param_tensor in model.state_dict():
+        #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
         early_stopping(vali_loss, model, path)
         if early_stopping.early_stop:
             accelerator.print("Early stopping")
@@ -262,9 +292,91 @@ for ii in range(args.itr):
 
         else:
             accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
+    
+    accelerator.wait_for_everyone()
+    
+    saveName = 'checkpoints/llamaTest3epoch6layers.pth'
+    torch.save(model.state_dict(),saveName)
+
+    
+    best_model_path = path + '/' + 'checkpoint'
+    accelerator.wait_for_everyone()
+    unwrapped_model = accelerator.unwrap_model(model)
+    torch.cuda.synchronize()
+    torch.cuda.empty_cache()
+    unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
+    
+    print("best path saved at: ", best_model_path)
+    #x, _ = train_loader.dataset.last_insample_window()
+    print("train_loader.dataset: ", train_loader.dataset)
+    print("test_loader.dataset: ", test_loader.dataset)
+    '''
+    x, _ = train_loader.dataset.last_insample_window()
+    y = test_loader.dataset.timeseries
+    x = torch.tensor(x, dtype=torch.float32).to(accelerator.device)
+    x = x.unsqueeze(-1)
+
+    model.eval()
+
+    with torch.no_grad():
+        B, _, C = x.shape
+        dec_inp = torch.zeros((B, args.pred_len, C)).float().to(accelerator.device)
+        dec_inp = torch.cat([x[:, -args.label_len:, :], dec_inp], dim=1)
+        outputs = torch.zeros((B, args.pred_len, C)).float().to(accelerator.device)
+        id_list = np.arange(0, B, args.eval_batch_size)
+        id_list = np.append(id_list, B)
+        for i in range(len(id_list) - 1):
+            outputs[id_list[i]:id_list[i + 1], :, :] = model(
+                x[id_list[i]:id_list[i + 1]],
+                None,
+                dec_inp[id_list[i]:id_list[i + 1]],
+                None
+            )
+        accelerator.wait_for_everyone()
+        f_dim = -1 if args.features == 'MS' else 0
+        outputs = outputs[:, -args.pred_len:, f_dim:]
+        outputs = outputs.detach().cpu().numpy()
+
+        preds = outputs
+        trues = y
+        x = x.detach().cpu().numpy()
+
+    accelerator.print('test shape:', preds.shape)
+
+    folder_path = './ETT_results/' + args.model + '-' + args.model_comment + '/'
+    if not os.path.exists(folder_path) and accelerator.is_local_main_process:
+        os.makedirs(folder_path)
+    if accelerator.is_local_main_process:
+        forecasts_df = pandas.DataFrame(preds[:, :, 0], columns=[f'V{i + 1}' for i in range(args.pred_len)])
+        forecasts_df.index = test_loader.dataset.ids[:preds.shape[0]]
+        forecasts_df.index.name = 'id'
+        forecasts_df.set_index(forecasts_df.columns[0], inplace=True)
+        forecasts_df.to_csv(folder_path + args.seasonal_patterns + '_forecast.csv')
+        
+        # calculate metrics
+        accelerator.print(args.model)
+        file_path = folder_path
+        if 'Weekly_forecast.csv' in os.listdir(file_path) \
+                and 'Monthly_forecast.csv' in os.listdir(file_path) \
+                and 'Yearly_forecast.csv' in os.listdir(file_path) \
+                and 'Daily_forecast.csv' in os.listdir(file_path) \
+                and 'Hourly_forecast.csv' in os.listdir(file_path) \
+                and 'Quarterly_forecast.csv' in os.listdir(file_path):
+            m4_summary = M4Summary(file_path, args.root_path)
+            # m4_forecast.set_index(m4_winner_forecast.columns[0], inplace=True)
+            smape_results, owa_results, mape, mase = m4_summary.evaluate()
+            accelerator.print('smape:', smape_results)
+            accelerator.print('mape:', mape)
+            accelerator.print('mase:', mase)
+            accelerator.print('owa:', owa_results)
+        else:
+            accelerator.print('After all 6 tasks are finished, you can calculate the averaged performance')
+        '''
+
 
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:
     path = './checkpoints'  # unique checkpoint saving path
-    del_files(path)  # delete checkpoint files
-    accelerator.print('success delete checkpoints')
+    #del_files(path)  # delete checkpoint files
+    #accelerator.print('success delete checkpoints')
+    accelerator.print('done!')

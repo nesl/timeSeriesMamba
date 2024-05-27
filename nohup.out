@@ -1,0 +1,436 @@
+[2024-05-16 18:51:29,062] [INFO] [real_accelerator.py:203:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-05-16 18:51:29,088] [INFO] [real_accelerator.py:203:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[93m [WARNING] [0m async_io requires the dev libaio .so object and headers but these were not found.
+[93m [WARNING] [0m async_io requires the dev libaio .so object and headers but these were not found.
+[93m [WARNING] [0m async_io: please install the libaio-dev package with apt
+[93m [WARNING] [0m If libaio is already installed (perhaps from source), try setting the CFLAGS and LDFLAGS environment variables to where it can be found.
+[93m [WARNING] [0m Please specify the CUTLASS repo directory as environment variable $CUTLASS_PATH
+[93m [WARNING] [0m async_io: please install the libaio-dev package with apt
+[93m [WARNING] [0m If libaio is already installed (perhaps from source), try setting the CFLAGS and LDFLAGS environment variables to where it can be found.
+[93m [WARNING] [0m Please specify the CUTLASS repo directory as environment variable $CUTLASS_PATH
+[93m [WARNING] [0m sparse_attn requires a torch version >= 1.5 and < 2.0 but detected 2.3
+[93m [WARNING] [0m using untested triton version (2.3.0), only 1.0.0 is known to be compatible
+[93m [WARNING] [0m sparse_attn requires a torch version >= 1.5 and < 2.0 but detected 2.3
+[93m [WARNING] [0m using untested triton version (2.3.0), only 1.0.0 is known to be compatible
+[2024-05-16 18:51:30,087] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-05-16 18:51:30,087] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+[2024-05-16 18:51:30,098] [INFO] [comm.py:637:init_distributed] cdb=None
+Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+Success copying parameter word_embeddings
+Success copying parameter word_embeddings
+Success copying parameter llm_model.embeddings.weight
+Success copying parameter llm_model.layers.0.norm.weight
+Success copying parameter llm_model.layers.0.mixer.A_log
+Success copying parameter llm_model.layers.0.mixer.D
+Success copying parameter llm_model.layers.0.mixer.conv1d.weight
+Success copying parameter llm_model.layers.0.mixer.conv1d.bias
+Success copying parameter llm_model.layers.0.mixer.in_proj.weight
+Success copying parameter llm_model.layers.0.mixer.x_proj.weight
+Success copying parameter llm_model.layers.0.mixer.dt_proj.weight
+Success copying parameter llm_model.layers.0.mixer.dt_proj.bias
+Success copying parameter llm_model.layers.0.mixer.out_proj.weight
+Success copying parameter llm_model.layers.1.norm.weight
+Success copying parameter llm_model.layers.1.mixer.A_log
+Success copying parameter llm_model.layers.1.mixer.D
+Success copying parameter llm_model.layers.1.mixer.conv1d.weight
+Success copying parameter llm_model.layers.1.mixer.conv1d.bias
+Success copying parameter llm_model.layers.1.mixer.in_proj.weight
+Success copying parameter llm_model.layers.1.mixer.x_proj.weight
+Success copying parameter llm_model.layers.1.mixer.dt_proj.weight
+Success copying parameter llm_model.layers.1.mixer.dt_proj.bias
+Success copying parameter llm_model.layers.1.mixer.out_proj.weight
+Success copying parameter llm_model.norm_f.weight
+Success copying parameter patch_embedding.value_embedding.tokenConv.weight
+Success copying parameter llm_model.embeddings.weight
+Success copying parameter llm_model.layers.0.norm.weight
+Success copying parameter llm_model.layers.0.mixer.A_log
+Success copying parameter llm_model.layers.0.mixer.D
+Success copying parameter llm_model.layers.0.mixer.conv1d.weight
+Success copying parameter llm_model.layers.0.mixer.conv1d.bias
+Success copying parameter llm_model.layers.0.mixer.in_proj.weight
+Success copying parameter llm_model.layers.0.mixer.x_proj.weight
+Success copying parameter llm_model.layers.0.mixer.dt_proj.weight
+Success copying parameter llm_model.layers.0.mixer.dt_proj.bias
+Success copying parameter llm_model.layers.0.mixer.out_proj.weight
+Success copying parameter llm_model.layers.1.norm.weight
+Success copying parameter llm_model.layers.1.mixer.A_log
+Success copying parameter llm_model.layers.1.mixer.D
+Success copying parameter llm_model.layers.1.mixer.conv1d.weight
+Success copying parameter llm_model.layers.1.mixer.conv1d.bias
+Success copying parameter llm_model.layers.1.mixer.in_proj.weight
+Success copying parameter llm_model.layers.1.mixer.x_proj.weight
+Success copying parameter llm_model.layers.1.mixer.dt_proj.weight
+Success copying parameter llm_model.layers.1.mixer.dt_proj.bias
+Success copying parameter llm_model.layers.1.mixer.out_proj.weight
+Success copying parameter llm_model.norm_f.weight
+Success copying parameter patch_embedding.value_embedding.tokenConv.weight
+Success copying parameter mapping_layer.weight
+Success copying parameter mapping_layer.bias
+Success copying parameter reprogramming_layer.query_projection.weight
+Success copying parameter reprogramming_layer.query_projection.bias
+Success copying parameter reprogramming_layer.key_projection.weight
+Success copying parameter reprogramming_layer.key_projection.bias
+Success copying parameter reprogramming_layer.value_projection.weight
+Success copying parameter reprogramming_layer.value_projection.bias
+Success copying parameter reprogramming_layer.out_projection.weight
+Success copying parameter reprogramming_layer.out_projection.bias
+Success copying parameter output_projection.linear.weight
+Success copying parameter output_projection.linear.bias
+[2024-05-16 18:51:31,293] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed info: version=0.14.2, git-hash=unknown, git-branch=unknown
+Success copying parameter mapping_layer.weight
+Success copying parameter mapping_layer.bias
+Success copying parameter reprogramming_layer.query_projection.weight
+Success copying parameter reprogramming_layer.query_projection.bias
+Success copying parameter reprogramming_layer.key_projection.weight
+Success copying parameter reprogramming_layer.key_projection.bias
+Success copying parameter reprogramming_layer.value_projection.weight
+Success copying parameter reprogramming_layer.value_projection.bias
+Success copying parameter reprogramming_layer.out_projection.weight
+Success copying parameter reprogramming_layer.out_projection.bias
+Success copying parameter output_projection.linear.weight
+Success copying parameter output_projection.linear.bias
+[2024-05-16 18:51:31,649] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Flops Profiler Enabled: False
+[2024-05-16 18:51:31,650] [INFO] [logging.py:96:log_dist] [Rank 0] Using client Optimizer as basic optimizer
+[2024-05-16 18:51:31,650] [INFO] [logging.py:96:log_dist] [Rank 0] Removing param_group that has no 'params' in the basic Optimizer
+[2024-05-16 18:51:31,650] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Basic Optimizer = Adam
+[2024-05-16 18:51:31,650] [INFO] [utils.py:56:is_zero_supported_optimizer] Checking ZeRO support for optimizer=Adam type=<class 'torch.optim.adam.Adam'>
+[2024-05-16 18:51:31,650] [INFO] [logging.py:96:log_dist] [Rank 0] Creating torch.bfloat16 ZeRO stage 2 optimizer
+[2024-05-16 18:51:31,650] [INFO] [stage_1_and_2.py:148:__init__] Reduce bucket size 200000000
+[2024-05-16 18:51:31,651] [INFO] [stage_1_and_2.py:149:__init__] Allgather bucket size 200000000
+[2024-05-16 18:51:31,651] [INFO] [stage_1_and_2.py:150:__init__] CPU Offload: False
+[2024-05-16 18:51:31,651] [INFO] [stage_1_and_2.py:151:__init__] Round robin gradient partitioning: False
+0it [00:00, ?it/s][2024-05-16 18:51:31,932] [INFO] [utils.py:779:see_memory_usage] Before initializing optimizer states
+[2024-05-16 18:51:31,933] [INFO] [utils.py:780:see_memory_usage] MA 0.29 GB         Max_MA 0.34 GB         CA 0.34 GB         Max_CA 0 GB 
+[2024-05-16 18:51:31,933] [INFO] [utils.py:787:see_memory_usage] CPU Virtual Memory:  used = 8.75 GB, percent = 7.0%
+0it [00:00, ?it/s]
+0it [00:00, ?it/s][2024-05-16 18:51:32,087] [INFO] [utils.py:779:see_memory_usage] After initializing optimizer states
+[2024-05-16 18:51:32,087] [INFO] [utils.py:780:see_memory_usage] MA 0.29 GB         Max_MA 0.39 GB         CA 0.44 GB         Max_CA 0 GB 
+[2024-05-16 18:51:32,088] [INFO] [utils.py:787:see_memory_usage] CPU Virtual Memory:  used = 8.67 GB, percent = 6.9%
+[2024-05-16 18:51:32,088] [INFO] [stage_1_and_2.py:543:__init__] optimizer state initialized
+[2024-05-16 18:51:32,232] [INFO] [utils.py:779:see_memory_usage] After initializing ZeRO optimizer
+[2024-05-16 18:51:32,232] [INFO] [utils.py:780:see_memory_usage] MA 0.29 GB         Max_MA 0.29 GB         CA 0.44 GB         Max_CA 0 GB 
+[2024-05-16 18:51:32,232] [INFO] [utils.py:787:see_memory_usage] CPU Virtual Memory:  used = 8.67 GB, percent = 6.9%
+[2024-05-16 18:51:32,233] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Final Optimizer = Adam
+[2024-05-16 18:51:32,233] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed using client LR scheduler
+[2024-05-16 18:51:32,233] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed LR Scheduler = None
+[2024-05-16 18:51:32,233] [INFO] [logging.py:96:log_dist] [Rank 0] step=0, skipped=0, lr=[0.0003999999999999993], mom=[(0.95, 0.999)]
+[2024-05-16 18:51:32,233] [INFO] [config.py:996:print] DeepSpeedEngine configuration:
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   activation_checkpointing_config  {
+    "partition_activations": false, 
+    "contiguous_memory_optimization": false, 
+    "cpu_checkpointing": false, 
+    "number_checkpoints": null, 
+    "synchronize_checkpoint_boundary": false, 
+    "profile": false
+}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   aio_config ................... {'block_size': 1048576, 'queue_depth': 8, 'thread_count': 1, 'single_submit': False, 'overlap_events': True}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   amp_enabled .................. False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   amp_params ................... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   autotuning_config ............ {
+    "enabled": false, 
+    "start_step": null, 
+    "end_step": null, 
+    "metric_path": null, 
+    "arg_mappings": null, 
+    "metric": "throughput", 
+    "model_info": null, 
+    "results_dir": "autotuning_results", 
+    "exps_dir": "autotuning_exps", 
+    "overwrite": true, 
+    "fast": true, 
+    "start_profile_step": 3, 
+    "end_profile_step": 5, 
+    "tuner_type": "gridsearch", 
+    "tuner_early_stopping": 5, 
+    "tuner_num_trials": 50, 
+    "model_info_path": null, 
+    "mp_size": 1, 
+    "max_train_batch_size": null, 
+    "min_train_batch_size": 1, 
+    "max_train_micro_batch_size_per_gpu": 1.024000e+03, 
+    "min_train_micro_batch_size_per_gpu": 1, 
+    "num_tuning_micro_batch_sizes": 3
+}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   bfloat16_enabled ............. True
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   bfloat16_immediate_grad_update  False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   checkpoint_parallel_write_pipeline  False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   checkpoint_tag_validation_enabled  True
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   checkpoint_tag_validation_fail  False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   comms_config ................. <deepspeed.comm.config.DeepSpeedCommsConfig object at 0x7f52e262b320>
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   communication_data_type ...... None
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   compile_config ............... enabled=False backend='inductor' kwargs={}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   compression_config ........... {'weight_quantization': {'shared_parameters': {'enabled': False, 'quantizer_kernel': False, 'schedule_offset': 0, 'quantize_groups': 1, 'quantize_verbose': False, 'quantization_type': 'symmetric', 'quantize_weight_in_forward': False, 'rounding': 'nearest', 'fp16_mixed_quantize': False, 'quantize_change_ratio': 0.001}, 'different_groups': {}}, 'activation_quantization': {'shared_parameters': {'enabled': False, 'quantization_type': 'symmetric', 'range_calibration': 'dynamic', 'schedule_offset': 1000}, 'different_groups': {}}, 'sparse_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'row_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'head_pruning': {'shared_parameters': {'enabled': False, 'method': 'topk', 'schedule_offset': 1000}, 'different_groups': {}}, 'channel_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'layer_reduction': {'enabled': False}}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   curriculum_enabled_legacy .... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   curriculum_params_legacy ..... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   data_efficiency_config ....... {'enabled': False, 'seed': 1234, 'data_sampling': {'enabled': False, 'num_epochs': 1000, 'num_workers': 0, 'curriculum_learning': {'enabled': False}}, 'data_routing': {'enabled': False, 'random_ltd': {'enabled': False, 'layer_token_lr_schedule': {'enabled': False}}}}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   data_efficiency_enabled ...... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   dataloader_drop_last ......... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   disable_allgather ............ False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   dump_state ................... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   dynamic_loss_scale_args ...... None
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_enabled ........... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_gas_boundary_resolution  1
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_layer_name ........ bert.encoder.layer
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_layer_num ......... 0
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_max_iter .......... 100
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_stability ......... 1e-06
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_tol ............... 0.01
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   eigenvalue_verbose ........... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   elasticity_enabled ........... False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   flops_profiler_config ........ {
+    "enabled": false, 
+    "recompute_fwd_factor": 0.0, 
+    "profile_step": 1, 
+    "module_depth": -1, 
+    "top_modules": 1, 
+    "detailed": true, 
+    "output_file": null
+}
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   fp16_auto_cast ............... None
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   fp16_enabled ................. False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   fp16_master_weights_and_gradients  False
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   global_rank .................. 0
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   grad_accum_dtype ............. None
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   gradient_accumulation_steps .. 1
+[2024-05-16 18:51:32,234] [INFO] [config.py:1000:print]   gradient_clipping ............ 0.0
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   gradient_predivide_factor .... 1.0
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   graph_harvesting ............. False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   hybrid_engine ................ enabled=False max_out_tokens=512 inference_tp_size=1 release_inference_cache=False pin_parameters=True tp_gather_partition_size=8
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   initial_dynamic_scale ........ 1
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   load_universal_checkpoint .... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   loss_scale ................... 1.0
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   memory_breakdown ............. False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   mics_hierarchial_params_gather  False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   mics_shard_size .............. -1
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   monitor_config ............... tensorboard=TensorBoardConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') wandb=WandbConfig(enabled=False, group=None, team=None, project='deepspeed') csv_monitor=CSVConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') enabled=False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   nebula_config ................ {
+    "enabled": false, 
+    "persistent_storage_path": null, 
+    "persistent_time_interval": 100, 
+    "num_of_version_in_retention": 2, 
+    "enable_nebula_load": true, 
+    "load_path": null
+}
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   optimizer_legacy_fusion ...... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   optimizer_name ............... None
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   optimizer_params ............. None
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   pipeline ..................... {'stages': 'auto', 'partition': 'best', 'seed_layers': False, 'activation_checkpoint_interval': 0, 'pipe_partitioned': True, 'grad_partitioned': True}
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   pld_enabled .................. False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   pld_params ................... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   prescale_gradients ........... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   scheduler_name ............... None
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   scheduler_params ............. None
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   seq_parallel_communication_data_type  torch.float32
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   sparse_attention ............. None
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   sparse_gradients_enabled ..... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   steps_per_print .............. inf
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   train_batch_size ............. 32
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   train_micro_batch_size_per_gpu  16
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   use_data_before_expert_parallel_  False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   use_node_local_storage ....... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   wall_clock_breakdown ......... False
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   weight_quantization_config ... None
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   world_size ................... 2
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   zero_allow_untested_optimizer  True
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   zero_config .................. stage=2 contiguous_gradients=True reduce_scatter=True reduce_bucket_size=200000000 use_multi_rank_bucket_allreduce=True allgather_partitions=True allgather_bucket_size=200000000 overlap_comm=True load_from_fp32_weights=True elastic_checkpoint=False offload_param=None offload_optimizer=None sub_group_size=1000000000 cpu_offload_param=None cpu_offload_use_pin_memory=None cpu_offload=None prefetch_bucket_size=50,000,000 param_persistence_threshold=100,000 model_persistence_threshold=sys.maxsize max_live_parameters=1,000,000,000 max_reuse_distance=1,000,000,000 gather_16bit_weights_on_model_save=False stage3_gather_fp16_weights_on_model_save=False ignore_unused_parameters=True legacy_stage1=False round_robin_gradients=False zero_hpz_partition_size=1 zero_quantized_weights=False zero_quantized_nontrainable_weights=False zero_quantized_gradients=False mics_shard_size=-1 mics_hierarchical_params_gather=False memory_efficient_linear=True pipeline_loading_checkpoint=False override_module_apply=True
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   zero_enabled ................. True
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   zero_force_ds_cpu_optimizer .. True
+[2024-05-16 18:51:32,235] [INFO] [config.py:1000:print]   zero_optimization_stage ...... 2
+[2024-05-16 18:51:32,235] [INFO] [config.py:986:print_user_config]   json = {
+    "bf16": {
+        "enabled": true, 
+        "auto_cast": true
+    }, 
+    "zero_optimization": {
+        "stage": 2, 
+        "allgather_partitions": true, 
+        "allgather_bucket_size": 2.000000e+08, 
+        "overlap_comm": true, 
+        "reduce_scatter": true, 
+        "reduce_bucket_size": 2.000000e+08, 
+        "contiguous_gradients": true, 
+        "sub_group_size": 1.000000e+09
+    }, 
+    "gradient_accumulation_steps": 1, 
+    "train_batch_size": 32, 
+    "train_micro_batch_size_per_gpu": 16, 
+    "steps_per_print": inf, 
+    "wall_clock_breakdown": false, 
+    "fp16": {
+        "enabled": false
+    }, 
+    "zero_allow_untested_optimizer": true
+}
+0it [00:00, ?it/s]0it [00:00, ?it/s]
+0it [00:00, ?it/s]1it [00:00,  1.52it/s]1it [00:01,  1.15s/it]3it [00:00,  4.60it/s]3it [00:01,  2.92it/s]5it [00:00,  7.25it/s]5it [00:01,  5.03it/s]7it [00:01,  7.08it/s]7it [00:01,  9.40it/s]9it [00:01, 11.18it/s]9it [00:01,  8.99it/s]11it [00:01, 12.80it/s]11it [00:01, 10.83it/s]13it [00:01, 12.42it/s]13it [00:01, 14.07it/s]15it [00:01, 14.96it/s]15it [00:01, 13.65it/s]17it [00:02, 14.40it/s]17it [00:01, 15.36it/s]19it [00:02, 15.34it/s]19it [00:01, 16.08it/s]21it [00:01, 16.47it/s]21it [00:02, 15.91it/s]23it [00:02, 16.05it/s]23it [00:01, 16.42it/s]25it [00:02, 16.35it/s]25it [00:02, 16.62it/s]27it [00:02, 16.43it/s]27it [00:02, 16.62it/s]29it [00:02, 16.50it/s]29it [00:02, 16.35it/s]31it [00:02, 16.45it/s]31it [00:02, 16.54it/s]33it [00:02, 16.64it/s]33it [00:03, 16.56it/s]35it [00:02, 16.74it/s]35it [00:03, 16.68it/s]37it [00:03, 16.52it/s]37it [00:02, 16.54it/s]39it [00:03, 16.39it/s]39it [00:02, 16.40it/s]41it [00:03, 16.43it/s]41it [00:03, 16.44it/s]43it [00:03, 16.48it/s]43it [00:03, 16.46it/s]45it [00:03, 16.59it/s]45it [00:03, 16.59it/s]47it [00:03, 16.59it/s]47it [00:03, 16.59it/s]49it [00:03, 16.69it/s]49it [00:04, 16.68it/s]51it [00:04, 16.49it/s]51it [00:03, 16.49it/s]53it [00:04, 16.60it/s]53it [00:03, 16.60it/s]55it [00:04, 16.54it/s]55it [00:03, 16.53it/s]57it [00:04, 16.60it/s]57it [00:04, 16.58it/s]59it [00:04, 16.55it/s]59it [00:04, 16.55it/s]61it [00:04, 16.76it/s]61it [00:04, 16.76it/s]63it [00:04, 16.73it/s]63it [00:04, 16.73it/s]65it [00:04, 16.50it/s]65it [00:04, 16.50it/s]67it [00:05, 16.58it/s]67it [00:04, 16.57it/s]69it [00:04, 16.55it/s]69it [00:05, 16.54it/s]71it [00:05, 16.42it/s]71it [00:04, 16.42it/s]73it [00:05, 16.04it/s]73it [00:05, 16.03it/s]75it [00:05, 16.07it/s]75it [00:05, 16.06it/s]77it [00:05, 16.37it/s]77it [00:05, 16.36it/s]79it [00:05, 16.54it/s]79it [00:05, 16.53it/s]81it [00:05, 16.60it/s]81it [00:05, 16.59it/s]83it [00:05, 16.69it/s]83it [00:06, 16.68it/s]85it [00:05, 16.61it/s]85it [00:06, 16.60it/s]87it [00:06, 16.30it/s]87it [00:05, 16.28it/s]89it [00:05, 16.22it/s]89it [00:06, 16.22it/s]91it [00:06, 16.31it/s]91it [00:06, 16.30it/s]93it [00:06, 16.30it/s]93it [00:06, 16.29it/s]95it [00:06, 16.21it/s]95it [00:06, 16.20it/s]97it [00:06, 16.27it/s]97it [00:06, 16.26it/s]99it [00:06, 16.41it/s]99it [00:07, 16.40it/s]101it [00:07, 16.49it/s]101it [00:06, 16.48it/s]103it [00:07, 16.70it/s]103it [00:06, 16.69it/s]105it [00:07, 16.72it/s]105it [00:06, 16.72it/s]107it [00:07, 16.68it/s]107it [00:07, 16.66it/s]109it [00:07, 16.71it/s]109it [00:07, 16.71it/s]111it [00:07, 16.70it/s]111it [00:07, 16.70it/s]113it [00:07, 16.58it/s]113it [00:07, 16.57it/s]115it [00:08, 16.52it/s]115it [00:07, 16.51it/s]117it [00:08, 16.30it/s]117it [00:07, 16.30it/s]119it [00:07, 16.34it/s]119it [00:08, 16.33it/s]121it [00:08, 16.44it/s]121it [00:07, 16.44it/s]123it [00:08, 16.24it/s]123it [00:08, 16.23it/s]125it [00:08, 16.49it/s]125it [00:08, 16.48it/s]127it [00:08, 16.52it/s]127it [00:08, 16.50it/s]129it [00:08, 16.60it/s]129it [00:08, 16.59it/s]131it [00:08, 16.39it/s]131it [00:09, 16.38it/s]133it [00:08, 16.37it/s]133it [00:09, 16.36it/s]135it [00:09, 16.25it/s]135it [00:08, 16.24it/s]137it [00:09, 16.42it/s]137it [00:08, 16.41it/s]139it [00:09, 16.52it/s]139it [00:09, 16.50it/s]141it [00:09, 16.02it/s]141it [00:09, 16.02it/s]143it [00:09, 15.89it/s]143it [00:09, 15.89it/s]145it [00:09, 16.17it/s]145it [00:09, 16.16it/s]147it [00:09, 15.67it/s]147it [00:10, 15.67it/s]149it [00:10, 15.85it/s]149it [00:09, 15.83it/s]151it [00:10, 16.00it/s]151it [00:09, 15.99it/s]153it [00:10, 16.02it/s]153it [00:09, 16.01it/s]155it [00:10, 16.21it/s]155it [00:10, 16.20it/s]157it [00:10, 16.43it/s]157it [00:10, 16.42it/s]159it [00:10, 16.58it/s]159it [00:10, 16.57it/s]161it [00:10, 16.63it/s]161it [00:10, 16.62it/s]163it [00:10, 16.68it/s]163it [00:10, 16.67it/s]165it [00:11, 16.69it/s]165it [00:10, 16.68it/s]167it [00:11, 16.62it/s]167it [00:10, 16.61it/s]169it [00:11, 16.71it/s]169it [00:10, 16.70it/s]171it [00:10, 16.65it/s]171it [00:11, 16.64it/s]173it [00:11, 16.61it/s]173it [00:11, 16.60it/s]175it [00:11, 16.69it/s]175it [00:11, 16.68it/s]177it [00:11, 16.78it/s]177it [00:11, 16.77it/s]179it [00:11, 16.68it/s]179it [00:11, 16.68it/s]181it [00:11, 16.49it/s]181it [00:12, 16.48it/s]183it [00:12, 16.68it/s]183it [00:11, 16.67it/s]185it [00:12, 16.59it/s]185it [00:11, 16.57it/s]187it [00:12, 16.53it/s]187it [00:11, 16.52it/s]189it [00:12, 16.67it/s]189it [00:12, 16.66it/s]191it [00:12, 16.52it/s]191it [00:12, 16.51it/s]193it [00:12, 16.44it/s]193it [00:12, 16.44it/s]195it [00:12, 16.36it/s]195it [00:12, 16.34it/s]197it [00:12, 16.27it/s]197it [00:13, 16.26it/s]199it [00:13, 16.33it/s]199it [00:12, 16.31it/s]201it [00:13, 16.16it/s]201it [00:12, 16.15it/s]203it [00:13, 16.27it/s]203it [00:12, 16.27it/s]205it [00:13, 16.38it/s]205it [00:13, 16.38it/s]207it [00:13, 16.29it/s]207it [00:13, 16.28it/s]209it [00:13, 16.20it/s]209it [00:13, 16.20it/s]211it [00:13, 16.20it/s]211it [00:13, 16.19it/s]213it [00:14, 16.34it/s]213it [00:13, 16.33it/s]215it [00:13, 16.37it/s]215it [00:14, 16.36it/s]217it [00:13, 16.12it/s]217it [00:14, 16.11it/s]219it [00:13, 16.04it/s]219it [00:14, 16.03it/s]221it [00:14, 16.18it/s]221it [00:14, 16.17it/s]223it [00:14, 16.35it/s]223it [00:14, 16.35it/s]225it [00:14, 16.34it/s]225it [00:14, 16.34it/s]227it [00:14, 16.37it/s]227it [00:14, 16.36it/s]229it [00:14, 16.57it/s]229it [00:14, 16.56it/s]231it [00:14, 16.58it/s]231it [00:15, 16.57it/s]233it [00:14, 16.72it/s]233it [00:15, 16.71it/s]235it [00:15, 15.83it/s]235it [00:14, 15.81it/s]237it [00:15, 15.97it/s]237it [00:15, 15.96it/s]239it [00:15, 16.21it/s]239it [00:15, 16.20it/s]241it [00:15, 16.53it/s]241it [00:15, 16.51it/s]243it [00:15, 16.53it/s]243it [00:15, 16.52it/s]245it [00:15, 16.75it/s]245it [00:15, 16.74it/s]247it [00:15, 16.74it/s]247it [00:16, 16.74it/s]249it [00:15, 16.64it/s]249it [00:16, 16.64it/s]251it [00:16, 16.72it/s]251it [00:15, 16.70it/s]253it [00:15, 16.64it/s]253it [00:16, 16.63it/s]255it [00:16, 15.97it/s]255it [00:16, 15.97it/s]257it [00:16, 16.04it/s]257it [00:16, 16.02it/s]259it [00:16, 16.10it/s]259it [00:16, 16.10it/s]261it [00:16, 16.25it/s]261it [00:16, 16.24it/s]263it [00:17, 16.29it/s]263it [00:16, 16.29it/s]265it [00:17, 16.28it/s]265it [00:16, 16.27it/s]267it [00:17, 16.31it/s]267it [00:16, 16.31it/s]269it [00:16, 16.66it/s]269it [00:17, 16.65it/s]271it [00:17, 16.36it/s]271it [00:17, 16.35it/s]273it [00:17, 16.32it/s]273it [00:17, 16.31it/s]275it [00:17, 16.35it/s]275it [00:17, 16.34it/s]277it [00:17, 16.52it/s]277it [00:17, 16.51it/s]279it [00:17, 16.38it/s]279it [00:18, 16.37it/s]281it [00:18, 16.48it/s]281it [00:17, 16.47it/s]283it [00:18, 16.35it/s]283it [00:17, 16.34it/s]285it [00:18, 16.37it/s]285it [00:17, 16.36it/s]287it [00:18, 16.43it/s]287it [00:18, 16.42it/s]289it [00:18, 16.52it/s]289it [00:18, 16.51it/s]291it [00:18, 16.45it/s]291it [00:18, 16.44it/s]293it [00:18, 16.68it/s]293it [00:18, 16.67it/s]295it [00:19, 16.77it/s]295it [00:18, 16.77it/s]297it [00:18, 16.75it/s]297it [00:19, 16.74it/s]299it [00:19, 16.63it/s]299it [00:18, 16.63it/s]301it [00:19, 16.91it/s]301it [00:18, 16.91it/s]303it [00:19, 16.91it/s]303it [00:19, 16.90it/s]305it [00:19, 16.78it/s]305it [00:19, 16.77it/s]307it [00:19, 16.75it/s]307it [00:19, 16.74it/s]309it [00:19, 16.64it/s]309it [00:19, 16.63it/s]311it [00:19, 16.74it/s]311it [00:19, 16.73it/s]313it [00:19, 16.65it/s]313it [00:20, 16.64it/s]315it [00:20, 16.62it/s]315it [00:19, 16.61it/s]317it [00:20, 16.46it/s]317it [00:19, 16.45it/s]319it [00:19, 16.44it/s]319it [00:20, 16.43it/s]321it [00:20, 16.40it/s]321it [00:20, 16.39it/s]323it [00:20, 16.42it/s]323it [00:20, 16.41it/s]325it [00:20, 16.45it/s]325it [00:20, 16.44it/s]327it [00:20, 16.75it/s]327it [00:20, 16.74it/s]329it [00:20, 16.62it/s]329it [00:21, 16.61it/s]331it [00:20, 16.23it/s]331it [00:21, 16.22it/s]333it [00:20, 16.29it/s]333it [00:21, 16.29it/s]335it [00:21, 16.44it/s]335it [00:20, 16.43it/s]337it [00:21, 16.35it/s]337it [00:21, 16.35it/s]339it [00:21, 15.25it/s]339it [00:21, 15.24it/s]341it [00:21, 15.49it/s]341it [00:21, 15.49it/s]343it [00:21, 15.68it/s]343it [00:21, 15.68it/s]345it [00:21, 16.01it/s]345it [00:22, 16.01it/s]347it [00:22, 16.14it/s]347it [00:21, 16.13it/s]349it [00:21, 16.20it/s]349it [00:22, 16.20it/s]351it [00:21, 16.29it/s]351it [00:22, 16.29it/s]353it [00:22, 16.16it/s]353it [00:22, 16.15it/s]355it [00:22, 15.97it/s]355it [00:22, 15.96it/s]357it [00:22, 15.51it/s]357it [00:22, 15.50it/s]359it [00:22, 15.79it/s]359it [00:22, 15.78it/s]361it [00:23, 16.15it/s]361it [00:22, 16.14it/s]363it [00:22, 16.38it/s]363it [00:23, 16.37it/s]365it [00:22, 16.47it/s]365it [00:23, 16.46it/s]367it [00:23, 16.57it/s]367it [00:22, 16.56it/s]369it [00:23, 16.45it/s]369it [00:23, 16.44it/s]371it [00:23, 16.32it/s]371it [00:23, 16.31it/s]373it [00:23, 16.25it/s]373it [00:23, 16.24it/s]375it [00:23, 16.39it/s]375it [00:23, 16.37it/s]377it [00:23, 16.38it/s]377it [00:24, 16.37it/s]379it [00:23, 16.47it/s]379it [00:24, 16.47it/s]381it [00:23, 16.44it/s]381it [00:24, 16.44it/s]383it [00:24, 16.39it/s]383it [00:23, 16.38it/s]385it [00:24, 16.33it/s]385it [00:24, 16.33it/s]387it [00:24, 15.43it/s]387it [00:24, 15.43it/s]389it [00:24, 15.77it/s]389it [00:24, 15.77it/s]391it [00:24, 15.99it/s]391it [00:24, 15.99it/s]393it [00:24, 16.06it/s]393it [00:25, 16.06it/s]395it [00:24, 16.21it/s]395it [00:25, 16.21it/s]397it [00:24, 16.30it/s]397it [00:25, 16.30it/s]399it [00:25, 16.48it/s]399it [00:24, 16.47it/s]401it [00:25, 16.52it/s]401it [00:25, 16.51it/s]403it [00:25, 16.84it/s]403it [00:25, 16.83it/s]405it [00:25, 16.57it/s]405it [00:25, 16.56it/s]407it [00:25, 16.53it/s]407it [00:25, 16.53it/s]409it [00:25, 16.59it/s]409it [00:26, 16.59it/s]411it [00:25, 16.69it/s]411it [00:26, 16.68it/s]413it [00:26, 16.70it/s]413it [00:25, 16.68it/s]415it [00:25, 16.65it/s]415it [00:26, 16.64it/s]417it [00:26, 16.45it/s]417it [00:25, 16.44it/s]419it [00:26, 16.38it/s]419it [00:26, 16.37it/s]421it [00:26, 16.32it/s]421it [00:26, 16.31it/s]423it [00:26, 16.38it/s]423it [00:26, 16.37it/s]425it [00:26, 16.54it/s]425it [00:26, 16.54it/s]427it [00:26, 16.57it/s]427it [00:27, 16.56it/s]429it [00:27, 16.21it/s]429it [00:26, 16.21it/s]431it [00:27, 16.22it/s]431it [00:26, 16.22it/s]433it [00:26, 16.25it/s]433it [00:27, 16.24it/s]435it [00:27, 16.23it/s]435it [00:27, 16.22it/s]437it [00:27, 16.27it/s]437it [00:27, 16.27it/s]439it [00:27, 16.36it/s]439it [00:27, 16.36it/s]441it [00:27, 15.70it/s]441it [00:27, 15.69it/s]443it [00:28, 15.78it/s]443it [00:27, 15.77it/s]445it [00:27, 16.04it/s]445it [00:28, 16.03it/s]447it [00:27, 16.14it/s]447it [00:28, 16.13it/s]449it [00:28, 16.11it/s]449it [00:27, 16.09it/s]451it [00:28, 16.08it/s]451it [00:28, 16.07it/s]453it [00:28, 16.22it/s]453it [00:28, 16.21it/s]455it [00:28, 16.39it/s]455it [00:28, 16.38it/s]457it [00:28, 16.46it/s]457it [00:28, 16.45it/s]459it [00:28, 16.50it/s]459it [00:29, 16.49it/s]461it [00:29, 16.45it/s]461it [00:28, 16.44it/s]463it [00:28, 15.83it/s]463it [00:29, 15.82it/s]465it [00:28, 15.95it/s]465it [00:29, 15.95it/s]467it [00:29, 16.14it/s]467it [00:29, 16.13it/s]469it [00:29, 16.12it/s]469it [00:29, 16.11it/s]471it [00:29, 16.11it/s]471it [00:29, 16.10it/s]473it [00:29, 16.19it/s]473it [00:29, 16.18it/s]475it [00:30, 16.41it/s]475it [00:29, 16.40it/s]477it [00:29, 16.32it/s]477it [00:30, 16.31it/s]479it [00:29, 16.33it/s]479it [00:30, 16.32it/s]481it [00:29, 16.41it/s]481it [00:30, 16.41it/s]483it [00:30, 16.61it/s]483it [00:30, 16.61it/s]485it [00:30, 16.70it/s]485it [00:30, 16.70it/s]487it [00:30, 16.89it/s]487it [00:30, 16.89it/s]489it [00:30, 16.81it/s]489it [00:30, 16.80it/s]491it [00:30, 16.65it/s]491it [00:31, 16.65it/s]493it [00:30, 16.60it/s]493it [00:31, 16.60it/s]495it [00:31, 16.06it/s]495it [00:30, 16.04it/s]497it [00:30, 16.05it/s]497it [00:31, 16.05it/s]499it [00:31, 15.52it/s]499it [00:31, 15.51it/s]501it [00:31, 15.75it/s]501it [00:31, 15.75it/s]503it [00:31, 15.66it/s]503it [00:31, 15.66it/s]505it [00:31, 15.26it/s]505it [00:31, 15.25it/s]507it [00:31, 15.65it/s]507it [00:32, 15.64it/s]509it [00:32, 15.87it/s]509it [00:31, 15.86it/s]511it [00:31, 16.17it/s]511it [00:32, 16.16it/s]513it [00:31, 16.10it/s]513it [00:32, 16.09it/s]515it [00:32, 16.27it/s]515it [00:32, 16.26it/s]517it [00:32, 16.23it/s]517it [00:32, 16.22it/s]519it [00:32, 16.39it/s]519it [00:32, 16.38it/s]521it [00:32, 16.45it/s]521it [00:32, 16.45it/s]523it [00:32, 16.69it/s]523it [00:33, 16.68it/s]525it [00:33, 16.50it/s]525it [00:32, 16.48it/s]527it [00:33, 16.08it/s]527it [00:32, 16.07it/s]529it [00:32, 16.41it/s]529it [00:33, 16.40it/s]531it [00:33, 15.90it/s]531it [00:33, 15.89it/s]533it [00:33, 15.98it/s]533it [00:33, 15.97it/s]535it [00:33, 16.17it/s]535it [00:33, 16.16it/s]537it [00:33, 16.10it/s]537it [00:33, 16.10it/s]539it [00:34, 16.27it/s]539it [00:33, 16.26it/s]541it [00:33, 16.51it/s]541it [00:34, 16.50it/s]543it [00:33, 16.51it/s]543it [00:34, 16.51it/s]545it [00:34, 16.44it/s]545it [00:33, 16.42it/s]547it [00:34, 16.56it/s]547it [00:34, 16.56it/s]549it [00:34, 16.66it/s]549it [00:34, 16.65it/s]551it [00:34, 16.00it/s]551it [00:34, 15.99it/s]553it [00:34, 16.03it/s]553it [00:34, 16.01it/s]555it [00:34, 16.29it/s]555it [00:34, 16.28it/s]557it [00:34, 16.29it/s]557it [00:35, 16.28it/s]559it [00:34, 16.38it/s]559it [00:35, 16.37it/s]561it [00:34, 16.34it/s]561it [00:35, 16.33it/s]563it [00:35, 16.37it/s]563it [00:34, 16.35it/s]565it [00:35, 16.66it/s]565it [00:35, 16.65it/s]567it [00:35, 16.80it/s]567it [00:35, 16.80it/s]569it [00:35, 16.84it/s]569it [00:35, 16.83it/s]571it [00:35, 16.88it/s]571it [00:35, 16.87it/s]573it [00:35, 16.69it/s]573it [00:36, 16.69it/s]575it [00:35, 16.58it/s]575it [00:36, 16.57it/s]577it [00:35, 16.69it/s]577it [00:36, 16.69it/s]579it [00:35, 16.28it/s]579it [00:36, 16.28it/s]581it [00:36, 16.41it/s]581it [00:36, 16.41it/s]583it [00:36, 16.53it/s]583it [00:36, 16.52it/s]585it [00:36, 16.50it/s]585it [00:36, 16.49it/s]587it [00:36, 16.33it/s]587it [00:36, 16.32it/s]589it [00:36, 16.31it/s]589it [00:37, 16.30it/s]591it [00:37, 16.35it/s]591it [00:36, 16.34it/s]593it [00:36, 16.65it/s]593it [00:37, 16.64it/s]595it [00:37, 16.69it/s]595it [00:36, 16.68it/s]597it [00:37, 16.63it/s]597it [00:37, 16.62it/s]599it [00:37, 16.37it/s]599it [00:37, 16.36it/s]601it [00:37, 16.47it/s]601it [00:37, 16.46it/s]603it [00:37, 16.51it/s]603it [00:37, 16.51it/s]605it [00:38, 16.33it/s]605it [00:37, 16.32it/s]607it [00:37, 15.74it/s]607it [00:38, 15.73it/s]609it [00:38, 14.03it/s]609it [00:37, 14.03it/s]609it [00:38, 15.89it/s]
+609it [00:37, 16.09it/s]
+0it [00:00, ?it/s]0it [00:00, ?it/s]huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+1it [00:00,  3.44it/s]1it [00:00,  3.44it/s]3it [00:00,  8.07it/s]3it [00:00,  8.06it/s]5it [00:00, 10.46it/s]5it [00:00, 10.45it/s]7it [00:00, 12.06it/s]7it [00:00, 12.05it/s]9it [00:00, 13.16it/s]9it [00:00, 13.15it/s]11it [00:00, 14.24it/s]11it [00:00, 14.23it/s]13it [00:01, 15.14it/s]13it [00:01, 15.14it/s]15it [00:01, 15.75it/s]15it [00:01, 15.74it/s]17it [00:01, 16.08it/s]17it [00:01, 16.08it/s]19it [00:01, 16.31it/s]19it [00:01, 16.30it/s]21it [00:01, 16.51it/s]21it [00:01, 16.49it/s]23it [00:01, 16.57it/s]23it [00:01, 16.56it/s]25it [00:01, 16.55it/s]25it [00:01, 16.55it/s]27it [00:01, 16.50it/s]27it [00:01, 16.49it/s]29it [00:02, 16.55it/s]29it [00:02, 16.55it/s]31it [00:02, 16.64it/s]31it [00:02, 16.63it/s]33it [00:02, 16.74it/s]33it [00:02, 16.73it/s]35it [00:02, 16.78it/s]35it [00:02, 16.77it/s]37it [00:02, 16.84it/s]37it [00:02, 16.82it/s]39it [00:02, 16.81it/s]39it [00:02, 16.80it/s]41it [00:02, 16.71it/s]41it [00:02, 16.70it/s]43it [00:02, 16.71it/s]43it [00:02, 16.70it/s]45it [00:02, 16.60it/s]45it [00:02, 16.59it/s]47it [00:03, 16.49it/s]47it [00:03, 16.48it/s]49it [00:03, 16.50it/s]49it [00:03, 16.49it/s]51it [00:03, 16.44it/s]51it [00:03, 16.42it/s]53it [00:03, 16.55it/s]53it [00:03, 16.54it/s]55it [00:03, 16.41it/s]55it [00:03, 16.40it/s]57it [00:03, 16.66it/s]57it [00:03, 16.65it/s]59it [00:03, 16.56it/s]59it [00:03, 16.56it/s]61it [00:03, 16.55it/s]61it [00:03, 16.55it/s]63it [00:04, 16.11it/s]63it [00:04, 16.09it/s]65it [00:04, 16.19it/s]65it [00:04, 16.19it/s]67it [00:04, 16.14it/s]67it [00:04, 16.13it/s]69it [00:04, 16.25it/s]69it [00:04, 16.25it/s]71it [00:04, 16.32it/s]71it [00:04, 16.32it/s]73it [00:04, 16.43it/s]73it [00:04, 16.42it/s]75it [00:04, 16.45it/s]75it [00:04, 16.45it/s]77it [00:04, 16.42it/s]77it [00:04, 16.41it/s]79it [00:05, 16.45it/s]79it [00:05, 16.45it/s]81it [00:05, 16.56it/s]81it [00:05, 16.56it/s]83it [00:05, 16.29it/s]83it [00:05, 16.28it/s]85it [00:05, 16.39it/s]85it [00:05, 16.38it/s]87it [00:05, 16.41it/s]87it [00:05, 16.40it/s]89it [00:05, 16.48it/s]89it [00:05, 16.47it/s]91it [00:05, 16.39it/s]91it [00:05, 16.39it/s]93it [00:05, 16.30it/s]93it [00:05, 16.30it/s]95it [00:06, 16.47it/s]95it [00:06, 16.46it/s]97it [00:06, 16.60it/s]97it [00:06, 16.58it/s]99it [00:06, 15.97it/s]99it [00:06, 15.97it/s]101it [00:06, 15.56it/s]101it [00:06, 15.55it/s]103it [00:06, 15.76it/s]103it [00:06, 15.75it/s]105it [00:06, 16.04it/s]105it [00:06, 16.03it/s]107it [00:06, 16.19it/s]107it [00:06, 16.18it/s]109it [00:06, 16.24it/s]109it [00:06, 16.23it/s]111it [00:07, 16.17it/s]111it [00:07, 16.16it/s]113it [00:07, 16.26it/s]113it [00:07, 16.26it/s]115it [00:07, 16.18it/s]115it [00:07, 16.17it/s]117it [00:07, 16.24it/s]117it [00:07, 16.23it/s]119it [00:07, 16.26it/s]119it [00:07, 16.25it/s]121it [00:07, 16.15it/s]121it [00:07, 16.14it/s]123it [00:07, 16.06it/s]123it [00:07, 16.05it/s]125it [00:07, 16.04it/s]125it [00:07, 16.03it/s]127it [00:08, 16.14it/s]127it [00:08, 16.13it/s]129it [00:08, 16.34it/s]129it [00:08, 16.34it/s]131it [00:08, 16.47it/s]131it [00:08, 16.46it/s]133it [00:08, 16.37it/s]133it [00:08, 16.36it/s]135it [00:08, 16.60it/s]135it [00:08, 16.59it/s]137it [00:08, 16.50it/s]137it [00:08, 16.49it/s]139it [00:08, 16.05it/s]139it [00:08, 16.05it/s]141it [00:08, 16.05it/s]141it [00:08, 16.04it/s]143it [00:08, 16.18it/s]143it [00:08, 16.19it/s]145it [00:09, 15.69it/s]145it [00:09, 15.68it/s]147it [00:09, 15.89it/s]147it [00:09, 15.88it/s]149it [00:09, 16.26it/s]149it [00:09, 16.26it/s]151it [00:09, 16.36it/s]151it [00:09, 16.35it/s]153it [00:09, 16.33it/s]153it [00:09, 16.32it/s]155it [00:09, 16.43it/s]155it [00:09, 16.43it/s]157it [00:09, 16.46it/s]157it [00:09, 16.45it/s]159it [00:09, 16.43it/s]159it [00:09, 16.42it/s]161it [00:10, 16.25it/s]161it [00:10, 16.24it/s]163it [00:10, 16.37it/s]163it [00:10, 16.36it/s]165it [00:10, 16.37it/s]165it [00:10, 16.37it/s]167it [00:10, 16.42it/s]167it [00:10, 16.41it/s]169it [00:10, 16.35it/s]169it [00:10, 16.34it/s]171it [00:10, 16.21it/s]171it [00:10, 16.20it/s]173it [00:10, 16.13it/s]173it [00:10, 16.12it/s]175it [00:10, 16.19it/s]175it [00:10, 16.18it/s]177it [00:11, 16.36it/s]177it [00:11, 16.35it/s]179it [00:11, 16.48it/s]179it [00:11, 16.47it/s]181it [00:11, 16.69it/s]181it [00:11, 16.68it/s]183it [00:11, 16.72it/s]183it [00:11, 16.71it/s]185it [00:11, 16.73it/s]185it [00:11, 16.71it/s]187it [00:11, 16.65it/s]187it [00:11, 16.64it/s]189it [00:11, 16.75it/s]189it [00:11, 16.75it/s]191it [00:11, 15.66it/s]191it [00:11, 15.66it/s]193it [00:12, 15.84it/s]193it [00:12, 15.83it/s]195it [00:12, 15.98it/s]195it [00:12, 15.97it/s]197it [00:12, 16.13it/s]197it [00:12, 16.13it/s]199it [00:12, 16.30it/s]199it [00:12, 16.30it/s]201it [00:12, 16.64it/s]201it [00:12, 16.63it/s]203it [00:12, 16.71it/s]203it [00:12, 16.70it/s]205it [00:12, 16.77it/s]205it [00:12, 16.77it/s]207it [00:12, 16.72it/s]207it [00:12, 16.72it/s]209it [00:13, 16.67it/s]209it [00:13, 16.67it/s]211it [00:13, 16.81it/s]211it [00:13, 16.81it/s]213it [00:13, 16.88it/s]213it [00:13, 16.86it/s]215it [00:13, 16.72it/s]215it [00:13, 16.72it/s]217it [00:13, 16.77it/s]217it [00:13, 16.76it/s]219it [00:13, 16.66it/s]219it [00:13, 16.65it/s]221it [00:13, 16.57it/s]221it [00:13, 16.56it/s]223it [00:13, 16.46it/s]223it [00:13, 16.44it/s]225it [00:13, 16.52it/s]225it [00:13, 16.52it/s]227it [00:14, 15.92it/s]227it [00:14, 15.91it/s]229it [00:14, 15.67it/s]229it [00:14, 15.67it/s]231it [00:14, 15.82it/s]231it [00:14, 15.81it/s]233it [00:14, 15.79it/s]233it [00:14, 15.79it/s]235it [00:14, 15.97it/s]235it [00:14, 15.96it/s]237it [00:14, 15.49it/s]237it [00:14, 15.49it/s]239it [00:14, 15.75it/s]239it [00:14, 15.76it/s]241it [00:14, 16.18it/s]241it [00:14, 16.17it/s]243it [00:15, 16.35it/s]243it [00:15, 16.34it/s]245it [00:15, 16.55it/s]245it [00:15, 16.55it/s]247it [00:15, 16.69it/s]247it [00:15, 16.69it/s]249it [00:15, 16.51it/s]249it [00:15, 16.50it/s]251it [00:15, 16.76it/s]251it [00:15, 16.77it/s]253it [00:15, 16.77it/s]253it [00:15, 16.77it/s]255it [00:15, 16.66it/s]255it [00:15, 16.66it/s]257it [00:15, 16.32it/s]257it [00:15, 16.31it/s]259it [00:16, 16.34it/s]259it [00:16, 16.33it/s]261it [00:16, 16.53it/s]261it [00:16, 16.52it/s]263it [00:16, 16.47it/s]263it [00:16, 16.46it/s]265it [00:16, 16.58it/s]265it [00:16, 16.57it/s]267it [00:16, 16.85it/s]267it [00:16, 16.84it/s]269it [00:16, 16.87it/s]269it [00:16, 16.87it/s]271it [00:16, 16.97it/s]271it [00:16, 16.97it/s]273it [00:16, 16.83it/s]273it [00:16, 16.82it/s]275it [00:17, 16.60it/s]275it [00:17, 16.60it/s]277it [00:17, 16.67it/s]277it [00:17, 16.67it/s]279it [00:17, 16.58it/s]279it [00:17, 16.57it/s]281it [00:17, 16.57it/s]281it [00:17, 16.57it/s]283it [00:17, 16.63it/s]283it [00:17, 16.63it/s]285it [00:17, 16.79it/s]285it [00:17, 16.78it/s]287it [00:17, 16.80it/s]287it [00:17, 16.80it/s]289it [00:17, 16.56it/s]289it [00:17, 16.55it/s]291it [00:17, 16.43it/s]291it [00:17, 16.42it/s]293it [00:18, 16.42it/s]293it [00:18, 16.42it/s]295it [00:18, 16.27it/s]295it [00:18, 16.25it/s]297it [00:18, 16.32it/s]297it [00:18, 16.31it/s]299it [00:18, 16.37it/s]299it [00:18, 16.36it/s]301it [00:18, 16.52it/s]301it [00:18, 16.51it/s]303it [00:18, 16.73it/s]303it [00:18, 16.72it/s]305it [00:18, 16.77it/s]305it [00:18, 16.76it/s]307it [00:18, 16.58it/s]307it [00:18, 16.57it/s]309it [00:19, 16.66it/s]309it [00:19, 16.65it/s]311it [00:19, 16.65it/s]311it [00:19, 16.64it/s]313it [00:19, 16.50it/s]313it [00:19, 16.49it/s]315it [00:19, 16.69it/s]315it [00:19, 16.69it/s]317it [00:19, 16.73it/s]317it [00:19, 16.72it/s]319it [00:19, 16.67it/s]319it [00:19, 16.67it/s]321it [00:19, 16.58it/s]321it [00:19, 16.57it/s]323it [00:19, 16.74it/s]323it [00:19, 16.73it/s]325it [00:20, 16.59it/s]325it [00:20, 16.58it/s]327it [00:20, 15.92it/s]327it [00:20, 15.92it/s]329it [00:20, 15.94it/s]329it [00:20, 15.92it/s]331it [00:20, 16.07it/s]331it [00:20, 16.07it/s]333it [00:20, 15.95it/s]333it [00:20, 15.94it/s]335it [00:20, 15.90it/s]335it [00:20, 15.89it/s]337it [00:20, 15.85it/s]337it [00:20, 15.84it/s]339it [00:20, 16.00it/s]339it [00:20, 15.99it/s]341it [00:21, 16.08it/s]341it [00:21, 16.07it/s]343it [00:21, 16.25it/s]343it [00:21, 16.24it/s]345it [00:21, 16.50it/s]345it [00:21, 16.50it/s]347it [00:21, 16.37it/s]347it [00:21, 16.37it/s]349it [00:21, 16.16it/s]349it [00:21, 16.15it/s]351it [00:21, 16.23it/s]351it [00:21, 16.22it/s]353it [00:21, 16.32it/s]353it [00:21, 16.31it/s]355it [00:21, 16.47it/s]355it [00:21, 16.46it/s]357it [00:22, 16.34it/s]357it [00:22, 16.33it/s]359it [00:22, 16.21it/s]359it [00:22, 16.20it/s]361it [00:22, 16.19it/s]361it [00:22, 16.18it/s]363it [00:22, 16.24it/s]363it [00:22, 16.23it/s]365it [00:22, 16.36it/s]365it [00:22, 16.35it/s]367it [00:22, 16.31it/s]367it [00:22, 16.30it/s]369it [00:22, 16.22it/s]369it [00:22, 16.22it/s]371it [00:22, 16.25it/s]371it [00:22, 16.25it/s]373it [00:23, 16.36it/s]373it [00:23, 16.36it/s]375it [00:23, 16.34it/s]375it [00:23, 16.34it/s]377it [00:23, 16.48it/s]377it [00:23, 16.48it/s]379it [00:23, 16.43it/s]379it [00:23, 16.43it/s]381it [00:23, 16.36it/s]381it [00:23, 16.35it/s]383it [00:23, 16.37it/s]383it [00:23, 16.36it/s]385it [00:23, 16.43it/s]385it [00:23, 16.42it/s]387it [00:23, 16.57it/s]387it [00:23, 16.56it/s]389it [00:23, 16.59it/s]389it [00:23, 16.58it/s]391it [00:24, 16.74it/s]391it [00:24, 16.74it/s]393it [00:24, 16.58it/s]393it [00:24, 16.57it/s]395it [00:24, 16.33it/s]395it [00:24, 16.32it/s]397it [00:24, 16.46it/s]397it [00:24, 16.46it/s]399it [00:24, 16.40it/s]399it [00:24, 16.39it/s]401it [00:24, 16.48it/s]401it [00:24, 16.47it/s]403it [00:24, 16.46it/s]403it [00:24, 16.44it/s]405it [00:24, 16.52it/s]405it [00:24, 16.51it/s]407it [00:25, 16.04it/s]407it [00:25, 16.03it/s]409it [00:25, 16.25it/s]409it [00:25, 16.24it/s]411it [00:25, 16.44it/s]411it [00:25, 16.43it/s]413it [00:25, 16.25it/s]413it [00:25, 16.24it/s]415it [00:25, 16.35it/s]415it [00:25, 16.35it/s]417it [00:25, 16.39it/s]417it [00:25, 16.39it/s]419it [00:25, 16.54it/s]419it [00:25, 16.53it/s]421it [00:25, 16.62it/s]421it [00:25, 16.61it/s]423it [00:26, 15.34it/s]423it [00:26, 15.34it/s]425it [00:26, 15.85it/s]425it [00:26, 15.84it/s]427it [00:26, 16.08it/s]427it [00:26, 16.07it/s]429it [00:26, 15.99it/s]429it [00:26, 15.98it/s]431it [00:26, 16.10it/s]431it [00:26, 16.09it/s]433it [00:26, 16.21it/s]433it [00:26, 16.20it/s]435it [00:26, 16.18it/s]435it [00:26, 16.18it/s]437it [00:26, 16.01it/s]437it [00:26, 16.00it/s]439it [00:27, 16.06it/s]439it [00:27, 16.05it/s]441it [00:27, 16.23it/s]441it [00:27, 16.22it/s]443it [00:27, 16.49it/s]443it [00:27, 16.49it/s]445it [00:27, 16.51it/s]445it [00:27, 16.50it/s]447it [00:27, 16.50it/s]447it [00:27, 16.49it/s]449it [00:27, 16.71it/s]449it [00:27, 16.71it/s]451it [00:27, 16.63it/s]451it [00:27, 16.63it/s]453it [00:27, 16.52it/s]453it [00:27, 16.50it/s]455it [00:28, 16.33it/s]455it [00:28, 16.32it/s]457it [00:28, 16.22it/s]457it [00:28, 16.22it/s]459it [00:28, 16.30it/s]459it [00:28, 16.29it/s]461it [00:28, 16.42it/s]461it [00:28, 16.41it/s]463it [00:28, 16.36it/s]463it [00:28, 16.35it/s]465it [00:28, 16.35it/s]465it [00:28, 16.35it/s]467it [00:28, 16.50it/s]467it [00:28, 16.48it/s]469it [00:28, 16.62it/s]469it [00:28, 16.61it/s]471it [00:29, 16.59it/s]471it [00:29, 16.58it/s]473it [00:29, 16.81it/s]473it [00:29, 16.80it/s]475it [00:29, 16.75it/s]475it [00:29, 16.74it/s]477it [00:29, 16.72it/s]477it [00:29, 16.71it/s]479it [00:29, 16.38it/s]479it [00:29, 16.37it/s]481it [00:29, 16.54it/s]481it [00:29, 16.53it/s]483it [00:29, 16.58it/s]483it [00:29, 16.58it/s]485it [00:29, 16.63it/s]485it [00:29, 16.61it/s]487it [00:29, 16.53it/s]487it [00:29, 16.53it/s]489it [00:30, 16.64it/s]489it [00:30, 16.62it/s]491it [00:30, 16.55it/s]491it [00:30, 16.55it/s]493it [00:30, 16.53it/s]493it [00:30, 16.53it/s]495it [00:30, 16.44it/s]495it [00:30, 16.43it/s]497it [00:30, 16.36it/s]497it [00:30, 16.35it/s]499it [00:30, 16.32it/s]499it [00:30, 16.31it/s]501it [00:30, 16.33it/s]501it [00:30, 16.32it/s]503it [00:30, 16.45it/s]503it [00:30, 16.44it/s]505it [00:31, 16.48it/s]505it [00:31, 16.47it/s]507it [00:31, 16.56it/s]507it [00:31, 16.55it/s]509it [00:31, 16.67it/s]509it [00:31, 16.67it/s]511it [00:31, 16.45it/s]511it [00:31, 16.45it/s]513it [00:31, 16.21it/s]513it [00:31, 16.21it/s]515it [00:31, 16.02it/s]515it [00:31, 16.00it/s]517it [00:31, 16.25it/s]517it [00:31, 16.25it/s]519it [00:31, 16.23it/s]519it [00:31, 16.23it/s]521it [00:32, 16.31it/s]521it [00:32, 16.30it/s]523it [00:32, 16.28it/s]523it [00:32, 16.28it/s]525it [00:32, 15.98it/s]525it [00:32, 15.98it/s]527it [00:32, 15.45it/s]527it [00:32, 15.44it/s]529it [00:32, 15.90it/s]529it [00:32, 15.89it/s]531it [00:32, 16.15it/s]531it [00:32, 16.15it/s]533it [00:32, 16.46it/s]533it [00:32, 16.46it/s]535it [00:32, 16.59it/s]535it [00:32, 16.57it/s]537it [00:33, 16.61it/s]537it [00:33, 16.60it/s]539it [00:33, 16.67it/s]539it [00:33, 16.66it/s]541it [00:33, 16.62it/s]541it [00:33, 16.61it/s]543it [00:33, 16.68it/s]543it [00:33, 16.68it/s]545it [00:33, 16.79it/s]545it [00:33, 16.79it/s]547it [00:33, 16.64it/s]547it [00:33, 16.63it/s]549it [00:33, 16.49it/s]549it [00:33, 16.49it/s]551it [00:33, 16.52it/s]551it [00:33, 16.52it/s]553it [00:34, 16.45it/s]553it [00:34, 16.44it/s]555it [00:34, 16.54it/s]555it [00:34, 16.53it/s]557it [00:34, 16.49it/s]557it [00:34, 16.49it/s]559it [00:34, 16.44it/s]559it [00:34, 16.43it/s]561it [00:34, 16.31it/s]561it [00:34, 16.31it/s]563it [00:34, 16.45it/s]563it [00:34, 16.44it/s]565it [00:34, 16.27it/s]565it [00:34, 16.27it/s]567it [00:34, 16.39it/s]567it [00:34, 16.39it/s]569it [00:34, 16.48it/s]569it [00:34, 16.48it/s]571it [00:35, 16.69it/s]571it [00:35, 16.69it/s]573it [00:35, 16.65it/s]573it [00:35, 16.64it/s]575it [00:35, 15.97it/s]575it [00:35, 15.97it/s]577it [00:35, 16.27it/s]577it [00:35, 16.26it/s]579it [00:35, 16.20it/s]579it [00:35, 16.19it/s]581it [00:35, 16.29it/s]581it [00:35, 16.28it/s]583it [00:35, 16.23it/s]583it [00:35, 16.22it/s]585it [00:35, 15.36it/s]585it [00:35, 15.35it/s]587it [00:36, 15.61it/s]587it [00:36, 15.60it/s]589it [00:36, 15.87it/s]589it [00:36, 15.86it/s]591it [00:36, 15.90it/s]591it [00:36, 15.88it/s]593it [00:36, 15.83it/s]593it [00:36, 15.82it/s]595it [00:36, 16.00it/s]595it [00:36, 15.99it/s]597it [00:36, 16.31it/s]597it [00:36, 16.31it/s]599it [00:36, 16.28it/s]599it [00:36, 16.27it/s]601it [00:36, 16.44it/s]601it [00:36, 16.43it/s]603it [00:37, 16.68it/s]603it [00:37, 16.66it/s]605it [00:37, 16.50it/s]605it [00:37, 16.49it/s]607it [00:37, 16.45it/s]607it [00:37, 16.44it/s]609it [00:37, 13.78it/s]609it [00:37, 13.78it/s]609it [00:37, 16.23it/s]
+609it [00:37, 16.23it/s]
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/oliver/Desktop/Time-LLM/eval_main.py", line 269, in <module>
+[rank0]:     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric,"t1")
+[rank0]:                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/home/oliver/Desktop/Time-LLM/utils/tools.py", line 198, in vali
+[rank0]:     print("pred shape!: ", preds.shape)
+[rank0]:                            ^^^^^^^^^^^
+[rank0]: AttributeError: 'list' object has no attribute 'shape'
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/home/oliver/Desktop/Time-LLM/eval_main.py", line 269, in <module>
+[rank1]:     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric,"t1")
+[rank1]:                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/home/oliver/Desktop/Time-LLM/utils/tools.py", line 198, in vali
+[rank1]:     print("pred shape!: ", preds.shape)
+[rank1]:                            ^^^^^^^^^^^
+[rank1]: AttributeError: 'list' object has no attribute 'shape'
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+E0516 18:52:51.098000 140216522788992 torch/distributed/elastic/multiprocessing/api.py:826] failed (exitcode: 1) local_rank: 0 (pid: 55620) of binary: /home/oliver/anaconda3/envs/time3/bin/python
+Traceback (most recent call last):
+  File "/home/oliver/anaconda3/envs/time3/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/oliver/anaconda3/envs/time3/lib/python3.12/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/oliver/anaconda3/envs/time3/lib/python3.12/site-packages/accelerate/commands/launch.py", line 1073, in launch_command
+    multi_gpu_launcher(args)
+  File "/home/oliver/anaconda3/envs/time3/lib/python3.12/site-packages/accelerate/commands/launch.py", line 718, in multi_gpu_launcher
+    distrib_run.run(args)
+  File "/home/oliver/anaconda3/envs/time3/lib/python3.12/site-packages/torch/distributed/run.py", line 870, in run
+    elastic_launch(
+  File "/home/oliver/anaconda3/envs/time3/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 132, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/oliver/anaconda3/envs/time3/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 263, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+eval_main.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-05-16_18:52:51
+  host      : Nesl-Predator
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 55621)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-05-16_18:52:51
+  host      : Nesl-Predator
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 55620)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
