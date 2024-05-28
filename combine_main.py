@@ -104,7 +104,7 @@ parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
-
+parser.add_argument('--early_break', type=int, default=0)
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
@@ -210,7 +210,7 @@ for ii in range(args.itr):
         #iterStartTime = time.time()
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
             #for testing purposes
-            if iter_count > 10:
+            if args.early_break!=0 and iter_count > args.early_break:
                 break
             iter_count += 1
             model_optim.zero_grad()
