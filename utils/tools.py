@@ -191,7 +191,7 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
     total_mae_loss = np.average(total_mae_loss)
     
     if csvpath is not "None":
-        folder_path = './valiResults/'+csvpath+ args.model + '-' + args.model_comment + '/'
+        folder_path = csvpath + '/valiResults/' 
         
         if not os.path.exists(folder_path) and accelerator.is_local_main_process:
             os.makedirs(folder_path)
