@@ -195,8 +195,8 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
         
         if not os.path.exists(folder_path) and accelerator.is_local_main_process:
             os.makedirs(folder_path)
-        print("pred!: ", preds[0].shape)
-        print("trues!: ", trues[0].shape)
+        #print("pred!: ", preds[0].shape)
+        #print("trues!: ", trues[0].shape)
         
         # Stack the list of tensors into a single PyTorch tensor
         preds_stacked = torch.stack(preds, dim=0)  # Resulting shape: [32, 96, 1]

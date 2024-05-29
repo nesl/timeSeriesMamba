@@ -195,11 +195,7 @@ for ii in range(args.itr):
     if args.use_amp:
         scaler = torch.cuda.amp.GradScaler()
     
-    #for param_tensor in model.state_dict():
-    #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
-    #trainStartTime = time.time()
-    #print("time prior to epoch runs: ", time.time()-startTime)
-    #print("epoch count: ", args.train_epochs)
+   
     for epoch in range(args.train_epochs):
         #epochStartTime = time.time()
         iter_count = 0
@@ -207,7 +203,7 @@ for ii in range(args.itr):
         
         model.train()
         epoch_time = time.time()
-        #iterStartTime = time.time()
+        
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
             #for testing purposes
             if args.early_break!=0 and iter_count > args.early_break:
@@ -257,9 +253,7 @@ for ii in range(args.itr):
                   print("outputs[0]: ", outputs[0][0])
                   print("loss: ", loss.item())
             
-            n = 5
-            if (i + 1) % n == 0:
-            #if (i + 1) % 100 == 0:
+            if (i + 1) % 100 == 0:
                 #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
                 accelerator.print(
                     "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -267,8 +261,7 @@ for ii in range(args.itr):
                 left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
                 accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                 iter_count = 0
-                break #testing purposes
-                #time_now = time.time()
+                
 
             if args.use_amp:
                 scaler.scale(loss).backward()
@@ -281,7 +274,7 @@ for ii in range(args.itr):
             if args.lradj == 'TST':
                 adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=False)
                 scheduler.step()
-            #break
+            
 
         accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
         train_loss = np.average(train_loss)
@@ -314,10 +307,6 @@ for ii in range(args.itr):
             accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
     
     accelerator.wait_for_everyone()
-    
-    #saveName = 'checkpoints/llamaTest3epoch6layers.pth'
-    #torch.save(model.state_dict(),saveName)
-
     
     best_model_path = path + '/' + 'checkpoint'
     accelerator.wait_for_everyone()
