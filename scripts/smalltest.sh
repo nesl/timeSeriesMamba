@@ -12,7 +12,7 @@ d_ff=128
 
 
 
-comment='checkpoints/combineTest3epoch6layers'
+comment='checkpoints/smallTest'
 
 
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port combine_main.py \
