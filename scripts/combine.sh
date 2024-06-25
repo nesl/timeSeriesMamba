@@ -71,4 +71,4 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
   --model_comment $comment
 
 
-echo "The script has completed. Output has been saved to $log_file"
+echo "The script has completed. Output has been saved to $comment"

@@ -248,11 +248,12 @@ for ii in range(args.itr):
                 batch_y = batch_y[:, -args.pred_len:, f_dim:]
                 loss = criterion(outputs, batch_y)
                 train_loss.append(loss.item())
+                '''
                 if iter_count == 1:
                   print("batch_x [0]", batch_x[0][0])
                   print("outputs[0]: ", outputs[0][0])
                   print("loss: ", loss.item())
-            
+                '''
             if (i + 1) % 100 == 0:
                 #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
                 accelerator.print(
