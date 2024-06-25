@@ -39,6 +39,8 @@ pip install -r requirements.txt
 You can access the well pre-processed datasets from [[Google Drive]](https://drive.google.com/file/d/1NF7VEefXCmXuWNbnNe858WvQAkJ_7wuP/view?usp=sharing), then place the downloaded contents under `./dataset`
 
 ## Quick Demos
+[You can access the Google Colab jupyter notebook for this project here.]([https://colab.research.google.com/drive/16cEvTRv11vYl2yos0m7Gc_-h58Fw7Vf1?usp=sharing])
+
 1. Download datasets and place them under `./dataset`
 2. Tune the model. We provide five experiment scripts for demonstration purpose under the folder `./scripts`. For example, you can evaluate on ETT datasets by:
 
