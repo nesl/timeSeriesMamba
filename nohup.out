@@ -1,9 +1,13 @@
-Setting llama_layers to 6
-Setting d_model to 6
-Setting epochs to 3
+Usage: ./scripts/combine.sh -l <llm_layers> -d <d_model> -e <train_epochs> -n <num_process> -c <save_checkpoints> -m <llm_model>
+Setting llm_layers to 12
+Setting d_model to 32
+Setting train_epochs to 
 Setting num_process to 1
-./scripts/combine.sh: 44: ./scripts/combine.sh: cannot create results/checkpoints/combine_l6_d6_e3_n1.txt: Directory nonexistent
-Setting llama_layers to 6
-Setting d_model to 6
-Setting epochs to 3
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 12
+Setting d_model to 32
+Setting train_epochs to 
 Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba

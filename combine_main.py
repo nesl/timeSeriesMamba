@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from models import Autoformer, DLinear, TimeLLM
+from models import Autoformer, DLinear, TimeMamba, TimeLLM
 
 from data_provider.data_factory import data_provider
 import time
@@ -16,6 +16,8 @@ import os
 
 import pandas as pd
 from utils.metrics import metric
+
+import wandb 
 
 
 os.environ['CURL_CA_BUNDLE'] = ''
@@ -81,7 +83,7 @@ parser.add_argument('--output_attention', action='store_true', help='whether to 
 parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 parser.add_argument('--stride', type=int, default=8, help='stride')
 parser.add_argument('--prompt_domain', type=int, default=0, help='')
-parser.add_argument('--llm_model', type=str, default='LLAMA', help='LLM model') # LLAMA, GPT2, BERT
+parser.add_argument('--llm_model', type=str, default='Mamba', help='LLM model') # LLAMA, GPT2, BERT, Mamba
 parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
 
 
@@ -99,18 +101,32 @@ parser.add_argument('--loss', type=str, default='MSE', help='loss function')
 parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
 parser.add_argument('--pct_start', type=float, default=0.2, help='pct_start')
 parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
-#parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
+parser.add_argument('--save_checkpoints', type=int, default=0)
+
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
+'''
+if args.use_wandb:
+    wandb.init(project = 'TimeMamba')
+    #log the hyperparameters
+    wandb.config.update({
+        'layer count': args.llm_layers,
+        'd_model': args.d_model,
+        'train epochs': args.train_epochs,
+        'framework name': args.model_name,
+        'LLM used': args.llm_model
+    })
+'''
 for ii in range(args.itr):
+
     # setting record of experiments
     setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
         args.task_name,
@@ -136,12 +152,14 @@ for ii in range(args.itr):
     vali_data, vali_loader = data_provider(args, 'val')
     test_data, test_loader = data_provider(args, 'test')
 
-    if args.model == 'Autoformer':
+    print("Using Framework: ", args.model)
+    if args.model == 'TimeLLM':
+        model = TimeLLM.Model(args).float()
+    elif args.model == 'Autoformer':
         model = Autoformer.Model(args).float()
     elif args.model == 'DLinear':
         model = DLinear.Model(args).float()
-    else:
-        model = TimeLLM.Model(args).float()
+    
 
     path = os.path.join(args.checkpoints,
                         setting + '-' + args.model_comment)  # unique checkpoint saving path
@@ -347,6 +365,9 @@ for ii in range(args.itr):
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:
     path = './checkpoints'  # unique checkpoint saving path
-    #del_files(path)  # delete checkpoint files
-    #accelerator.print('success delete checkpoints')
+    
+    if args.save_checkpoints == 0:
+        del_files(path)  # delete checkpoint files
+        accelerator.print('success delete checkpoints')
+        
     accelerator.print('done!')
