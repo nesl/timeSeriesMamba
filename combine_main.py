@@ -126,7 +126,7 @@ if args.use_wandb:
     })
 '''
 for ii in range(args.itr):
-
+   # torch.cuda.empty_cache() #try this!
     # setting record of experiments
     setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
         args.task_name,
@@ -264,6 +264,13 @@ for ii in range(args.itr):
                 if args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                 else:
+                    '''
+                    print("batch_x type", batch_x.dtype)
+                    print('batch_x_mark type', batch_x_mark.dtype)
+                    print('dec_inp type', dec_inp.dtype)
+                    print('batch_y_mark type', batch_y_mark.dtype)
+                    '''
+                    #all of these gave float32
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 f_dim = -1 if args.features == 'MS' else 0
                 outputs = outputs[:, -args.pred_len:, f_dim:]

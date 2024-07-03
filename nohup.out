@@ -48,3 +48,9 @@ Setting train_epochs to
 Setting num_process to 1
 Setting save_checkpoints to 0
 Setting llm_model to LLAMA
+Setting llm_layers to 32
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_params to 2.8b
+Setting save_checkpoints to 0
+Setting llm_model to Mamba

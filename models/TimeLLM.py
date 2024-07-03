@@ -21,7 +21,10 @@ class FlattenHead(nn.Module):
         self.dropout = nn.Dropout(head_dropout)
 
     def forward(self, x):
+        #x = x.to(self.nf.dtype)
         x = self.flatten(x)
+        x = x.to(torch.bfloat16)
+        print("\nx dtype", x.dtype)
         x = self.linear(x)
         x = self.dropout(x)
         return x
@@ -52,7 +55,7 @@ class Model(nn.Module):
                 )
             self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
 
-        if configs.llm_model == "Mamba2":
+        elif configs.llm_model == "Mamba2":
             self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
@@ -192,6 +195,7 @@ class Model(nn.Module):
 
         print("LLM model used is: ", configs.llm_model)
 
+        
         if self.tokenizer.eos_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         else:
@@ -221,7 +225,12 @@ class Model(nn.Module):
 
         self.patch_nums = int((configs.seq_len - self.patch_len) / self.stride + 2)
         self.head_nf = self.d_ff * self.patch_nums
+        #print("self.head_nf dtype", type(self.head_nf))
+        #print("self.pred_len dtype", type(self.pred_len))
+        #these two are ints
 
+        print("configs enc in dtype", type(configs.enc_in))
+        print("configs.dropout", configs.dropout)
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
             self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len,
                                                  head_dropout=configs.dropout)
@@ -232,6 +241,14 @@ class Model(nn.Module):
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
+            '''
+            print("x_enc type", x_enc.dtype)
+            print('x_mark_enc type', x_mark_enc.dtype)
+            print('x_dec type', x_dec.dtype)
+            print('x_mark_dec type', x_mark_dec.dtype)
+            '''
+            #all float32s
+
             dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
             return dec_out[:, -self.pred_len:, :]
         return None
@@ -285,7 +302,8 @@ class Model(nn.Module):
         dec_out = torch.reshape(
             dec_out, (-1, n_vars, dec_out.shape[-2], dec_out.shape[-1]))
         dec_out = dec_out.permute(0, 1, 3, 2).contiguous()
-
+        
+        #patch nums is an int
         dec_out = self.output_projection(dec_out[:, :, :, -self.patch_nums:])
         dec_out = dec_out.permute(0, 2, 1).contiguous()
 
