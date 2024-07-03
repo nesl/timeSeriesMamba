@@ -39,29 +39,31 @@ class Model(nn.Module):
         self.d_llm = configs.llm_dim
         self.patch_len = configs.patch_len
         self.stride = configs.stride
+        self.num_params = configs.num_params
 
         if configs.llm_model == "Mamba":
-            self.mamba_config = MambaConfig.from_pretrained("state-spaces/mamba-130m-hf")
+            self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
             self.mamba_config.output_hidden_states = True
-            try:
+            try: 
                 self.llm_model = MambaModel.from_pretrained(
-                "state-spaces/mamba-130m-hf",
-                config=self.mamba_config
+                f"state-spaces/mamba2-{self.num_params}"
+                #f"state-spaces/mamba2-{self.num_params}",
+                #config=self.mamba_config
                 )
             except EnvironmentError:  # downloads model from HF is not already done
                 print("Local model files not found. Attempting to download...")
                 self.llm_model = MambaModel.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
-                    'state-spaces/mamba-130m-hf',
+                    f'state-spaces/mamba2-{self.num_params}',
                     trust_remote_code=True,
                     local_files_only=False,
-                    config=self.llama_config,
+                    config=self.mamba_config,
                     # load_in_4bit=True
                 )
             
-            self.tokenizer = AutoTokenizer.from_pretrained("state-spaces/mamba-130m-hf")
+            self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
 
            
         elif configs.llm_model == 'LLAMA':

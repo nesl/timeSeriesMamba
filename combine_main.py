@@ -84,8 +84,8 @@ parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 parser.add_argument('--stride', type=int, default=8, help='stride')
 parser.add_argument('--prompt_domain', type=int, default=0, help='')
 parser.add_argument('--llm_model', type=str, default='Mamba', help='LLM model') # LLAMA, GPT2, BERT, Mamba
-parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
-
+parser.add_argument('--llm_dim', type=int, default='2560', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
+parser.add_argument('--num_params', type=str, default='130m', help='string of our param size to append to huggingface')
 
 # optimization
 parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -188,11 +188,15 @@ for ii in range(args.itr):
     early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience)
     
     trained_parameters = []
+
     for p in model.parameters():
         if p.requires_grad is True:
             trained_parameters.append(p)
-
+    
     model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
+
+    earlyUnwrap = accelerator.unwrap_model(model)
+    print(f'Total number of parameters: {sum(p.numel() for p in earlyUnwrap.parameters())}')
 
     if args.lradj == 'COS':
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
