@@ -18,7 +18,7 @@ import pandas as pd
 from utils.metrics import metric
 
 import wandb 
-
+from torchsummary import summary
 
 os.environ['CURL_CA_BUNDLE'] = ''
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
@@ -104,16 +104,17 @@ parser.add_argument('--use_amp', action='store_true', help='use automatic mixed 
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
+parser.add_argument('--use_wandb', type=bool, default=True)
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
 parser.add_argument('--save_checkpoints', type=int, default=0)
+
 
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
-'''
 if args.use_wandb:
     wandb.init(project = 'TimeMamba')
     #log the hyperparameters
@@ -121,10 +122,11 @@ if args.use_wandb:
         'layer count': args.llm_layers,
         'd_model': args.d_model,
         'train epochs': args.train_epochs,
-        'framework name': args.model_name,
+        'model id': args.model_id,
+        'model' : args.model,
         'LLM used': args.llm_model
     })
-'''
+
 for ii in range(args.itr):
 
     # setting record of experiments
@@ -197,6 +199,7 @@ for ii in range(args.itr):
 
     earlyUnwrap = accelerator.unwrap_model(model)
     print(f'Total number of parameters: {sum(p.numel() for p in earlyUnwrap.parameters())}')
+    #summary(earlyUnwrap, ((1,2),(3,4),(5,6),(7,8)))
 
     if args.lradj == 'COS':
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
@@ -308,7 +311,7 @@ for ii in range(args.itr):
         accelerator.print(
             "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
-        
+        wandb.log({"train loss":train_loss, "vali loss": vali_loss, "test loss": test_loss, "MAE loss": test_mae_loss})
         #for param_tensor in model.state_dict():
         #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
         early_stopping(vali_loss, model, path)
