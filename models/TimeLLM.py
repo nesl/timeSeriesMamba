@@ -3,7 +3,7 @@ from math import sqrt
 import torch
 import torch.nn as nn
 
-from transformers import MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
+from transformers import AutoModel,MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
     BertModel, BertTokenizer
 from layers.Embed import PatchEmbedding
 import transformers
@@ -42,15 +42,27 @@ class Model(nn.Module):
         self.num_params = configs.num_params
 
         if configs.llm_model == "Mamba":
-            self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
+            self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
+            self.mamba_config.num_hidden_layers = configs.llm_layers
+            self.mamba_config.output_attentions = True
+            self.mamba_config.output_hidden_states = True
+            
+            self.llm_model = MambaModel.from_pretrained(
+            f"state-spaces/mamba-{self.num_params}-hf",
+            config=self.mamba_config
+            )
+            self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
+
+        elif configs.llm_model == "Mamba2":
+            '''
+            self.mamba_config = AutoModel.from_pretrained("state-spaces/mamba2-130m")
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
             self.mamba_config.output_hidden_states = True
             try: 
-                self.llm_model = MambaModel.from_pretrained(
-                f"state-spaces/mamba2-{self.num_params}"
-                #f"state-spaces/mamba2-{self.num_params}",
-                #config=self.mamba_config
+                self.llm_model = AutoModel.from_pretrained(
+                "state-spaces/mamba2-130m",
+                config=self.mamba_config
                 )
             except EnvironmentError:  # downloads model from HF is not already done
                 print("Local model files not found. Attempting to download...")
@@ -63,8 +75,9 @@ class Model(nn.Module):
                     # load_in_4bit=True
                 )
             
-            self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
-
+            self.tokenizer = AutoTokenizer.from_pretrained(f"nvidia/mamba2-8b-3t-4k")
+            '''
+            self.llm_model = AutoModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}",ignore_mismatched_sizes=True)
            
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
