@@ -46,6 +46,7 @@ class Model(nn.Module):
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
             self.mamba_config.output_hidden_states = True
+<<<<<<< HEAD
             
             self.llm_model = MambaModel.from_pretrained(
             f"state-spaces/mamba-{self.num_params}-hf",
@@ -56,6 +57,16 @@ class Model(nn.Module):
         elif configs.llm_model == "Mamba2":
             '''
             self.mamba_config = AutoModel.from_pretrained("state-spaces/mamba2-130m")
+=======
+            self.llm_model = MambaModel.from_pretrained(
+                f"state-spaces/mamba-{self.num_params}-hf",
+                config=self.mamba_config
+                )
+            self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
+
+        if configs.llm_model == "Mamba2":
+            self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
+>>>>>>> fa8894df07a757a5558c5275274b5097e07bb7fb
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
             self.mamba_config.output_hidden_states = True
