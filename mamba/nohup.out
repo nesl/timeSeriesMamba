@@ -1,0 +1,50 @@
+Usage: ./scripts/combine.sh -l <llm_layers> -d <d_model> -e <train_epochs> -n <num_process> -c <save_checkpoints> -m <llm_model>
+Setting llm_layers to 12
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 12
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 24
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 24
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Usage: ./scripts/combine.sh -l <llm_layers> -d <d_model> -e <train_epochs> -n <num_process> -c <save_checkpoints> -m <llm_model>
+Setting llm_layers to 32
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 32
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 32
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to Mamba
+Setting llm_layers to 32
+Setting d_model to 32
+Setting train_epochs to 
+Setting num_process to 1
+Setting save_checkpoints to 0
+Setting llm_model to LLAMA
