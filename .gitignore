@@ -1,2 +1,4 @@
-checkpoints/
-results/
+checkpoints/*
+results/*
+wandb/*
+dataset/*
