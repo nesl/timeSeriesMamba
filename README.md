@@ -1,4 +1,13 @@
 # Mamba
+Installation guide:
+'''
+conda create -n Mamba2 python=3.9
+pip install packaging
+pip install torch
+pip install .
+'''
+
+
 
 ![Mamba](assets/selection.png "Selective State Space")
 > **Mamba: Linear-Time Sequence Modeling with Selective State Spaces**\
