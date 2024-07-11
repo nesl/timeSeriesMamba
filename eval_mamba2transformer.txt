@@ -1,0 +1,43 @@
+2024-07-09:16:11:28,969 INFO     [__main__.py:251] Verbosity set to INFO
+2024-07-09:16:11:33,865 INFO     [__main__.py:335] Selected Tasks: ['arc_challenge', 'arc_easy', 'hellaswag', 'lambada_openai', 'openbookqa', 'piqa', 'winogrande']
+2024-07-09:16:11:33,865 INFO     [__main__.py:336] Loading selected tasks...
+2024-07-09:16:11:33,866 INFO     [evaluator.py:131] Setting random seed to 0 | Setting numpy seed to 1234 | Setting torch manual seed to 1234
+2024-07-09:16:11:33,939 WARNING  [other.py:349] Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+2024-07-09:16:11:33,940 INFO     [huggingface.py:162] Using device 'cuda'
+2024-07-09:16:11:34,389 INFO     [huggingface.py:414] Overrode HF model backend type, and using type 'causal'
+/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/huggingface_hub/file_download.py:982: UserWarning: Not enough free disk space to download the file. The expected file size is: 5396.09 MB. The target location /home/oliver/.cache/huggingface/hub/models--state-spaces--mamba2attn-2.7b/blobs only has 1742.09 MB free disk space.
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/oliver/anaconda3/envs/Mamba2/bin/lm_eval", line 8, in <module>
+    sys.exit(cli_evaluate())
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/__main__.py", line 342, in cli_evaluate
+    results = evaluator.simple_evaluate(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/utils.py", line 288, in _wrapper
+    return fn(*args, **kwargs)
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/evaluator.py", line 164, in simple_evaluate
+    lm = lm_eval.api.registry.get_model(model).create_from_arg_string(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/api/model.py", line 133, in create_from_arg_string
+    return cls(**args, **args2)
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/models/mamba_lm.py", line 56, in __init__
+    super().__init__(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/models/huggingface.py", line 201, in __init__
+    self._create_model(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/lm_eval/models/mamba_lm.py", line 97, in _create_model
+    self._model = MambaLMHeadModel.from_pretrained(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/mamba_ssm/models/mixer_seq_simple.py", line 291, in from_pretrained
+    model.load_state_dict(load_state_dict_hf(pretrained_model_name, device=device, dtype=dtype))
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/mamba_ssm/utils/hf.py", line 17, in load_state_dict_hf
+    resolved_archive_file = cached_file(model_name, WEIGHTS_NAME, _raise_exceptions_for_missing_entries=False)
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/transformers/utils/hub.py", line 399, in cached_file
+    resolved_file = hf_hub_download(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 1221, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 1367, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 1884, in _download_to_tmp_and_move
+    http_get(
+  File "/home/oliver/anaconda3/envs/Mamba2/lib/python3.9/site-packages/huggingface_hub/file_download.py", line 542, in http_get
+    temp_file.write(chunk)
+OSError: [Errno 28] No space left on device
