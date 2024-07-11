@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from models import Autoformer, DLinear, TimeMamba, TimeLLM
+from models import Autoformer, DLinear, TimeLLM
 
 from data_provider.data_factory import data_provider
 import time
@@ -17,7 +17,7 @@ import os
 import pandas as pd
 from utils.metrics import metric
 
-import wandb 
+#import wandb 
 
 
 os.environ['CURL_CA_BUNDLE'] = ''

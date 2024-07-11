@@ -3,8 +3,9 @@ from math import sqrt
 import torch
 import torch.nn as nn
 
-from transformers import MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
-    BertModel, BertTokenizer
+
+#from transformers import LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig,BertModel, BertTokenizer
+from transformers import MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig,BertModel, BertTokenizer
 from layers.Embed import PatchEmbedding
 import transformers
 from layers.StandardNorm import Normalize
@@ -24,7 +25,7 @@ class FlattenHead(nn.Module):
         #x = x.to(self.nf.dtype)
         x = self.flatten(x)
         x = x.to(torch.bfloat16)
-        print("\nx dtype", x.dtype)
+        #print("\nx dtype", x.dtype)
         x = self.linear(x)
         x = self.dropout(x)
         return x
