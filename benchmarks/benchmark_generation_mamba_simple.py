@@ -50,6 +50,8 @@ else:
     tokens = tokenizer(args.prompt, return_tensors="pt")
     input_ids = tokens.input_ids.to(device=device)
     attn_mask = tokens.attention_mask.to(device=device)
+    print("input_ids: ", input_ids)
+    print("attn_mask: ", attn_mask)
 max_length = input_ids.shape[1] + args.genlen
 
 if is_mamba:
