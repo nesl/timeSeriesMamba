@@ -187,8 +187,10 @@ class MixerModel(nn.Module):
             for i, layer in enumerate(self.layers)
         }
 
-    def forward(self, input_ids, inference_params=None, **mixer_kwargs):
-        hidden_states = self.embedding(input_ids)
+    #def forward(self, input_embeddings, input_ids, inference_params=None, **mixer_kwargs):
+    def forward(self, input_embeddings, inference_params=None, **mixer_kwargs):
+        #hidden_states = self.embedding(input_ids)
+        hidden_states = input_embeddings
         residual = None
         for layer in self.layers:
             hidden_states, residual = layer(
@@ -272,17 +274,22 @@ class MambaLMHeadModel(nn.Module, GenerationMixin):
     def allocate_inference_cache(self, batch_size, max_seqlen, dtype=None, **kwargs):
         return self.backbone.allocate_inference_cache(batch_size, max_seqlen, dtype=dtype, **kwargs)
 
-    def forward(self, input_ids, position_ids=None, inference_params=None, num_last_tokens=0, **mixer_kwargs):
+    #def forward(self, input_ids, position_ids=None, inference_params=None, num_last_tokens=0, **mixer_kwargs):
+    def forward(self, input_embeddings, input_ids=None, position_ids=None, inference_params=None, num_last_tokens=0, **mixer_kwargs):
         """
         "position_ids" is just to be compatible with Transformer generation. We don't use it.
         num_last_tokens: if > 0, only return the logits for the last n tokens
         """
-        hidden_states = self.backbone(input_ids, inference_params=inference_params, **mixer_kwargs)
+        #hidden_states = self.backbone(input_ids, inference_params=inference_params, **mixer_kwargs)
+        hidden_states = self.backbone(input_embeddings, inference_params=inference_params, **mixer_kwargs)
         if num_last_tokens > 0:
             hidden_states = hidden_states[:, -num_last_tokens:]
         lm_logits = self.lm_head(hidden_states)
-        CausalLMOutput = namedtuple("CausalLMOutput", ["logits"])
-        return CausalLMOutput(logits=lm_logits)
+        #CausalLMOutput = namedtuple("CausalLMOutput", ["logits"])
+        CausalLMOutput = namedtuple("CausalLMOutput", ["logits","last_hidden_state"])
+        #print("hidden states: ", hidden_states)
+        #print("hidden_states[-1]", hidden_states[-1])
+        return CausalLMOutput(logits=lm_logits,last_hidden_state=hidden_states)
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name, device=None, dtype=None, **kwargs):
@@ -308,6 +315,9 @@ class MambaLMHeadModel(nn.Module, GenerationMixin):
         config_path = os.path.join(save_directory, 'config.json')
         with open(config_path, 'w') as f:
             json.dump(self.config.__dict__, f, indent=4)
+
+    def get_input_embeddings(self):
+        return self.backbone.embedding
 
 class MambaTimeHeadModel(nn.Module, GenerationMixin):
 
@@ -396,6 +406,7 @@ class MambaTimeHeadModel(nn.Module, GenerationMixin):
         config = MambaConfig(**config_data)
         model = cls(config, device=device, dtype=dtype, **kwargs)
         #initializations here
+        
         return model
 
     def save_pretrained(self, save_directory):
