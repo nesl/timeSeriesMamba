@@ -124,7 +124,8 @@ if args.use_wandb:
         'train epochs': args.train_epochs,
         'model id': args.model_id,
         'model' : args.model,
-        'LLM used': args.llm_model
+        'LLM used': args.llm_model,
+        'num params': args.num_params
     })
 
 for ii in range(args.itr):
@@ -367,6 +368,7 @@ for ii in range(args.itr):
 
         metrics = metric(predictions_array, test_array)
         print("metrics: ", metrics)
+        wandb.log({"mae":metrics[0],"mse":metrics[1], "rmse":metrics[2], "mape":metrics[3], "mspe":metrics[4]})
     
 
 accelerator.wait_for_everyone()
