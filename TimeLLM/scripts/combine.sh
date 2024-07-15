@@ -54,7 +54,7 @@ if [ "$llm_model" = "Mamba2" ]; then
 fi
 
 # Redirect output to a file named after the comment variable
-
+: '
 tag="ETTh1_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
@@ -92,7 +92,6 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
 
 echo "ETTh1 completed, saved to $comment"
 
-
 tag="ETTh2_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
@@ -129,7 +128,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --num_params $num_params
 
 echo "ETTh2 completed, saved to $comment"
-
+'
 tag="ETTm1_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
@@ -158,7 +157,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --batch_size $batch_size \
   --lradj 'TST'\
   --learning_rate 0.001 \
-  --llm_layers $llama_layers \
+  --llm_layers $llm_layers \
   --train_epochs $train_epochs \
   --model_comment $comment \
   --save_checkpoints $save_checkpoints \
@@ -197,7 +196,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --batch_size $batch_size \
   --lradj 'TST'\
   --learning_rate 0.001 \
-  --llm_layers $llama_layers \
+  --llm_layers $llm_layers \
   --train_epochs $train_epochs \
   --model_comment $comment \
   --save_checkpoints $save_checkpoints \
@@ -233,7 +232,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --c_out 321 \
   --batch_size $batch_size \
   --learning_rate $learning_rate \
-  --llm_layers $llama_layers \
+  --llm_layers $llm_layers \
   --train_epochs $train_epochs \
   --model_comment $comment\
   --save_checkpoints $save_checkpoints \
@@ -271,7 +270,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --d_ff 32 \
   --batch_size $batch_size \
   --learning_rate $learning_rate \
-  --llm_layers $llama_layers \
+  --llm_layers $llm_layers \
   --train_epochs $train_epochs \
   --model_comment $comment
   --save_checkpoints $save_checkpoints \
@@ -306,7 +305,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --c_out 862 \
   --batch_size $batch_size \
   --learning_rate $learning_rate \
-  --llm_layers $llama_layers \
+  --llm_layers $llm_layers \
   --train_epochs $train_epochs \
   --model_comment $comment \
   --save_checkpoints $save_checkpoints \
