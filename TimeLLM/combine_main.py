@@ -84,7 +84,7 @@ parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 parser.add_argument('--stride', type=int, default=8, help='stride')
 parser.add_argument('--prompt_domain', type=int, default=0, help='')
 parser.add_argument('--llm_model', type=str, default='Mamba', help='LLM model') # LLAMA, GPT2, BERT, Mamba
-parser.add_argument('--llm_dim', type=int, default='2560', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
+parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
 parser.add_argument('--num_params', type=str, default='130m', help='string of our param size to append to huggingface')
 
 # optimization
@@ -104,10 +104,10 @@ parser.add_argument('--use_amp', action='store_true', help='use automatic mixed 
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
-parser.add_argument('--use_wandb', type=bool, default=True)
+parser.add_argument('--use_wandb', type=int, default=0)
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
-parser.add_argument('--save_checkpoints', type=int, default=0)
+parser.add_argument('--save_checkpoints', type=int, default=1)
 
 
 args = parser.parse_args()
@@ -267,8 +267,11 @@ for ii in range(args.itr):
                 #print("no amp")
                 if args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    print("no amp output attention: ", outputs)
                 else:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    print("no amp no output attention: ", outputs)
+
                 f_dim = -1 if args.features == 'MS' else 0
                 outputs = outputs[:, -args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -args.pred_len:, f_dim:]

@@ -1,49 +1,52 @@
-# Copyright (c) 2023, Tri Dao, Albert Gu.
-
 import argparse
-import time
-import json
+import torch
 from accelerate import Accelerator, DeepSpeedPlugin
 from accelerate import DistributedDataParallelKwargs
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+#from TimeLLM.models import Autoformer, DLinear, TimeLLM
+from mamba_ssm.models import BackboneModel
 
-from einops import rearrange
-
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from TimeLLM.data_provider.data_factory import data_provider
+import time
+import random
+import numpy as np
+import os
 
 import pandas as pd
 from TimeLLM.utils.metrics import metric
-from TimeLLM.utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, load_content
 
 import wandb 
+from torchsummary import summary
 
-#from mamba_ssm.models.mixer_seq_simple import MambaTimeHeadModel
-from models.mixer_seq_simple import MambaTimeHeadModel, MambaLMHeadModel
-from fn_model import TimeModel
-from data_provider.data_factory import data_provider
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
 
-parser = argparse.ArgumentParser(description="Generation benchmarking")
-parser.add_argument("--model-name", type=str, default="state-spaces/mamba-130m")
-parser.add_argument("--prompt", type=str, default=None)
-parser.add_argument("--promptlen", type=int, default=100)
-parser.add_argument("--genlen", type=int, default=100)
-parser.add_argument("--temperature", type=float, default=1.0)
-parser.add_argument("--topk", type=int, default=1)
-parser.add_argument("--topp", type=float, default=1.0)
-parser.add_argument("--minp", type=float, default=0.0)
-parser.add_argument("--repetition-penalty", type=float, default=1.0)
-parser.add_argument("--batch", type=int, default=1)
+from TimeLLM.utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, load_content
+
+parser = argparse.ArgumentParser(description='Time-LLM')
+
+fix_seed = 2021
+random.seed(fix_seed)
+torch.manual_seed(fix_seed)
+np.random.seed(fix_seed)
+
+# basic config
+parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
+                    help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
+parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
+parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
+parser.add_argument('--model_comment', type=str, required=True, default='none', help='prefix when saving test results')
+parser.add_argument('--model', type=str, required=True, default='Autoformer',
+                    help='model name, options: [Autoformer, DLinear]')
+parser.add_argument('--seed', type=int, default=2021, help='random seed')
 
 # data loader
 parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')
 parser.add_argument('--root_path', type=str, default='./dataset', help='root path of the data file')
-parser.add_argument('--data_path', type=str, default='ETT-small/ETTh1.csv', help='data file')
+parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
 parser.add_argument('--features', type=str, default='M',
                     help='forecasting task, options:[M, S, MS]; '
                          'M:multivariate predict multivariate, S: univariate predict univariate, '
@@ -82,7 +85,7 @@ parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 parser.add_argument('--stride', type=int, default=8, help='stride')
 parser.add_argument('--prompt_domain', type=int, default=0, help='')
 parser.add_argument('--llm_model', type=str, default='Mamba', help='LLM model') # LLAMA, GPT2, BERT, Mamba
-parser.add_argument('--llm_dim', type=int, default='2560', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
+parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
 parser.add_argument('--num_params', type=str, default='130m', help='string of our param size to append to huggingface')
 
 # optimization
@@ -102,81 +105,283 @@ parser.add_argument('--use_amp', action='store_true', help='use automatic mixed 
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
+parser.add_argument('--use_wandb', type=int, default=0)
+#parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
+parser.add_argument('--early_break', type=int, default=0)
+parser.add_argument('--save_checkpoints', type=int, default=1)
+
+
 args = parser.parse_args()
-path = args.model_comment
-args.content = load_content(args)
-if not os.path.exists(path) and accelerator.is_local_main_process:
-    os.makedirs(path)
+ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
+deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
+accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
+
+if args.use_wandb:
+    wandb.init(project = 'TimeMamba')
+    #log the hyperparameters
+    wandb.config.update({
+        'layer count': args.llm_layers,
+        'd_model': args.d_model,
+        'train epochs': args.train_epochs,
+        'model id': args.model_id,
+        'model' : args.model,
+        'LLM used': args.llm_model,
+        'num params': args.num_params
+    })
+
+for ii in range(args.itr):
+
+    # setting record of experiments
+    setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
+        args.task_name,
+        args.model_id,
+        args.model,
+        args.data,
+        args.features,
+        args.seq_len,
+        args.label_len,
+        args.pred_len,
+        args.d_model,
+        args.n_heads,
+        args.e_layers,
+        args.d_layers,
+        args.d_ff,
+        args.factor,
+        args.embed,
+        args.des, ii)
+    #print("arg tim starts")
+    #startTime = time.time()
+
+    train_data, train_loader = data_provider(args, 'train')
+    vali_data, vali_loader = data_provider(args, 'val')
+    test_data, test_loader = data_provider(args, 'test')
+
+    print("Using Framework: ", args.model)
+    '''
+    if args.model == 'TimeLLM':
+        model = TimeLLM.Model(args).float()
+    elif args.model == 'Autoformer':
+        model = Autoformer.Model(args).float()
+    elif args.model == 'DLinear':
+        model = DLinear.Model(args).float()
+    elif args.model == 'BackboneModel':
+        model = BackboneModel.Model(args).float()
+    '''
+    model = BackboneModel.Model(args).float()
+
+    path = os.path.join(args.checkpoints,
+                        setting + '-' + args.model_comment)  # unique checkpoint saving path
     
-repeats = 10
-device = "cuda"
-dtype = torch.float16
-
-print(f"Loading model {args.model_name}")
-is_mamba = args.model_name.startswith("state-spaces/mamba") or args.model_name.startswith("state-spaces/transformerpp")
-if is_mamba:
-    tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
-    model = MambaTimeHeadModel.from_init(args.model_name, device=device, dtype=dtype)
-else:
-    print("NOT MAMBA?!")
-    #tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-    #model = AutoModelForCausalLM.from_init(args.model_name, device_map={"": device}, torch_dtype=dtype)
-
-print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}")
-
-#training time! we need some data and stuff
-model.train()
-
-#need to change these args...
-
-train_data, train_loader = data_provider(args, 'train')
-vali_data, vali_loader = data_provider(args, 'val')
-test_data, test_loader = data_provider(args, 'test')
-
-print("test data! ", test_data)
-#this is eval mode, let's train before here
-model.eval()
-torch.random.manual_seed(0)
-
-if args.prompt is None:
-    input_ids = torch.randint(1, 1000, (args.batch, args.promptlen), dtype=torch.long, device="cuda")
-    attn_mask = torch.ones_like(input_ids, dtype=torch.long, device="cuda")
-    #args.prompt = test_data
+    path = args.model_comment
+    args.content = load_content(args)
+    if not os.path.exists(path) and accelerator.is_local_main_process:
+        os.makedirs(path)
     
-else:
+    '''
+    #this is to allow for repeat trials without overwriting old stuff        
+    else: 
+        i = 1
+        while os.path.exists(path):
+            path = path + f'{i}'
+            i+=1
+        print("path already exists! making path at ", path)
+        os.makedirs(path)
+    '''
+
+    time_now = time.time()
+    #train_loader = train_loader[0:120]#try this to shorten
+    train_steps = len(train_loader)
+    #train_steps = 120
+
+    early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience)
     
-    tokens = tokenizer(args.prompt, return_tensors="pt")
-    input_ids = tokens.input_ids.to(device=device)
-    attn_mask = tokens.attention_mask.to(device=device)
+    trained_parameters = []
 
-
-input_ids = torch.tensor(list(map(float, args.prompt.split(','))),device=device,dtype=int).unsqueeze(0)
-
-#print("input ids: ", input_ids)
-#max_length = input_ids.shape[1] + args.genlen
-
-def fn(input_ids=input_ids):
-    embed_in = model.get_input_embeddings()(input_ids)
-    timeOut = model(embed_in).last_hidden_state
-    outputModel = TimeModel(input_dim=timeOut.shape, genlen=args.genlen, device=device, dtype=dtype)
-    return outputModel(timeOut)
-
-
-out = fn()
-
-
-if args.prompt is not None:
-    #print(tokenizer.batch_decode(out.sequences.tolist()))
-    print(out.tolist())
+    for p in model.parameters():
+        if p.requires_grad is True:
+            trained_parameters.append(p)
     
-torch.cuda.synchronize()
+    model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
 
-#this repeats section is just for timing how fast it is!
-start = time.time()
+    earlyUnwrap = accelerator.unwrap_model(model)
+    print(f'Total number of parameters: {sum(p.numel() for p in earlyUnwrap.parameters())}')
+    #summary(earlyUnwrap, ((1,2),(3,4),(5,6),(7,8)))
 
-for _ in range(repeats):
-    fn()
+    if args.lradj == 'COS':
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
+    else:
+        scheduler = lr_scheduler.OneCycleLR(optimizer=model_optim,
+                                            steps_per_epoch=train_steps,
+                                            pct_start=args.pct_start,
+                                            epochs=args.train_epochs,
+                                            max_lr=args.learning_rate)
 
-torch.cuda.synchronize()
-print(f"Prompt length: {len(args.prompt)}, generation length: {args.genlen}")
-print(f"{args.model_name} prompt processing + decoding time: {(time.time() - start) / repeats * 1000:.0f}ms")
+    criterion = nn.MSELoss()
+    mae_metric = nn.L1Loss()
+
+    
+    train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(
+        train_loader, vali_loader, test_loader, model, model_optim, scheduler)
+
+    if args.use_amp:
+        scaler = torch.cuda.amp.GradScaler()
+    
+   
+    for epoch in range(args.train_epochs):
+        #epochStartTime = time.time()
+        iter_count = 0
+        train_loss = []
+        
+        model.train()
+        epoch_time = time.time()
+        
+        for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
+            #for testing purposes
+            if args.early_break!=0 and iter_count > args.early_break:
+                break
+            iter_count += 1
+            model_optim.zero_grad()
+
+            batch_x = batch_x.float().to(accelerator.device)
+            batch_y = batch_y.float().to(accelerator.device)
+            batch_x_mark = batch_x_mark.float().to(accelerator.device)
+            batch_y_mark = batch_y_mark.float().to(accelerator.device)
+            
+            # decoder input
+            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float().to(
+                accelerator.device)
+            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(
+                accelerator.device)
+
+
+            # encoder - decoder
+            if args.use_amp:
+                #print("using amp")
+                with torch.cuda.amp.autocast():
+                    if args.output_attention:
+                        outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    else:
+                        outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+
+                    f_dim = -1 if args.features == 'MS' else 0
+                    outputs = outputs[:, -args.pred_len:, f_dim:]
+                    batch_y = batch_y[:, -args.pred_len:, f_dim:].to(accelerator.device)
+                    loss = criterion(outputs, batch_y)
+                    train_loss.append(loss.item())
+            else:
+                #print("no amp")
+                if args.output_attention:
+                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    print("no amp output attention: ", outputs)
+                else:
+                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    print("no amp no output attention: ", outputs)
+
+                f_dim = -1 if args.features == 'MS' else 0
+                outputs = outputs[:, -args.pred_len:, f_dim:]
+                batch_y = batch_y[:, -args.pred_len:, f_dim:]
+                loss = criterion(outputs, batch_y)
+                train_loss.append(loss.item())
+                
+            if (i + 1) % 100 == 0:
+                #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
+                accelerator.print(
+                    "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
+                speed = (time.time() - time_now) / iter_count
+                left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
+                accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
+                iter_count = 0
+                
+
+            if args.use_amp:
+                scaler.scale(loss).backward()
+                scaler.step(model_optim)
+                scaler.update()
+            else:
+                accelerator.backward(loss)
+                model_optim.step()
+
+            if args.lradj == 'TST':
+                adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=False)
+                scheduler.step()
+            
+
+        accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
+        train_loss = np.average(train_loss)
+        print("calculating vali loss")
+        vali_loss, vali_mae_loss = vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric)
+        print("calculating test loss")
+        test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
+        accelerator.print(
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
+        if args.use_wandb:
+            wandb.log({"train loss":train_loss, "vali loss": vali_loss, "test loss": test_loss, "MAE loss": test_mae_loss})
+        #for param_tensor in model.state_dict():
+        #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
+        early_stopping(vali_loss, model, path)
+        if early_stopping.early_stop:
+            accelerator.print("Early stopping")
+            break
+
+        if args.lradj != 'TST':
+            if args.lradj == 'COS':
+                scheduler.step()
+                accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
+            else:
+                if epoch == 0:
+                    args.learning_rate = model_optim.param_groups[0]['lr']
+                    accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
+                adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=True)
+
+        else:
+            accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
+    
+    accelerator.wait_for_everyone()
+    
+    best_model_path = path + '/' + 'checkpoint'
+    accelerator.wait_for_everyone()
+    unwrapped_model = accelerator.unwrap_model(model)
+    torch.cuda.synchronize()
+    torch.cuda.empty_cache()
+    unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
+    
+    print(f'Total number of parameters: {sum(p.numel() for p in unwrapped_model.parameters())}')
+
+    unwrapped_model.eval()
+    with torch.no_grad():
+
+        iter_count = 0
+        train_loss = []
+        
+        #vali_loss, vali_mae_loss = vali(args, accelerator, unwrapped_model, vali_data, vali_loader, criterion, mae_metric)
+        test_loss, test_mae_loss = vali(args, accelerator, unwrapped_model, test_data, test_loader, criterion, mae_metric,path)
+        
+        file = path+'/valiResults/'
+        # Read the CSV file into a pandas DataFrame for predictions
+        predictions_df = pd.read_csv(file+'forecasts.csv')
+
+        # Convert DataFrame to a NumPy array and discard the first row
+        predictions_array = predictions_df.iloc[1:, 1:].to_numpy().astype(float)
+
+        # Read the CSV file into a pandas DataFrame for test set
+        test_df = pd.read_csv(file+'trues.csv')
+
+        # Convert DataFrame to a NumPy array and discard the first row
+        test_array = test_df.iloc[1:, 1:].to_numpy().astype(float)
+
+        metrics = metric(predictions_array, test_array)
+        print("metrics: ", metrics)
+        if args.use_wandb:
+            wandb.log({"mae":metrics[0],"mse":metrics[1], "rmse":metrics[2], "mape":metrics[3], "mspe":metrics[4]})
+    
+
+accelerator.wait_for_everyone()
+if accelerator.is_local_main_process:
+    path = './checkpoints'  # unique checkpoint saving path
+    
+    if args.save_checkpoints == 0:
+        del_files(path)  # delete checkpoint files
+        accelerator.print('success delete checkpoints')
+        
+    accelerator.print('done!')

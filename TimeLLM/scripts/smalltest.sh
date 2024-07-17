@@ -40,6 +40,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
   --llm_layers $llama_layers \
   --train_epochs $train_epochs \
   --model_comment $comment \
-  --early_break 1
+  --early_break 1 \
+  --use_wandb 0
   #--use_amp 
 
