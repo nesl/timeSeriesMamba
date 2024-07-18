@@ -97,7 +97,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
 
 echo "ETTh1 completed, saved to $comment"
 
-: '
+
 tag="ETTh2_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
@@ -320,5 +320,3 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --num_params $num_params
 
 echo "Traffic completed, saved to $comment"
-
-'

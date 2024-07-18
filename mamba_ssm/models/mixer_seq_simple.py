@@ -398,15 +398,30 @@ class MambaTimeHeadModel(nn.Module, GenerationMixin):
     def from_pretrained(cls, pretrained_model_name, device=None, dtype=None, **kwargs):
         config_data = load_config_hf(pretrained_model_name)
         config = MambaConfig(**config_data)
+        print("pretrained config", config)
         model = cls(config, device=device, dtype=dtype, **kwargs)
         model.load_state_dict(load_state_dict_hf(pretrained_model_name, device=device, dtype=dtype))
         return model
     
     #or let's try to use some weight initializations
     @classmethod
-    def from_init(cls, pretrained_model_name, device=None, dtype=None, **kwargs):
-        config_data = load_config_hf(pretrained_model_name)
-        config = MambaConfig(**config_data)
+    def from_init(cls, config_data, device=None, dtype=None, **kwargs):
+        #config_data = load_config_hf(pretrained_model_name)
+        # Function to filter dictionary keys
+        def filter_config_data(config_dict, valid_keys):
+            return {key: config_dict[key] for key in valid_keys if key in config_dict}
+
+        # Get valid keys from MambaConfig
+        valid_keys = MambaConfig.__dataclass_fields__.keys()
+
+        # Convert Namespace to dictionary and filter it
+        filtered_config_data = filter_config_data(vars(config_data), valid_keys)
+
+        # Create MambaConfig instance using the filtered dictionary
+        config = MambaConfig(**filtered_config_data)
+        print("defined config", config)
+        #so the MambaConfig class defines some key-value pairs as a dict and gives some defaults
+        #these config args are then sent to the cls method? which initializes the mixer model?
         model = cls(config, device=device, dtype=dtype, **kwargs)
         #initializations here
         
