@@ -87,6 +87,7 @@ parser.add_argument('--prompt_domain', type=int, default=0, help='')
 parser.add_argument('--llm_model', type=str, default='Mamba', help='LLM model') # LLAMA, GPT2, BERT, Mamba
 parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
 parser.add_argument('--num_params', type=str, default='130m', help='string of our param size to append to huggingface')
+parser.add_argument('--n_layer', type=int, default=12)
 
 # optimization
 parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -102,10 +103,9 @@ parser.add_argument('--loss', type=str, default='MSE', help='loss function')
 parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
 parser.add_argument('--pct_start', type=float, default=0.2, help='pct_start')
 parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
-parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
-parser.add_argument('--use_wandb', type=int, default=0)
+parser.add_argument('--use_wandb', type=int, default=1)
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
 parser.add_argument('--save_checkpoints', type=int, default=1)
@@ -116,11 +116,11 @@ ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
-if args.use_wandb:
+if args.use_wandb == 1:
     wandb.init(project = 'TimeMamba')
     #log the hyperparameters
     wandb.config.update({
-        'layer count': args.llm_layers,
+        'layer count': args.n_layer,
         'd_model': args.d_model,
         'train epochs': args.train_epochs,
         'model id': args.model_id,
@@ -193,7 +193,7 @@ for ii in range(args.itr):
     train_steps = len(train_loader)
     #train_steps = 120
 
-    early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience)
+    early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience, verbose=True)
     
     trained_parameters = []
 
@@ -272,10 +272,10 @@ for ii in range(args.itr):
                 #print("no amp")
                 if args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                    print("no amp output attention: ", outputs)
+                    #print("no amp output attention: ", outputs)
                 else:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                    print("no amp no output attention: ", outputs)
+                    #print("no amp no output attention: ", outputs)
 
                 f_dim = -1 if args.features == 'MS' else 0
                 outputs = outputs[:, -args.pred_len:, f_dim:]

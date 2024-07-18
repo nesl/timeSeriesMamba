@@ -52,9 +52,13 @@ class Model(nn.Module):
         self.dtype = float
 
         print("configs.llm_model: ", configs.llm_model)
-        if configs.llm_model == "MambaBackbone":
+        configs.ssm_cfg={'layer': configs.llm_model}
+
+        if configs.llm_model in  ["Mamba", "Mamba2"]:
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
-            self.llm_model = MambaTimeHeadModel.from_init(f"state-spaces/mamba2-{self.num_params}", device=self.device, dtype=self.dtype)
+            #self.llm_model = MambaTimeHeadModel.from_init(f"state-spaces/mamba2-{self.num_params}", device=self.device, dtype=self.dtype)
+            self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
+            
             #might need to change this name...
         else:
             raise Exception('LLM model is not defined')

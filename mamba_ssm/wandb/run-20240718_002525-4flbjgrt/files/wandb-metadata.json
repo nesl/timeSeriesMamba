@@ -1,0 +1,269 @@
+{
+    "os": "Linux-5.4.0-150-generic-x86_64-with-glibc2.27",
+    "python": "3.9.19",
+    "heartbeatAt": "2024-07-18T07:25:26.140875",
+    "startedAt": "2024-07-18T07:25:25.711034",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--task_name",
+        "long_term_forecast",
+        "--is_training",
+        "1",
+        "--root_path",
+        "./dataset/ETT-small/",
+        "--data_path",
+        "ETTh1.csv",
+        "--model_id",
+        "ETTh1_512_96",
+        "--model",
+        "BackboneModel",
+        "--data",
+        "ETTh1",
+        "--features",
+        "M",
+        "--seq_len",
+        "512",
+        "--label_len",
+        "48",
+        "--pred_len",
+        "96",
+        "--factor",
+        "3",
+        "--enc_in",
+        "7",
+        "--dec_in",
+        "7",
+        "--c_out",
+        "7",
+        "--des",
+        "Exp",
+        "--itr",
+        "1",
+        "--d_model",
+        "32",
+        "--d_ff",
+        "128",
+        "--batch_size",
+        "16",
+        "--learning_rate",
+        "0.01",
+        "--llm_layers",
+        "32",
+        "--train_epochs",
+        "30",
+        "--model_comment",
+        "checkpoints/ETTh1_l32_d32_e30_mMambaBackbone_n130m",
+        "--save_checkpoints",
+        "0",
+        "--llm_model",
+        "MambaBackbone",
+        "--llm_dim",
+        "768",
+        "--num_params",
+        "130m"
+    ],
+    "state": "running",
+    "program": "/home/oliver/Desktop/mamba/mamba_ssm/train.py",
+    "codePathLocal": "train.py",
+    "codePath": "mamba_ssm/train.py",
+    "git": {
+        "remote": "git@github.com:nesl/timeSeriesMamba.git",
+        "commit": "73e58673af00f13f37910d1f4e84a985f54b837c"
+    },
+    "email": "owang235@gmail.com",
+    "root": "/home/oliver/Desktop/mamba",
+    "host": "Nesl-Predator",
+    "username": "oliver",
+    "executable": "/home/oliver/anaconda3/envs/Mamba2/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 2094.3946250000004,
+        "min": 2200.0,
+        "max": 3400.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2176.251,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1890.933,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2409.525,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1887.337,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1889.481,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2014.253,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1890.475,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1890.828,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2115.271,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2130.838,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1862.182,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2180.837,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2013.814,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1928.501,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1936.43,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2456.836,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2191.532,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2179.332,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2117.658,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1985.26,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2180.505,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2193.614,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2189.259,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2195.15,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2056.116,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2097.697,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1967.093,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2200.429,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1993.682,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2076.6,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2090.379,
+            "min": 2200.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2632.53,
+            "min": 2200.0,
+            "max": 3400.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 1832.2072448730469,
+            "used": 1711.988925933838
+        }
+    },
+    "gpu": "NVIDIA RTX A6000",
+    "gpu_count": 2,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA RTX A6000",
+            "memory_total": 51527024640
+        },
+        {
+            "name": "NVIDIA RTX A6000",
+            "memory_total": 51527024640
+        }
+    ],
+    "memory": {
+        "total": 125.72471618652344
+    }
+}
