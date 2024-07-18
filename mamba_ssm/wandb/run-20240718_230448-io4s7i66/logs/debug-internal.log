@@ -1,0 +1,194 @@
+2024-07-18 23:04:48,784 INFO    StreamThr :332093 [internal.py:wandb_internal():85] W&B internal server running at pid: 332093, started at: 2024-07-18 23:04:48.784206
+2024-07-18 23:04:48,786 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status
+2024-07-18 23:04:48,787 INFO    WriterThread:332093 [datastore.py:open_for_write():87] open: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/run-io4s7i66.wandb
+2024-07-18 23:04:48,788 DEBUG   SenderThread:332093 [sender.py:send():379] send: header
+2024-07-18 23:04:48,788 DEBUG   SenderThread:332093 [sender.py:send():379] send: run
+2024-07-18 23:04:49,049 INFO    SenderThread:332093 [dir_watcher.py:__init__():211] watching files in: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files
+2024-07-18 23:04:49,049 INFO    SenderThread:332093 [sender.py:_start_run_threads():1188] run started: io4s7i66 with start time 1721343888.783971
+2024-07-18 23:04:49,058 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: check_version
+2024-07-18 23:04:49,059 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: check_version
+2024-07-18 23:04:49,130 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: run_start
+2024-07-18 23:04:49,302 DEBUG   HandlerThread:332093 [system_info.py:__init__():26] System info init
+2024-07-18 23:04:49,302 DEBUG   HandlerThread:332093 [system_info.py:__init__():41] System info init done
+2024-07-18 23:04:49,302 INFO    HandlerThread:332093 [system_monitor.py:start():194] Starting system monitor
+2024-07-18 23:04:49,303 INFO    SystemMonitor:332093 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-07-18 23:04:49,303 INFO    HandlerThread:332093 [system_monitor.py:probe():214] Collecting system info
+2024-07-18 23:04:49,303 INFO    SystemMonitor:332093 [interfaces.py:start():188] Started cpu monitoring
+2024-07-18 23:04:49,304 INFO    SystemMonitor:332093 [interfaces.py:start():188] Started disk monitoring
+2024-07-18 23:04:49,305 INFO    SystemMonitor:332093 [interfaces.py:start():188] Started gpu monitoring
+2024-07-18 23:04:49,306 INFO    SystemMonitor:332093 [interfaces.py:start():188] Started memory monitoring
+2024-07-18 23:04:49,307 INFO    SystemMonitor:332093 [interfaces.py:start():188] Started network monitoring
+2024-07-18 23:04:49,341 DEBUG   HandlerThread:332093 [system_info.py:probe():152] Probing system
+2024-07-18 23:04:49,343 DEBUG   HandlerThread:332093 [system_info.py:_probe_git():137] Probing git
+2024-07-18 23:04:49,348 DEBUG   HandlerThread:332093 [system_info.py:_probe_git():145] Probing git done
+2024-07-18 23:04:49,348 DEBUG   HandlerThread:332093 [system_info.py:probe():200] Probing system done
+2024-07-18 23:04:49,348 DEBUG   HandlerThread:332093 [system_monitor.py:probe():223] {'os': 'Linux-5.15.0-102-generic-x86_64-with-glibc2.35', 'python': '3.11.9', 'heartbeatAt': '2024-07-18T23:04:49.341764', 'startedAt': '2024-07-18T23:04:48.781595', 'docker': None, 'cuda': None, 'args': ('--task_name', 'long_term_forecast', '--is_training', '1', '--root_path', './dataset/ETT-small/', '--data_path', 'ETTh1.csv', '--model_id', 'ETTh1_512_96', '--model', 'BackboneModel', '--data', 'ETTh1', '--features', 'M', '--seq_len', '512', '--label_len', '48', '--pred_len', '96', '--factor', '3', '--enc_in', '7', '--dec_in', '7', '--c_out', '7', '--des', 'Exp', '--itr', '1', '--d_model', '256', '--d_ff', '128', '--batch_size', '16', '--learning_rate', '0.01', '--n_layer', '32', '--train_epochs', '30', '--model_comment', 'checkpoints/dsweep_l32_d256_e30_mMamba2_n1', '--save_checkpoints', '0', '--llm_model', 'Mamba2', '--llm_dim', '256', '--num_params', '1', '--use_wandb', '1'), 'state': 'running', 'program': '/home/nesl/oliver/timeSeriesMamba/mamba_ssm/train.py', 'codePathLocal': 'train.py', 'codePath': 'mamba_ssm/train.py', 'git': {'remote': 'https://github.com/nesl/timeSeriesMamba.git', 'commit': 'd44f33328c691f3c5adad12b6f8dcb154bad50e7'}, 'email': 'owang235@gmail.com', 'root': '/home/nesl/oliver/timeSeriesMamba', 'host': 'sn4622120321', 'username': 'nesl', 'executable': '/home/nesl/anaconda3/envs/TimeMamba/bin/python', 'cpu_count': 64, 'cpu_count_logical': 128, 'cpu_freq': {'current': 2205.7494609375, 'min': 1500.0, 'max': 3250.0}, 'cpu_freq_per_core': [{'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3794.081, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 3250.0, 'min': 1500.0, 'max': 3250.0}, {'current': 1500.0, 'min': 1500.0, 'max': 3250.0}], 'disk': {'/': {'total': 3654.5877227783203, 'used': 449.1061210632324}}, 'gpu': 'NVIDIA H100 NVL', 'gpu_count': 4, 'gpu_devices': [{'name': 'NVIDIA H100 NVL', 'memory_total': 100485038080}, {'name': 'NVIDIA H100 NVL', 'memory_total': 100485038080}, {'name': 'NVIDIA H100 NVL', 'memory_total': 100485038080}, {'name': 'NVIDIA H100 NVL', 'memory_total': 100485038080}], 'memory': {'total': 1511.5607643127441}}
+2024-07-18 23:04:49,349 INFO    HandlerThread:332093 [system_monitor.py:probe():224] Finished collecting system info
+2024-07-18 23:04:49,349 INFO    HandlerThread:332093 [system_monitor.py:probe():227] Publishing system info
+2024-07-18 23:04:49,349 DEBUG   HandlerThread:332093 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2024-07-18 23:04:50,050 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_created():271] file/dir created: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/conda-environment.yaml
+2024-07-18 23:04:50,565 DEBUG   HandlerThread:332093 [system_info.py:_save_conda():224] Saving conda packages done
+2024-07-18 23:04:50,566 INFO    HandlerThread:332093 [system_monitor.py:probe():229] Finished publishing system info
+2024-07-18 23:04:50,568 DEBUG   SenderThread:332093 [sender.py:send():379] send: files
+2024-07-18 23:04:50,568 INFO    SenderThread:332093 [sender.py:_save_file():1454] saving file wandb-metadata.json with policy now
+2024-07-18 23:04:50,638 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: python_packages
+2024-07-18 23:04:50,639 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: python_packages
+2024-07-18 23:04:50,639 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: stop_status
+2024-07-18 23:04:50,639 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: stop_status
+2024-07-18 23:04:50,642 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:50,765 DEBUG   SenderThread:332093 [sender.py:send():379] send: telemetry
+2024-07-18 23:04:50,765 DEBUG   SenderThread:332093 [sender.py:send():379] send: config
+2024-07-18 23:04:50,910 INFO    wandb-upload_0:332093 [upload_job.py:push():130] Uploaded file /tmp/tmpj6qf_ih5wandb/zpt71bwv-wandb-metadata.json
+2024-07-18 23:04:51,049 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/conda-environment.yaml
+2024-07-18 23:04:51,050 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_created():271] file/dir created: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/wandb-metadata.json
+2024-07-18 23:04:51,050 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_created():271] file/dir created: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/requirements.txt
+2024-07-18 23:04:51,050 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_created():271] file/dir created: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:04:51,639 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:52,664 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:53,050 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:04:53,664 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:53,813 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:04:54,664 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:55,051 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:04:55,667 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:56,666 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:57,667 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:58,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:04:59,641 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:04:59,666 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:00,667 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:01,667 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:02,667 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:03,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:04,642 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:04,667 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:05,640 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: stop_status
+2024-07-18 23:05:05,640 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: stop_status
+2024-07-18 23:05:05,681 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:06,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:07,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:08,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:09,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:09,745 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:10,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:11,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:12,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:13,058 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:13,669 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:14,668 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:14,848 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:15,059 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:15,669 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:16,669 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:17,060 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:17,669 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:18,669 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:19,061 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:19,670 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:19,922 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:20,061 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/config.yaml
+2024-07-18 23:05:20,640 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: stop_status
+2024-07-18 23:05:20,640 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: stop_status
+2024-07-18 23:05:20,670 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:21,062 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:21,670 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:22,670 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:23,063 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:23,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:24,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:25,064 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:25,127 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:25,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:26,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:27,065 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:27,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:28,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:29,065 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:29,671 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:30,154 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:30,701 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:31,066 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:31,672 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:32,672 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:33,067 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:33,672 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:34,672 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:35,068 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:35,230 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:35,641 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: stop_status
+2024-07-18 23:05:35,641 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: stop_status
+2024-07-18 23:05:35,672 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:36,673 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:37,069 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:37,673 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:38,673 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:39,070 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:39,674 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:40,295 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:40,674 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:41,071 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:41,674 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:42,675 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:43,072 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:43,675 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:44,675 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:45,072 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:45,325 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:45,676 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:46,675 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:47,073 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:47,675 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:48,675 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:49,074 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:49,307 DEBUG   SystemMonitor:332093 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-07-18 23:05:49,309 DEBUG   SenderThread:332093 [sender.py:send():379] send: stats
+2024-07-18 23:05:49,676 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:50,446 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:50,640 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: stop_status
+2024-07-18 23:05:50,641 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: stop_status
+2024-07-18 23:05:50,676 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:51,075 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:51,676 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:52,676 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:53,076 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:53,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:54,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:55,077 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:55,558 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:05:55,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:56,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:57,078 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:57,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:58,678 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:05:59,078 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:05:59,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:00,564 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:06:00,677 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:01,079 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:01,678 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:02,678 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:03,080 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:03,678 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:04,678 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:05,081 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:05,581 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:06:05,641 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: stop_status
+2024-07-18 23:06:05,642 DEBUG   SenderThread:332093 [sender.py:send_request():406] send_request: stop_status
+2024-07-18 23:06:05,679 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:06,679 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:07,082 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:07,679 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:08,679 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:09,083 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:09,679 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:10,590 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:06:10,680 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:11,084 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:11,680 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:12,680 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:13,084 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:13,680 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:14,681 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
+2024-07-18 23:06:15,085 INFO    Thread-12 :332093 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240718_230448-io4s7i66/files/output.log
+2024-07-18 23:06:15,645 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: status_report
+2024-07-18 23:06:15,681 DEBUG   HandlerThread:332093 [handler.py:handle_request():158] handle_request: internal_messages
