@@ -6,6 +6,8 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
+import sys
+sys.path.insert(0,'/home/nesl/oliver/timeSeriesMamba')
 #from TimeLLM.models import Autoformer, DLinear, TimeLLM
 from mamba_ssm.models import BackboneModel
 
@@ -23,7 +25,6 @@ from torchsummary import summary
 
 os.environ['CURL_CA_BUNDLE'] = ''
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
-
 from TimeLLM.utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, load_content
 
 parser = argparse.ArgumentParser(description='Time-LLM')
