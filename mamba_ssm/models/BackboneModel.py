@@ -48,13 +48,14 @@ class Model(nn.Module):
         self.patch_len = configs.patch_len
         self.stride = configs.stride
         self.num_params = configs.num_params
-        self.device = "cuda"
+        self.device = configs.device
         self.dtype = float
 
         print("configs.llm_model: ", configs.llm_model)
         configs.ssm_cfg={'layer': configs.llm_model}
 
-        if configs.llm_model in  ["Mamba", "Mamba2"]:
+        if configs.llm_model in  ["Mamba1", "Mamba2"]:            
+            #print("DEVICE: ", self.device)
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
             #self.llm_model = MambaTimeHeadModel.from_init(f"state-spaces/mamba2-{self.num_params}", device=self.device, dtype=self.dtype)
             self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)

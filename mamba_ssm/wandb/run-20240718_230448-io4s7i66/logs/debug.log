@@ -26,3 +26,4 @@ config: {}
 2024-07-18 23:04:50,639 INFO    MainThread:331954 [wandb_run.py:_redirect():2325] Redirects installed.
 2024-07-18 23:04:50,640 INFO    MainThread:331954 [wandb_init.py:init():847] run started, returning control to user process
 2024-07-18 23:04:50,640 INFO    MainThread:331954 [wandb_run.py:_config_callback():1382] config_cb None None {'layer count': 32, 'd_model': 256, 'train epochs': 30, 'model id': 'ETTh1_512_96', 'model': 'BackboneModel', 'LLM used': 'Mamba2', 'num params': '1'}
+2024-07-19 01:16:49,687 WARNING MsgRouterThr:331954 [router.py:message_loop():77] message_loop has been closed

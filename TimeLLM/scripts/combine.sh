@@ -3,12 +3,13 @@ train_epochs=3
 learning_rate=0.01
 llm_layers=6
 
-master_port=01097
+master_port=01060
 num_params=1
 batch_size=16
 d_model=32
 d_ff=128
 num_params='2.8b'
+gpu_id=1
 
 # Function to display usage information
 usage() {
@@ -46,21 +47,21 @@ echo "Setting llm_model to $llm_model"
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}"
 
 llm_dim=0
-if [ "$llm_model" = "Mamba" ]; then
+if [ "$num_params" = "130m" ]; then
   llm_dim=768
 fi
-if [ "$llm_model" = "Mamba2" ]; then
+if [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560
 fi
 
 # Redirect output to a file named after the comment variable
-: '
+
 tag="ETTh1_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -92,12 +93,13 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
 
 echo "ETTh1 completed, saved to $comment"
 
+
 tag="ETTh2_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -128,13 +130,13 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --num_params $num_params
 
 echo "ETTh2 completed, saved to $comment"
-'
+
 tag="ETTm1_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -173,7 +175,7 @@ comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -212,7 +214,7 @@ comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/electricity/ \
@@ -248,7 +250,7 @@ comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/weather/ \
@@ -286,7 +288,7 @@ comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
 exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/traffic/ \

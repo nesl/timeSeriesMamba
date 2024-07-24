@@ -127,11 +127,17 @@ if args.use_wandb == 1:
         'model id': args.model_id,
         'model' : args.model,
         'LLM used': args.llm_model,
-        'num params': args.num_params
+        #'num params': args.num_params
     })
+all_metrics = []
 
-for ii in range(args.itr):
+seeds = [2,3,10,15,42,100,101,2021,2024,9999]
 
+for ii in range(len(seeds)):
+    fix_seed = seeds[ii]
+    random.seed(fix_seed)
+    torch.manual_seed(fix_seed)
+    np.random.seed(fix_seed)
     # setting record of experiments
     setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
         args.task_name,
@@ -157,17 +163,10 @@ for ii in range(args.itr):
     vali_data, vali_loader = data_provider(args, 'val')
     test_data, test_loader = data_provider(args, 'test')
 
+    args.device = accelerator.device
+
     print("Using Framework: ", args.model)
-    '''
-    if args.model == 'TimeLLM':
-        model = TimeLLM.Model(args).float()
-    elif args.model == 'Autoformer':
-        model = Autoformer.Model(args).float()
-    elif args.model == 'DLinear':
-        model = DLinear.Model(args).float()
-    elif args.model == 'BackboneModel':
-        model = BackboneModel.Model(args).float()
-    '''
+    print("args.device: ", args.device)
     model = BackboneModel.Model(args).float()
 
     path = os.path.join(args.checkpoints,
@@ -317,7 +316,7 @@ for ii in range(args.itr):
             "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
         if args.use_wandb:
-            wandb.log({"train loss":train_loss, "vali loss": vali_loss, "test loss": test_loss, "MAE loss": test_mae_loss})
+            wandb.log({f"train loss {ii}":train_loss, f"vali loss {ii}": vali_loss, f"test loss {ii}": test_loss, f"MAE loss {ii}": test_mae_loss})
         #for param_tensor in model.state_dict():
         #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
         early_stopping(vali_loss, model, path)
@@ -347,7 +346,9 @@ for ii in range(args.itr):
     torch.cuda.empty_cache()
     unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
     
-    print(f'Total number of parameters: {sum(p.numel() for p in unwrapped_model.parameters())}')
+    num_params = sum(p.numel() for p in unwrapped_model.parameters())
+    print(f'Total number of parameters: {num_params}')
+    wandb.config.update({'num_params':num_params})
 
     unwrapped_model.eval()
     with torch.no_grad():
@@ -374,8 +375,12 @@ for ii in range(args.itr):
         metrics = metric(predictions_array, test_array)
         print("metrics: ", metrics)
         if args.use_wandb:
-            wandb.log({"mae":metrics[0],"mse":metrics[1], "rmse":metrics[2], "mape":metrics[3], "mspe":metrics[4]})
-    
+            wandb.log({f"mae {ii}":metrics[0],f"mse {ii}":metrics[1], f"rmse {ii}":metrics[2], f"mape {ii}":metrics[3], f"mspe {ii}":metrics[4]})
+        all_metrics.append(metrics)
+
+if args.use_wandb:
+    all_metrics = np.mean(all_metrics, axis=0)
+    wandb.log({f"mae":all_metrics[0],f"mse":all_metrics[1], f"rmse":all_metrics[2], f"mape":all_metrics[3], f"mspe":all_metrics[4]})
 
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:

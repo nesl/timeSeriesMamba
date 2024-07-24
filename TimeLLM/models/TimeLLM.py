@@ -10,10 +10,11 @@ import transformers
 from layers.StandardNorm import Normalize
 
 import sys
-sys.path.insert(0, '/home/oliver/Desktop/mamba')
-
-from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
-
+#print("sys.path before:", sys.path)
+sys.path.insert(0, '/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/')
+#print("sys.path after:", sys.path)
+from mixer_seq_simple import MambaLMHeadModel,MambaTimeHeadModel
+sys.path.pop(0)
 
 
 transformers.logging.set_verbosity_error()
@@ -48,7 +49,9 @@ class Model(nn.Module):
         self.stride = configs.stride
         self.num_params = configs.num_params
 
+        
         if configs.llm_model == "Mamba":
+            '''
             self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
@@ -59,12 +62,17 @@ class Model(nn.Module):
             config=self.mamba_config
             )
             self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
-
+            '''
+            self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba-{self.num_params}")#, device=device, dtype=dtype)
+            
         elif configs.llm_model == "Mamba2":
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
             self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")#, device=device, dtype=dtype)
             #self.llm_model = AutoModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             #print("Mamba2 info: ", self.llm_model.vocab_size)
+       
+
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
