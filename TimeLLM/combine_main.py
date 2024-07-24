@@ -27,11 +27,6 @@ from utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, lo
 
 parser = argparse.ArgumentParser(description='Time-LLM')
 
-fix_seed = 2021
-random.seed(fix_seed)
-torch.manual_seed(fix_seed)
-np.random.seed(fix_seed)
-
 # basic config
 parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
                     help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
@@ -104,17 +99,17 @@ parser.add_argument('--use_amp', action='store_true', help='use automatic mixed 
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
-parser.add_argument('--use_wandb', type=int, default=0)
+parser.add_argument('--use_wandb', type=int, default=1)
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
-parser.add_argument('--save_checkpoints', type=int, default=1)
+parser.add_argument('--save_checkpoints', type=int, default=0)
 
 
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
-
+print("accelerator device: ", accelerator.device)
 if args.use_wandb:
     wandb.init(project = 'TimeMamba')
     #log the hyperparameters
@@ -125,11 +120,20 @@ if args.use_wandb:
         'model id': args.model_id,
         'model' : args.model,
         'LLM used': args.llm_model,
-        'num params': args.num_params
+        #'num params': args.num_params
     })
 
-for ii in range(args.itr):
 
+
+all_metrics = []
+
+seeds = [2,3,10,15,42,100,101,2021,2024,9999]
+
+for ii in range(len(seeds)):
+    fix_seed = seeds[ii]
+    random.seed(fix_seed)
+    torch.manual_seed(fix_seed)
+    np.random.seed(fix_seed)
     # setting record of experiments
     setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
         args.task_name,
@@ -164,25 +168,15 @@ for ii in range(args.itr):
         model = DLinear.Model(args).float()
     
 
-    path = os.path.join(args.checkpoints,
-                        setting + '-' + args.model_comment)  # unique checkpoint saving path
+    #path = os.path.join(args.checkpoints,setting + '-' + args.model_comment)  # unique checkpoint saving path
     
     path = args.model_comment
     args.content = load_content(args)
+    print("os.path.exists: ", path)
+    print("accel local main process: ", accelerator.is_local_main_process)
     if not os.path.exists(path) and accelerator.is_local_main_process:
         os.makedirs(path)
-    
-    '''
-    #this is to allow for repeat trials without overwriting old stuff        
-    else: 
-        i = 1
-        while os.path.exists(path):
-            path = path + f'{i}'
-            i+=1
-        print("path already exists! making path at ", path)
-        os.makedirs(path)
-    '''
-
+   
     time_now = time.time()
     #train_loader = train_loader[0:120]#try this to shorten
     train_steps = len(train_loader)
@@ -267,10 +261,10 @@ for ii in range(args.itr):
                 #print("no amp")
                 if args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                    print("no amp output attention: ", outputs)
+                    #print("no amp output attention: ", outputs)
                 else:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                    print("no amp no output attention: ", outputs)
+                    #print("no amp no output attention: ", outputs)
 
                 f_dim = -1 if args.features == 'MS' else 0
                 outputs = outputs[:, -args.pred_len:, f_dim:]
@@ -310,7 +304,7 @@ for ii in range(args.itr):
         accelerator.print(
             "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
-        wandb.log({"train loss":train_loss, "vali loss": vali_loss, "test loss": test_loss, "MAE loss": test_mae_loss})
+        wandb.log({f"train loss {ii}":train_loss, f"vali loss {ii}": vali_loss, f"test loss {ii}": test_loss, f"MAE loss {ii}": test_mae_loss})
         #for param_tensor in model.state_dict():
         #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
         early_stopping(vali_loss, model, path)
@@ -340,8 +334,12 @@ for ii in range(args.itr):
     torch.cuda.empty_cache()
     unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
     
-    print(f'Total number of parameters: {sum(p.numel() for p in unwrapped_model.parameters())}')
-
+    if ii==len(seeds)-1:
+        num_params = sum(p.numel() for p in unwrapped_model.parameters())
+        print(f'Total number of parameters: {num_params}')
+        if use_wandb:
+            wandb.config.update({'num_params':num_params})
+    
     unwrapped_model.eval()
     with torch.no_grad():
 
@@ -366,8 +364,13 @@ for ii in range(args.itr):
 
         metrics = metric(predictions_array, test_array)
         print("metrics: ", metrics)
-        wandb.log({"mae":metrics[0],"mse":metrics[1], "rmse":metrics[2], "mape":metrics[3], "mspe":metrics[4]})
-    
+        if args.use_wandb:
+            wandb.log({f"mae {ii}":metrics[0],f"mse {ii}":metrics[1], f"rmse {ii}":metrics[2], f"mape {ii}":metrics[3], f"mspe {ii}":metrics[4]})
+        all_metrics.append(metrics)
+
+if args.use_wandb:
+    all_metrics = np.mean(all_metrics, axis=0)
+    wandb.log({f"mae":all_metrics[0],f"mse":all_metrics[1], f"rmse":all_metrics[2], f"mape":all_metrics[3], f"mspe":all_metrics[4]})
 
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:
