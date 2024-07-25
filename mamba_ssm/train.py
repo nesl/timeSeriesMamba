@@ -1,4 +1,9 @@
 import argparse
+
+import os
+cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
+print(f'CUDA_VISIBLE_DEVICES: {cuda_visible_devices}')
+
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
 from accelerate import DistributedDataParallelKwargs
@@ -15,7 +20,7 @@ from TimeLLM.data_provider.data_factory import data_provider
 import time
 import random
 import numpy as np
-import os
+
 
 import pandas as pd
 from TimeLLM.utils.metrics import metric
@@ -115,7 +120,6 @@ parser.add_argument('--save_checkpoints', type=int, default=1)
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
-accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
 if args.use_wandb == 1:
     wandb.init(project = 'TimeMamba')
@@ -138,6 +142,8 @@ for ii in range(len(seeds)):
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
+    accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
+
     # setting record of experiments
     setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
         args.task_name,
@@ -166,7 +172,7 @@ for ii in range(len(seeds)):
     args.device = accelerator.device
 
     print("Using Framework: ", args.model)
-    print("args.device: ", args.device)
+    #print("args.device: ", args.device)
     model = BackboneModel.Model(args).float()
 
     path = os.path.join(args.checkpoints,
@@ -189,10 +195,7 @@ for ii in range(len(seeds)):
     '''
 
     time_now = time.time()
-    #train_loader = train_loader[0:120]#try this to shorten
     train_steps = len(train_loader)
-    #train_steps = 120
-
     early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience, verbose=True)
     
     trained_parameters = []
