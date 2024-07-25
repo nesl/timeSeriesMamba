@@ -1,3 +1,8 @@
+import os
+cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
+print(f'CUDA_VISIBLE_DEVICES: {cuda_visible_devices}')
+
+
 import argparse
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
@@ -12,7 +17,6 @@ from data_provider.data_factory import data_provider
 import time
 import random
 import numpy as np
-import os
 
 import pandas as pd
 from utils.metrics import metric
@@ -108,8 +112,6 @@ parser.add_argument('--save_checkpoints', type=int, default=0)
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
-accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
-print("accelerator device: ", accelerator.device)
 if args.use_wandb:
     wandb.init(project = 'TimeMamba')
     #log the hyperparameters
@@ -127,9 +129,11 @@ if args.use_wandb:
 
 all_metrics = []
 
-seeds = [2,3,10,15,42,100,101,2021,2024,9999]
-
+#seeds = [2,3,10,15,42,100,101,2021,2024,9999]
+seeds = [1,2]
 for ii in range(len(seeds)):
+    accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
+    print("accelerator device: ", accelerator.device)
     fix_seed = seeds[ii]
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
@@ -304,7 +308,8 @@ for ii in range(len(seeds)):
         accelerator.print(
             "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
                 epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
-        wandb.log({f"train loss {ii}":train_loss, f"vali loss {ii}": vali_loss, f"test loss {ii}": test_loss, f"MAE loss {ii}": test_mae_loss})
+        if args.use_wandb:
+            wandb.log({f"train loss {ii}":train_loss, f"vali loss {ii}": vali_loss, f"test loss {ii}": test_loss, f"MAE loss {ii}": test_mae_loss})
         #for param_tensor in model.state_dict():
         #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
         early_stopping(vali_loss, model, path)
@@ -337,7 +342,7 @@ for ii in range(len(seeds)):
     if ii==len(seeds)-1:
         num_params = sum(p.numel() for p in unwrapped_model.parameters())
         print(f'Total number of parameters: {num_params}')
-        if use_wandb:
+        if args.use_wandb:
             wandb.config.update({'num_params':num_params})
     
     unwrapped_model.eval()

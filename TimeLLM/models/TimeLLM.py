@@ -48,7 +48,7 @@ class Model(nn.Module):
         self.patch_len = configs.patch_len
         self.stride = configs.stride
         self.num_params = configs.num_params
-
+        self.llm_model_name = configs.llm_model
         
         if configs.llm_model == "Mamba":
             '''
@@ -79,6 +79,7 @@ class Model(nn.Module):
             self.llama_config.num_hidden_layers = configs.llm_layers
             self.llama_config.output_attentions = True
             self.llama_config.output_hidden_states = True
+            '''
             try:
                 self.llm_model = LlamaModel.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
@@ -108,6 +109,21 @@ class Model(nn.Module):
             except EnvironmentError:  # downloads the tokenizer from HF if not already done
                 print("Local tokenizer files not found. Atempting to download them..")
                 self.tokenizer = LlamaTokenizer.from_pretrained(
+                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
+                    'huggyllama/llama-7b',
+                    trust_remote_code=True,
+                    local_files_only=False
+                )
+                '''
+            self.llm_model = LlamaModel.from_pretrained(
+                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
+                    'huggyllama/llama-7b',
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config,
+                    # load_in_4bit=True
+                )
+            self.tokenizer = LlamaTokenizer.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
                     'huggyllama/llama-7b',
                     trust_remote_code=True,
@@ -275,7 +291,11 @@ class Model(nn.Module):
         enc_out, n_vars = self.patch_embedding(x_enc.to(torch.bfloat16))
         enc_out = self.reprogramming_layer(enc_out, source_embeddings, source_embeddings)
         llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)
-        dec_out = self.llm_model(llama_enc_out).last_hidden_state
+        
+        if "LLAMA" in self.llm_model_name: #i think this is fine, it just feeds embeddings instead of prompts?
+            dec_out = self.llm_model(inputs_embeds=llama_enc_out).last_hidden_state
+        else:
+            dec_out = self.llm_model(llama_enc_out).last_hidden_state
         
         #llama enc out is float tensor
         #dec_out = self.llm_model(input_ids=prompt).last_hidden_state

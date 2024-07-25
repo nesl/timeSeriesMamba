@@ -10,7 +10,12 @@ num_params='2.7b'
 
 llm_dim=768
 
-gpu_id=0
+gpu_id=1
+#see if this helps
+export CUDA_VISIBLE_DEVICES=$gpu_id
+
+#echo $CUDA_VISIBLE_DEVICES
+#so this is visible as 1, yet it doesnt make a difference...
 
 # Function to display usage information
 usage() {

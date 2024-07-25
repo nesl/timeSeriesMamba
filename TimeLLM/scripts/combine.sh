@@ -3,13 +3,15 @@ train_epochs=3
 learning_rate=0.01
 llm_layers=6
 
-master_port=01060
+master_port=01070
 num_params=1
 batch_size=16
 d_model=32
 d_ff=128
 num_params='2.8b'
 gpu_id=1
+export CUDA_VISIBLE_DEVICES=$gpu_id
+
 
 # Function to display usage information
 usage() {
@@ -52,6 +54,9 @@ if [ "$num_params" = "130m" ]; then
 fi
 if [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560
+fi
+if [ "$num_params" = "7b" ]; then
+  llm_dim=4096
 fi
 
 # Redirect output to a file named after the comment variable
