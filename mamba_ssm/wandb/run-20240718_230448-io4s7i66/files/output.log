@@ -1,0 +1,5030 @@
+Using Framework:  BackboneModel
+configs.llm_model:  Mamba2
+defined config MambaConfig(d_model=256, d_intermediate=0, n_layer=32, vocab_size=50277, ssm_cfg={'layer': 'Mamba2'}, attn_layer_idx=[], attn_cfg={}, rms_norm=True, residual_in_fp32=True, fused_add_norm=True, pad_vocab_size_multiple=8, tie_embeddings=True)
+LLM model used is:  Mamba2
+Total number of parameters: 79893712
+[2024-07-18 23:04:51,379] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed info: version=0.14.0, git-hash=unknown, git-branch=unknown
+[2024-07-18 23:04:52,369] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Flops Profiler Enabled: False
+[2024-07-18 23:04:52,370] [INFO] [logging.py:96:log_dist] [Rank 0] Using client Optimizer as basic optimizer
+[2024-07-18 23:04:52,370] [INFO] [logging.py:96:log_dist] [Rank 0] Removing param_group that has no 'params' in the basic Optimizer
+[2024-07-18 23:04:52,371] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Basic Optimizer = Adam
+[2024-07-18 23:04:52,371] [INFO] [utils.py:56:is_zero_supported_optimizer] Checking ZeRO support for optimizer=Adam type=<class 'torch.optim.adam.Adam'>
+[2024-07-18 23:04:52,371] [INFO] [logging.py:96:log_dist] [Rank 0] Creating torch.bfloat16 ZeRO stage 2 optimizer
+[2024-07-18 23:04:52,371] [INFO] [stage_1_and_2.py:149:__init__] Reduce bucket size 200000000
+[2024-07-18 23:04:52,371] [INFO] [stage_1_and_2.py:150:__init__] Allgather bucket size 200000000
+[2024-07-18 23:04:52,371] [INFO] [stage_1_and_2.py:151:__init__] CPU Offload: False
+[2024-07-18 23:04:52,371] [INFO] [stage_1_and_2.py:152:__init__] Round robin gradient partitioning: False
+[2024-07-18 23:04:52,549] [INFO] [utils.py:800:see_memory_usage] Before initializing optimizer states
+[2024-07-18 23:04:52,550] [INFO] [utils.py:801:see_memory_usage] MA 0.34 GB         Max_MA 0.44 GB         CA 0.45 GB         Max_CA 0 GB
+[2024-07-18 23:04:52,550] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 14.88 GB, percent = 1.0%
+[2024-07-18 23:04:52,663] [INFO] [utils.py:800:see_memory_usage] After initializing optimizer states
+[2024-07-18 23:04:52,664] [INFO] [utils.py:801:see_memory_usage] MA 0.34 GB         Max_MA 0.54 GB         CA 0.64 GB         Max_CA 1 GB
+[2024-07-18 23:04:52,664] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 14.88 GB, percent = 1.0%
+[2024-07-18 23:04:52,664] [INFO] [stage_1_and_2.py:539:__init__] optimizer state initialized
+[2024-07-18 23:04:52,765] [INFO] [utils.py:800:see_memory_usage] After initializing ZeRO optimizer
+[2024-07-18 23:04:52,766] [INFO] [utils.py:801:see_memory_usage] MA 0.34 GB         Max_MA 0.34 GB         CA 0.64 GB         Max_CA 1 GB
+[2024-07-18 23:04:52,767] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 14.88 GB, percent = 1.0%
+[2024-07-18 23:04:52,767] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Final Optimizer = Adam
+[2024-07-18 23:04:52,767] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed using client LR scheduler
+[2024-07-18 23:04:52,767] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed LR Scheduler = None
+[2024-07-18 23:04:52,767] [INFO] [logging.py:96:log_dist] [Rank 0] step=0, skipped=0, lr=[0.0003999999999999993], mom=[(0.95, 0.999)]
+[2024-07-18 23:04:52,768] [INFO] [config.py:996:print] DeepSpeedEngine configuration:
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   activation_checkpointing_config  {
+    "partition_activations": false,
+    "contiguous_memory_optimization": false,
+    "cpu_checkpointing": false,
+    "number_checkpoints": null,
+    "synchronize_checkpoint_boundary": false,
+    "profile": false
+}
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   aio_config ................... {'block_size': 1048576, 'queue_depth': 8, 'thread_count': 1, 'single_submit': False, 'overlap_events': True}
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   amp_enabled .................. False
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   amp_params ................... False
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   autotuning_config ............ {
+    "enabled": false,
+    "start_step": null,
+    "end_step": null,
+    "metric_path": null,
+    "arg_mappings": null,
+    "metric": "throughput",
+    "model_info": null,
+    "results_dir": "autotuning_results",
+    "exps_dir": "autotuning_exps",
+    "overwrite": true,
+    "fast": true,
+    "start_profile_step": 3,
+    "end_profile_step": 5,
+    "tuner_type": "gridsearch",
+    "tuner_early_stopping": 5,
+    "tuner_num_trials": 50,
+    "model_info_path": null,
+    "mp_size": 1,
+    "max_train_batch_size": null,
+    "min_train_batch_size": 1,
+    "max_train_micro_batch_size_per_gpu": 1.024000e+03,
+    "min_train_micro_batch_size_per_gpu": 1,
+    "num_tuning_micro_batch_sizes": 3
+}
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   bfloat16_enabled ............. True
+[2024-07-18 23:04:52,768] [INFO] [config.py:1000:print]   bfloat16_immediate_grad_update  False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   checkpoint_parallel_write_pipeline  False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   checkpoint_tag_validation_enabled  True
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   checkpoint_tag_validation_fail  False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   comms_config ................. <deepspeed.comm.config.DeepSpeedCommsConfig object at 0x7fbf3209d1d0>
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   communication_data_type ...... None
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   compile_config ............... enabled=False backend='inductor' kwargs={}
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   compression_config ........... {'weight_quantization': {'shared_parameters': {'enabled': False, 'quantizer_kernel': False, 'schedule_offset': 0, 'quantize_groups': 1, 'quantize_verbose': False, 'quantization_type': 'symmetric', 'quantize_weight_in_forward': False, 'rounding': 'nearest', 'fp16_mixed_quantize': False, 'quantize_change_ratio': 0.001}, 'different_groups': {}}, 'activation_quantization': {'shared_parameters': {'enabled': False, 'quantization_type': 'symmetric', 'range_calibration': 'dynamic', 'schedule_offset': 1000}, 'different_groups': {}}, 'sparse_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'row_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'head_pruning': {'shared_parameters': {'enabled': False, 'method': 'topk', 'schedule_offset': 1000}, 'different_groups': {}}, 'channel_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'layer_reduction': {'enabled': False}}
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   curriculum_enabled_legacy .... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   curriculum_params_legacy ..... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   data_efficiency_config ....... {'enabled': False, 'seed': 1234, 'data_sampling': {'enabled': False, 'num_epochs': 1000, 'num_workers': 0, 'curriculum_learning': {'enabled': False}}, 'data_routing': {'enabled': False, 'random_ltd': {'enabled': False, 'layer_token_lr_schedule': {'enabled': False}}}}
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   data_efficiency_enabled ...... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   dataloader_drop_last ......... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   disable_allgather ............ False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   dump_state ................... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   dynamic_loss_scale_args ...... None
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_enabled ........... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_gas_boundary_resolution  1
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_layer_name ........ bert.encoder.layer
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_layer_num ......... 0
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_max_iter .......... 100
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_stability ......... 1e-06
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_tol ............... 0.01
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   eigenvalue_verbose ........... False
+[2024-07-18 23:04:52,769] [INFO] [config.py:1000:print]   elasticity_enabled ........... False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   flops_profiler_config ........ {
+    "enabled": false,
+    "recompute_fwd_factor": 0.0,
+    "profile_step": 1,
+    "module_depth": -1,
+    "top_modules": 1,
+    "detailed": true,
+    "output_file": null
+}
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   fp16_auto_cast ............... None
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   fp16_enabled ................. False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   fp16_master_weights_and_gradients  False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   global_rank .................. 0
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   grad_accum_dtype ............. None
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   gradient_accumulation_steps .. 1
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   gradient_clipping ............ 0.0
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   gradient_predivide_factor .... 1.0
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   graph_harvesting ............. False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   hybrid_engine ................ enabled=False max_out_tokens=512 inference_tp_size=1 release_inference_cache=False pin_parameters=True tp_gather_partition_size=8
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   initial_dynamic_scale ........ 1
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   load_universal_checkpoint .... False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   loss_scale ................... 1.0
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   memory_breakdown ............. False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   mics_hierarchial_params_gather  False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   mics_shard_size .............. -1
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   monitor_config ............... tensorboard=TensorBoardConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') wandb=WandbConfig(enabled=False, group=None, team=None, project='deepspeed') csv_monitor=CSVConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') enabled=False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   nebula_config ................ {
+    "enabled": false,
+    "persistent_storage_path": null,
+    "persistent_time_interval": 100,
+    "num_of_version_in_retention": 2,
+    "enable_nebula_load": true,
+    "load_path": null
+}
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   optimizer_legacy_fusion ...... False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   optimizer_name ............... None
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   optimizer_params ............. None
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   pipeline ..................... {'stages': 'auto', 'partition': 'best', 'seed_layers': False, 'activation_checkpoint_interval': 0, 'pipe_partitioned': True, 'grad_partitioned': True}
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   pld_enabled .................. False
+[2024-07-18 23:04:52,770] [INFO] [config.py:1000:print]   pld_params ................... False
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   prescale_gradients ........... False
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   scheduler_name ............... None
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   scheduler_params ............. None
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   seq_parallel_communication_data_type  torch.float32
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   sparse_attention ............. None
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   sparse_gradients_enabled ..... False
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   steps_per_print .............. inf
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   train_batch_size ............. 16
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   train_micro_batch_size_per_gpu  16
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   use_data_before_expert_parallel_  False
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   use_node_local_storage ....... False
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   wall_clock_breakdown ......... False
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   weight_quantization_config ... None
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   world_size ................... 1
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   zero_allow_untested_optimizer  True
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   zero_config .................. stage=2 contiguous_gradients=True reduce_scatter=True reduce_bucket_size=200000000 use_multi_rank_bucket_allreduce=True allgather_partitions=True allgather_bucket_size=200000000 overlap_comm=True load_from_fp32_weights=True elastic_checkpoint=False offload_param=None offload_optimizer=None sub_group_size=1000000000 cpu_offload_param=None cpu_offload_use_pin_memory=None cpu_offload=None prefetch_bucket_size=50,000,000 param_persistence_threshold=100,000 model_persistence_threshold=sys.maxsize max_live_parameters=1,000,000,000 max_reuse_distance=1,000,000,000 gather_16bit_weights_on_model_save=False stage3_gather_fp16_weights_on_model_save=False ignore_unused_parameters=True legacy_stage1=False round_robin_gradients=False zero_hpz_partition_size=1 zero_quantized_weights=False zero_quantized_nontrainable_weights=False zero_quantized_gradients=False mics_shard_size=-1 mics_hierarchical_params_gather=False memory_efficient_linear=True pipeline_loading_checkpoint=False override_module_apply=True
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   zero_enabled ................. True
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   zero_force_ds_cpu_optimizer .. True
+[2024-07-18 23:04:52,771] [INFO] [config.py:1000:print]   zero_optimization_stage ...... 2
+[2024-07-18 23:04:52,771] [INFO] [config.py:986:print_user_config]   json = {
+    "bf16": {
+        "enabled": true,
+        "auto_cast": true
+    },
+    "zero_optimization": {
+        "stage": 2,
+        "allgather_partitions": true,
+        "allgather_bucket_size": 2.000000e+08,
+        "overlap_comm": true,
+        "reduce_scatter": true,
+        "reduce_bucket_size": 2.000000e+08,
+        "contiguous_gradients": true,
+        "sub_group_size": 1.000000e+09
+    },
+    "gradient_accumulation_steps": 1,
+    "train_batch_size": 16,
+    "train_micro_batch_size_per_gpu": 16,
+    "steps_per_print": inf,
+    "wall_clock_breakdown": false,
+    "fp16": {
+        "enabled": false
+    },
+    "zero_allow_untested_optimizer": true
+}
+
+
+
+
+
+
+
+
+96it [00:33,  6.72it/s]
+	iters: 100, epoch: 1 | loss: 0.5336106
+
+
+
+
+
+
+
+
+198it [00:49,  6.32it/s]
+	iters: 200, epoch: 1 | loss: 0.8065295
+
+
+
+
+
+
+
+287it [01:03,  6.30it/s]
+	iters: 300, epoch: 1 | loss: 0.3310025
+
+
+
+
+
+
+
+
+395it [01:19,  6.48it/s]
+	iters: 400, epoch: 1 | loss: 0.6894706
+
+
+
+
+
+
+
+
+499it [01:35,  6.53it/s]
+	iters: 500, epoch: 1 | loss: 0.2456437
+
+
+
+
+
+
+
+589it [01:49,  6.56it/s]
+	iters: 600, epoch: 1 | loss: 0.3495836
+
+
+
+
+
+
+
+
+691it [02:05,  6.44it/s]
+	iters: 700, epoch: 1 | loss: 0.2424738
+
+
+
+
+
+
+
+
+796it [02:21,  6.73it/s]
+	iters: 800, epoch: 1 | loss: 0.3706393
+
+
+
+
+
+
+
+891it [02:35,  6.85it/s]
+	iters: 900, epoch: 1 | loss: 0.4531696
+
+
+
+
+
+
+
+
+997it [02:51,  6.79it/s]
+	iters: 1000, epoch: 1 | loss: 0.2666115
+
+
+
+
+
+
+
+1090it [03:05,  6.29it/s]
+	iters: 1100, epoch: 1 | loss: 0.3918110
+
+
+
+
+
+
+
+
+1196it [03:21,  6.79it/s]
+	iters: 1200, epoch: 1 | loss: 0.3830054
+
+
+
+
+
+
+
+1288it [03:35,  6.65it/s]
+	iters: 1300, epoch: 1 | loss: 0.4380747
+
+
+
+
+
+
+
+
+1395it [03:51,  6.70it/s]
+	iters: 1400, epoch: 1 | loss: 0.3748716
+
+
+
+
+
+
+
+1490it [04:05,  6.93it/s]
+	iters: 1500, epoch: 1 | loss: 0.7661013
+
+
+
+
+
+
+
+1586it [04:19,  6.95it/s]
+	iters: 1600, epoch: 1 | loss: 0.3936995
+
+
+
+
+
+
+
+
+1696it [04:35,  6.68it/s]
+	iters: 1700, epoch: 1 | loss: 0.5716199
+
+
+
+
+
+
+
+1789it [04:49,  6.74it/s]
+	iters: 1800, epoch: 1 | loss: 0.5975486
+
+
+
+
+
+
+
+
+1894it [05:05,  6.76it/s]
+	iters: 1900, epoch: 1 | loss: 0.3216460
+
+
+
+
+
+
+
+
+1999it [05:21,  6.49it/s]
+	iters: 2000, epoch: 1 | loss: 0.2856469
+
+
+
+
+
+
+
+2092it [05:35,  6.68it/s]
+	iters: 2100, epoch: 1 | loss: 0.3133482
+
+
+
+
+
+
+
+
+2196it [05:51,  6.43it/s]
+	iters: 2200, epoch: 1 | loss: 0.3761803
+
+
+
+
+
+
+
+2289it [06:05,  6.86it/s]
+	iters: 2300, epoch: 1 | loss: 0.4330462
+
+
+
+
+
+
+
+
+2395it [06:21,  6.81it/s]
+	iters: 2400, epoch: 1 | loss: 0.4664277
+
+
+
+
+
+
+
+
+2498it [06:37,  6.19it/s]
+	iters: 2500, epoch: 1 | loss: 0.5504537
+
+
+
+
+
+
+
+2592it [06:51,  6.86it/s]
+	iters: 2600, epoch: 1 | loss: 0.3175591
+
+
+
+
+
+
+
+
+2698it [07:07,  6.59it/s]
+	iters: 2700, epoch: 1 | loss: 0.4676324
+
+
+
+
+
+
+
+2789it [07:21,  6.49it/s]
+	iters: 2800, epoch: 1 | loss: 0.4819028
+
+
+
+
+
+
+
+
+2894it [07:37,  6.22it/s]
+	iters: 2900, epoch: 1 | loss: 0.3529432
+
+
+
+
+
+
+
+
+2999it [07:53,  6.55it/s]
+	iters: 3000, epoch: 1 | loss: 0.3351040
+
+
+
+
+
+
+
+3093it [08:07,  6.76it/s]
+	iters: 3100, epoch: 1 | loss: 0.3504183
+
+
+
+
+
+
+
+
+3200it [08:23,  6.16it/s]
+	iters: 3200, epoch: 1 | loss: 0.3184997
+
+
+
+
+
+
+
+3292it [08:37,  6.92it/s]
+	iters: 3300, epoch: 1 | loss: 0.4060905
+
+
+
+
+
+
+
+
+3398it [08:54,  6.68it/s]
+	iters: 3400, epoch: 1 | loss: 0.4073854
+
+
+
+
+
+
+
+3490it [09:07,  6.58it/s]
+	iters: 3500, epoch: 1 | loss: 0.2337728
+
+3514it [09:11,  6.37it/s]
+1it [00:00,  2.83it/s]
+Epoch: 1 cost time: 551.7069418430328
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1206it [00:54, 22.18it/s]
+1218it [00:55, 22.12it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+799it [00:36, 22.42it/s]
+Epoch: 1 | Train Loss: 0.4015730 Vali Loss: 0.7294348 Test Loss: 0.3866309 MAE Loss: 0.4097034
+Validation loss decreased (inf --> 0.729435).  Saving model ...
+lr = 0.0004000000
+1218it [00:55, 22.12it/s]
+
+
+
+
+
+92it [00:14,  6.64it/s]
+	iters: 100, epoch: 2 | loss: 0.3231535
+
+
+
+
+
+
+
+
+196it [00:30,  6.67it/s]
+	iters: 200, epoch: 2 | loss: 0.4126491
+
+
+
+
+
+
+
+
+302it [00:46,  6.39it/s]
+	iters: 300, epoch: 2 | loss: 0.3112026
+
+
+
+
+
+
+
+395it [01:00,  6.87it/s]
+	iters: 400, epoch: 2 | loss: 0.3220352
+
+
+
+
+
+
+
+
+502it [01:16,  6.38it/s]
+	iters: 500, epoch: 2 | loss: 0.4021406
+
+
+
+
+
+
+
+593it [01:30,  6.18it/s]
+	iters: 600, epoch: 2 | loss: 0.2162261
+
+
+
+
+
+
+
+
+697it [01:46,  6.56it/s]
+	iters: 700, epoch: 2 | loss: 0.3638300
+
+
+
+
+
+
+
+789it [02:00,  6.71it/s]
+	iters: 800, epoch: 2 | loss: 0.4909279
+
+
+
+
+
+
+
+
+893it [02:16,  6.44it/s]
+	iters: 900, epoch: 2 | loss: 0.3435444
+
+
+
+
+
+
+
+
+998it [02:32,  6.46it/s]
+	iters: 1000, epoch: 2 | loss: 0.4145075
+
+
+
+
+
+
+
+
+1101it [02:48,  6.30it/s]
+	iters: 1100, epoch: 2 | loss: 0.3526559
+
+
+
+
+
+
+
+1192it [03:02,  6.27it/s]
+	iters: 1200, epoch: 2 | loss: 0.3441293
+
+
+
+
+
+
+
+
+1297it [03:18,  6.56it/s]
+	iters: 1300, epoch: 2 | loss: 0.2903495
+
+
+
+
+
+
+
+1390it [03:32,  6.31it/s]
+	iters: 1400, epoch: 2 | loss: 0.3524175
+
+
+
+
+
+
+
+
+1491it [03:47,  6.78it/s]
+	iters: 1500, epoch: 2 | loss: 0.2129191
+
+
+
+
+
+
+
+
+1593it [04:03,  6.71it/s]
+	iters: 1600, epoch: 2 | loss: 0.3005621
+
+
+
+
+
+
+
+
+1698it [04:19,  6.66it/s]
+	iters: 1700, epoch: 2 | loss: 0.3988149
+
+
+
+
+
+
+
+1790it [04:33,  6.51it/s]
+	iters: 1800, epoch: 2 | loss: 0.2940263
+
+
+
+
+
+
+
+
+1893it [04:49,  6.76it/s]
+	iters: 1900, epoch: 2 | loss: 0.3401216
+
+
+
+
+
+
+
+
+1998it [05:05,  6.78it/s]
+	iters: 2000, epoch: 2 | loss: 0.3218925
+
+
+
+
+
+
+
+2089it [05:19,  6.46it/s]
+	iters: 2100, epoch: 2 | loss: 0.5994789
+
+
+
+
+
+
+
+
+2192it [05:35,  6.33it/s]
+	iters: 2200, epoch: 2 | loss: 0.2148638
+
+
+
+
+
+
+
+
+2294it [05:51,  6.59it/s]
+	iters: 2300, epoch: 2 | loss: 0.3423660
+
+
+
+
+
+
+
+
+2399it [06:07,  6.26it/s]
+	iters: 2400, epoch: 2 | loss: 0.4529325
+
+
+
+
+
+
+
+2490it [06:22,  6.31it/s]
+	iters: 2500, epoch: 2 | loss: 0.2343259
+
+
+
+
+
+
+
+
+2594it [06:38,  6.27it/s]
+	iters: 2600, epoch: 2 | loss: 0.5957477
+
+
+
+
+
+
+
+
+2698it [06:54,  6.46it/s]
+	iters: 2700, epoch: 2 | loss: 0.3903544
+
+
+
+
+
+
+
+2790it [07:08,  6.55it/s]
+	iters: 2800, epoch: 2 | loss: 0.4701709
+
+
+
+
+
+
+
+
+2893it [07:23,  6.26it/s]
+	iters: 2900, epoch: 2 | loss: 0.3293113
+
+
+
+
+
+
+
+
+2994it [07:40,  6.65it/s]
+	iters: 3000, epoch: 2 | loss: 0.3514205
+
+
+
+
+
+
+
+
+3099it [07:56,  6.73it/s]
+	iters: 3100, epoch: 2 | loss: 0.3511074
+
+
+
+
+
+
+
+3189it [08:10,  6.55it/s]
+	iters: 3200, epoch: 2 | loss: 0.4052746
+
+
+
+
+
+
+
+
+3294it [08:26,  6.75it/s]
+	iters: 3300, epoch: 2 | loss: 0.4008869
+
+
+
+
+
+
+
+
+3399it [08:42,  6.76it/s]
+	iters: 3400, epoch: 2 | loss: 0.2139698
+
+
+
+
+
+
+
+3491it [08:56,  6.38it/s]
+	iters: 3500, epoch: 2 | loss: 0.2119971
+
+3504it [08:58,  6.50it/s]
+Epoch: 2 cost time: 539.8184988498688
+3514it [08:59,  6.51it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1197it [00:54, 22.45it/s]
+1218it [00:55, 21.94it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1216it [00:54, 22.49it/s]
+Epoch: 2 | Train Loss: 0.3662407 Vali Loss: 0.7128657 Test Loss: 0.4046550 MAE Loss: 0.4197908
+Validation loss decreased (0.729435 --> 0.712866).  Saving model ...
+1218it [00:55, 22.11it/s]
+
+
+
+
+
+
+
+100it [00:15,  6.13it/s]
+	iters: 100, epoch: 3 | loss: 0.4406059
+
+
+
+
+
+
+
+191it [00:29,  5.96it/s]
+	iters: 200, epoch: 3 | loss: 0.5562992
+
+
+
+
+
+
+
+
+297it [00:45,  6.62it/s]
+	iters: 300, epoch: 3 | loss: 0.3358651
+
+
+
+
+
+
+
+
+401it [01:01,  6.54it/s]
+	iters: 400, epoch: 3 | loss: 0.3559091
+
+
+
+
+
+
+
+494it [01:15,  6.69it/s]
+	iters: 500, epoch: 3 | loss: 0.4129897
+
+
+
+
+
+
+
+
+600it [01:31,  6.65it/s]
+	iters: 600, epoch: 3 | loss: 0.2504265
+
+
+
+
+
+
+
+691it [01:45,  6.63it/s]
+	iters: 700, epoch: 3 | loss: 0.4299099
+
+
+
+
+
+
+
+
+796it [02:01,  6.34it/s]
+	iters: 800, epoch: 3 | loss: 0.2918606
+
+
+
+
+
+
+
+
+900it [02:17,  6.40it/s]
+	iters: 900, epoch: 3 | loss: 0.4036706
+
+
+
+
+
+
+
+990it [02:31,  6.75it/s]
+	iters: 1000, epoch: 3 | loss: 0.3581219
+
+
+
+
+
+
+
+
+1095it [02:47,  6.38it/s]
+	iters: 1100, epoch: 3 | loss: 0.3934631
+
+
+
+
+
+
+
+
+1201it [03:03,  6.43it/s]
+	iters: 1200, epoch: 3 | loss: 0.2956172
+
+
+
+
+
+
+
+1293it [03:17,  6.77it/s]
+	iters: 1300, epoch: 3 | loss: 0.2921261
+
+
+
+
+
+
+
+
+1395it [03:33,  6.55it/s]
+	iters: 1400, epoch: 3 | loss: 0.3041650
+
+
+
+
+
+
+
+
+1499it [03:49,  6.33it/s]
+	iters: 1500, epoch: 3 | loss: 0.2957979
+
+
+
+
+
+
+
+
+1602it [04:05,  6.18it/s]
+	iters: 1600, epoch: 3 | loss: 0.3070285
+
+
+
+
+
+
+
+1695it [04:19,  6.58it/s]
+	iters: 1700, epoch: 3 | loss: 0.4612235
+
+
+
+
+
+
+
+
+1799it [04:35,  6.23it/s]
+	iters: 1800, epoch: 3 | loss: 0.3254877
+
+
+
+
+
+
+
+1891it [04:49,  6.45it/s]
+	iters: 1900, epoch: 3 | loss: 0.2926031
+
+
+
+
+
+
+
+
+1994it [05:05,  6.18it/s]
+	iters: 2000, epoch: 3 | loss: 0.3582536
+
+
+
+
+
+
+
+
+2098it [05:21,  6.49it/s]
+	iters: 2100, epoch: 3 | loss: 0.2827859
+
+
+
+
+
+
+
+2190it [05:35,  6.65it/s]
+	iters: 2200, epoch: 3 | loss: 0.3085864
+
+
+
+
+
+
+
+
+2290it [05:51,  6.71it/s]
+	iters: 2300, epoch: 3 | loss: 0.3615019
+
+
+
+
+
+
+
+
+2396it [06:07,  6.63it/s]
+	iters: 2400, epoch: 3 | loss: 0.4237273
+
+
+
+
+
+
+
+2487it [06:21,  6.28it/s]
+	iters: 2500, epoch: 3 | loss: 0.3103370
+
+
+
+
+
+
+
+
+2592it [06:37,  6.57it/s]
+	iters: 2600, epoch: 3 | loss: 0.4215145
+
+
+
+
+
+
+
+
+2696it [06:53,  6.42it/s]
+	iters: 2700, epoch: 3 | loss: 0.3915303
+
+
+
+
+
+
+
+2789it [07:07,  6.68it/s]
+	iters: 2800, epoch: 3 | loss: 0.3547075
+
+
+
+
+
+
+
+
+2892it [07:23,  6.16it/s]
+	iters: 2900, epoch: 3 | loss: 0.3059111
+
+
+
+
+
+
+
+
+2995it [07:39,  6.65it/s]
+	iters: 3000, epoch: 3 | loss: 0.2853363
+
+
+
+
+
+
+
+3088it [07:53,  6.53it/s]
+	iters: 3100, epoch: 3 | loss: 0.2257546
+
+
+
+
+
+
+
+
+3191it [08:09,  6.48it/s]
+	iters: 3200, epoch: 3 | loss: 0.2971173
+
+
+
+
+
+
+
+
+3294it [08:25,  6.26it/s]
+	iters: 3300, epoch: 3 | loss: 0.2477623
+
+
+
+
+
+
+
+
+3397it [08:41,  6.11it/s]
+	iters: 3400, epoch: 3 | loss: 0.3363385
+
+
+
+
+
+
+
+
+3496it [08:57,  6.31it/s]
+	iters: 3500, epoch: 3 | loss: 0.2654222
+
+3509it [08:59,  6.34it/s]
+Epoch: 3 cost time: 540.4970049858093
+3514it [09:00,  6.50it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1216it [00:55, 21.70it/s]
+1218it [00:55, 21.94it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1189it [00:53, 22.08it/s]
+Epoch: 3 | Train Loss: 0.3339197 Vali Loss: 0.8140911 Test Loss: 0.4105458 MAE Loss: 0.4287040
+EarlyStopping counter: 1 out of 10
+1218it [00:55, 22.05it/s]
+
+
+
+
+
+
+
+91it [00:14,  6.41it/s]
+	iters: 100, epoch: 4 | loss: 0.5007057
+
+
+
+
+
+
+
+
+195it [00:30,  6.25it/s]
+	iters: 200, epoch: 4 | loss: 0.2882686
+
+
+
+
+
+
+
+
+294it [00:46,  6.29it/s]
+	iters: 300, epoch: 4 | loss: 0.2670218
+
+
+
+
+
+
+
+
+396it [01:02,  6.54it/s]
+	iters: 400, epoch: 4 | loss: 0.2324861
+
+
+
+
+
+
+
+489it [01:16,  6.32it/s]
+	iters: 500, epoch: 4 | loss: 0.2883150
+
+
+
+
+
+
+
+
+592it [01:32,  6.68it/s]
+	iters: 600, epoch: 4 | loss: 0.2260488
+
+
+
+
+
+
+
+
+695it [01:48,  6.39it/s]
+	iters: 700, epoch: 4 | loss: 0.3958314
+
+
+
+
+
+
+
+
+797it [02:04,  6.59it/s]
+	iters: 800, epoch: 4 | loss: 0.2235663
+
+
+
+
+
+
+
+
+900it [02:20,  6.59it/s]
+	iters: 900, epoch: 4 | loss: 0.2898278
+
+
+
+
+
+
+
+
+1001it [02:36,  6.42it/s]
+	iters: 1000, epoch: 4 | loss: 0.2832631
+
+
+
+
+
+
+
+1090it [02:50,  6.14it/s]
+	iters: 1100, epoch: 4 | loss: 0.2771177
+
+
+
+
+
+
+
+
+1192it [03:06,  6.56it/s]
+	iters: 1200, epoch: 4 | loss: 0.4607782
+
+
+
+
+
+
+
+
+1295it [03:22,  6.48it/s]
+	iters: 1300, epoch: 4 | loss: 0.2837631
+
+
+
+
+
+
+
+
+1400it [03:38,  6.59it/s]
+	iters: 1400, epoch: 4 | loss: 0.2760049
+
+
+
+
+
+
+
+1491it [03:52,  6.41it/s]
+	iters: 1500, epoch: 4 | loss: 0.3147951
+
+
+
+
+
+
+
+
+1593it [04:08,  6.15it/s]
+	iters: 1600, epoch: 4 | loss: 0.2588659
+
+
+
+
+
+
+
+
+1696it [04:24,  6.52it/s]
+	iters: 1700, epoch: 4 | loss: 0.3723839
+
+
+
+
+
+
+
+
+1801it [04:40,  6.55it/s]
+	iters: 1800, epoch: 4 | loss: 0.2469066
+
+
+
+
+
+
+
+1894it [04:54,  6.65it/s]
+	iters: 1900, epoch: 4 | loss: 0.3051152
+
+
+
+
+
+
+
+
+1999it [05:10,  6.53it/s]
+	iters: 2000, epoch: 4 | loss: 0.2039674
+
+
+
+
+
+
+
+2090it [05:24,  6.48it/s]
+	iters: 2100, epoch: 4 | loss: 0.3271418
+
+
+
+
+
+
+
+
+2193it [05:40,  6.21it/s]
+	iters: 2200, epoch: 4 | loss: 0.2153214
+
+
+
+
+
+
+
+
+2294it [05:56,  6.74it/s]
+	iters: 2300, epoch: 4 | loss: 0.3450039
+
+
+
+
+
+
+
+
+2398it [06:12,  6.50it/s]
+	iters: 2400, epoch: 4 | loss: 0.3665411
+
+
+
+
+
+
+
+2490it [06:26,  6.66it/s]
+	iters: 2500, epoch: 4 | loss: 0.2546582
+
+
+
+
+
+
+
+
+2595it [06:42,  6.27it/s]
+	iters: 2600, epoch: 4 | loss: 0.3301458
+
+
+
+
+
+
+
+
+2699it [06:58,  6.66it/s]
+	iters: 2700, epoch: 4 | loss: 0.2019830
+
+
+
+
+
+
+
+2791it [07:12,  6.11it/s]
+	iters: 2800, epoch: 4 | loss: 0.2903282
+
+
+
+
+
+
+
+
+2893it [07:28,  6.27it/s]
+	iters: 2900, epoch: 4 | loss: 0.3627472
+
+
+
+
+
+
+
+
+2997it [07:44,  6.65it/s]
+	iters: 3000, epoch: 4 | loss: 0.2763563
+
+
+
+
+
+
+
+
+3098it [08:00,  6.47it/s]
+	iters: 3100, epoch: 4 | loss: 0.3378623
+
+
+
+
+
+
+
+3189it [08:14,  6.46it/s]
+	iters: 3200, epoch: 4 | loss: 0.3114570
+
+
+
+
+
+
+
+
+3292it [08:30,  6.32it/s]
+	iters: 3300, epoch: 4 | loss: 0.3051797
+
+
+
+
+
+
+
+
+3396it [08:46,  6.58it/s]
+	iters: 3400, epoch: 4 | loss: 0.2580732
+
+
+
+
+
+
+
+3487it [09:00,  6.18it/s]
+	iters: 3500, epoch: 4 | loss: 0.2677903
+
+
+3513it [09:04,  6.72it/s]
+Epoch: 4 cost time: 544.8487992286682
+3514it [09:04,  6.45it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1195it [00:53, 22.21it/s]
+1218it [00:54, 22.17it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1215it [00:54, 22.48it/s]
+Epoch: 4 | Train Loss: 0.3005778 Vali Loss: 0.8021555 Test Loss: 0.4251032 MAE Loss: 0.4384620
+EarlyStopping counter: 2 out of 10
+1218it [00:54, 22.16it/s]
+
+
+
+
+
+
+88it [00:13,  6.76it/s]
+	iters: 100, epoch: 5 | loss: 0.2941907
+
+
+
+
+
+
+
+
+191it [00:29,  6.68it/s]
+	iters: 200, epoch: 5 | loss: 0.2049370
+
+
+
+
+
+
+
+
+297it [00:45,  6.74it/s]
+	iters: 300, epoch: 5 | loss: 0.2751287
+
+
+
+
+
+
+
+388it [01:00,  6.41it/s]
+	iters: 400, epoch: 5 | loss: 0.3902012
+
+
+
+
+
+
+
+
+492it [01:16,  6.22it/s]
+	iters: 500, epoch: 5 | loss: 0.3066001
+
+
+
+
+
+
+
+
+595it [01:31,  6.64it/s]
+	iters: 600, epoch: 5 | loss: 0.2988795
+
+
+
+
+
+
+
+688it [01:46,  6.64it/s]
+	iters: 700, epoch: 5 | loss: 0.4264386
+
+
+
+
+
+
+
+
+793it [02:02,  6.61it/s]
+	iters: 800, epoch: 5 | loss: 0.2028583
+
+
+
+
+
+
+
+
+897it [02:18,  6.69it/s]
+	iters: 900, epoch: 5 | loss: 0.2412630
+
+
+
+
+
+
+
+989it [02:32,  6.46it/s]
+	iters: 1000, epoch: 5 | loss: 0.2170614
+
+
+
+
+
+
+
+
+1093it [02:48,  6.72it/s]
+	iters: 1100, epoch: 5 | loss: 0.2965455
+
+
+
+
+
+
+
+
+1197it [03:04,  6.73it/s]
+	iters: 1200, epoch: 5 | loss: 0.2250702
+
+
+
+
+
+
+
+
+1300it [03:20,  6.64it/s]
+	iters: 1300, epoch: 5 | loss: 0.2213322
+
+
+
+
+
+
+
+1391it [03:34,  6.72it/s]
+	iters: 1400, epoch: 5 | loss: 0.1962975
+
+
+
+
+
+
+
+
+1496it [03:50,  6.66it/s]
+	iters: 1500, epoch: 5 | loss: 0.3120923
+
+
+
+
+
+
+
+1588it [04:04,  6.50it/s]
+	iters: 1600, epoch: 5 | loss: 0.2903813
+
+
+
+
+
+
+
+
+1694it [04:20,  6.78it/s]
+	iters: 1700, epoch: 5 | loss: 0.2650337
+
+
+
+
+
+
+
+
+1798it [04:36,  6.65it/s]
+	iters: 1800, epoch: 5 | loss: 0.2698588
+
+
+
+
+
+
+
+1889it [04:50,  6.37it/s]
+	iters: 1900, epoch: 5 | loss: 0.1737437
+
+
+
+
+
+
+
+
+1996it [05:06,  6.68it/s]
+	iters: 2000, epoch: 5 | loss: 0.2173114
+
+
+
+
+
+
+
+
+2101it [05:22,  6.35it/s]
+	iters: 2100, epoch: 5 | loss: 0.2350176
+
+
+
+
+
+
+
+2192it [05:36,  6.61it/s]
+	iters: 2200, epoch: 5 | loss: 0.2845607
+
+
+
+
+
+
+
+
+2296it [05:52,  6.55it/s]
+	iters: 2300, epoch: 5 | loss: 0.2611900
+
+
+
+
+
+
+
+
+2400it [06:08,  6.65it/s]
+	iters: 2400, epoch: 5 | loss: 0.3716501
+
+
+
+
+
+
+
+2492it [06:22,  6.70it/s]
+	iters: 2500, epoch: 5 | loss: 0.2255615
+
+
+
+
+
+
+
+
+2598it [06:38,  6.73it/s]
+	iters: 2600, epoch: 5 | loss: 0.2149710
+
+
+
+
+
+
+
+2690it [06:52,  6.75it/s]
+	iters: 2700, epoch: 5 | loss: 0.4298028
+
+
+
+
+
+
+
+
+2796it [07:08,  6.73it/s]
+	iters: 2800, epoch: 5 | loss: 0.2380352
+
+
+
+
+
+
+
+
+2902it [07:24,  6.57it/s]
+	iters: 2900, epoch: 5 | loss: 0.3166991
+
+
+
+
+
+
+
+2994it [07:38,  6.60it/s]
+	iters: 3000, epoch: 5 | loss: 0.2328236
+
+
+
+
+
+
+
+
+3095it [07:54,  6.27it/s]
+	iters: 3100, epoch: 5 | loss: 0.2890067
+
+
+
+
+
+
+
+
+3197it [08:10,  6.24it/s]
+	iters: 3200, epoch: 5 | loss: 0.2326453
+
+
+
+
+
+
+
+
+3300it [08:26,  6.59it/s]
+	iters: 3300, epoch: 5 | loss: 0.2335073
+
+
+
+
+
+
+
+3390it [08:40,  6.40it/s]
+	iters: 3400, epoch: 5 | loss: 0.3432253
+
+
+
+
+
+
+
+
+3494it [08:56,  6.34it/s]
+	iters: 3500, epoch: 5 | loss: 0.2940723
+
+3506it [08:58,  6.35it/s]
+Epoch: 5 cost time: 539.8314855098724
+3514it [08:59,  6.51it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1201it [00:54, 22.43it/s]
+1218it [00:55, 22.12it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1216it [00:55, 22.58it/s]
+Epoch: 5 | Train Loss: 0.2751375 Vali Loss: 0.8399939 Test Loss: 0.4479862 MAE Loss: 0.4529478
+EarlyStopping counter: 3 out of 10
+1218it [00:55, 22.03it/s]
+
+
+
+
+
+
+
+101it [00:15,  6.49it/s]
+	iters: 100, epoch: 6 | loss: 0.2918589
+
+
+
+
+
+
+
+191it [00:29,  5.98it/s]
+	iters: 200, epoch: 6 | loss: 0.2752526
+
+
+
+
+
+
+
+
+293it [00:45,  6.53it/s]
+	iters: 300, epoch: 6 | loss: 0.4393278
+
+
+
+
+
+
+
+
+398it [01:01,  6.64it/s]
+	iters: 400, epoch: 6 | loss: 0.3801419
+
+
+
+
+
+
+
+490it [01:16,  6.72it/s]
+	iters: 500, epoch: 6 | loss: 0.2311612
+
+
+
+
+
+
+
+
+594it [01:31,  6.37it/s]
+	iters: 600, epoch: 6 | loss: 0.2478701
+
+
+
+
+
+
+
+
+698it [01:47,  6.26it/s]
+	iters: 700, epoch: 6 | loss: 0.2392140
+
+
+
+
+
+
+
+
+800it [02:03,  6.34it/s]
+	iters: 800, epoch: 6 | loss: 0.1823141
+
+
+
+
+
+
+
+891it [02:17,  6.13it/s]
+	iters: 900, epoch: 6 | loss: 0.2129421
+
+
+
+
+
+
+
+
+995it [02:34,  6.61it/s]
+	iters: 1000, epoch: 6 | loss: 0.2012617
+
+
+
+
+
+
+
+
+1098it [02:50,  6.65it/s]
+	iters: 1100, epoch: 6 | loss: 0.1990686
+
+
+
+
+
+
+
+
+1198it [03:05,  6.31it/s]
+	iters: 1200, epoch: 6 | loss: 0.2559325
+
+
+
+
+
+
+
+
+1300it [03:22,  6.20it/s]
+	iters: 1300, epoch: 6 | loss: 0.2411482
+
+
+
+
+
+
+
+
+1403it [03:38,  6.64it/s]
+	iters: 1400, epoch: 6 | loss: 0.2717506
+
+
+
+
+
+
+
+1493it [03:52,  6.31it/s]
+	iters: 1500, epoch: 6 | loss: 0.3160396
+
+
+
+
+
+
+
+
+1597it [04:08,  6.41it/s]
+	iters: 1600, epoch: 6 | loss: 0.2792410
+
+
+
+
+
+
+
+
+1701it [04:24,  6.75it/s]
+	iters: 1700, epoch: 6 | loss: 0.2646475
+
+
+
+
+
+
+
+
+1804it [04:40,  6.52it/s]
+	iters: 1800, epoch: 6 | loss: 0.4293713
+
+
+
+
+
+
+
+1897it [04:54,  6.69it/s]
+	iters: 1900, epoch: 6 | loss: 0.2136090
+
+
+
+
+
+
+
+
+2001it [05:10,  6.53it/s]
+	iters: 2000, epoch: 6 | loss: 0.1982814
+
+
+
+
+
+
+
+
+2104it [05:26,  6.61it/s]
+	iters: 2100, epoch: 6 | loss: 0.1909646
+
+
+
+
+
+
+
+2195it [05:40,  6.16it/s]
+	iters: 2200, epoch: 6 | loss: 0.2268762
+
+
+
+
+
+
+
+
+2299it [05:56,  6.67it/s]
+	iters: 2300, epoch: 6 | loss: 0.3428178
+
+
+
+
+
+
+
+
+2403it [06:12,  6.66it/s]
+	iters: 2400, epoch: 6 | loss: 0.2627904
+
+
+
+
+
+
+
+2495it [06:26,  6.71it/s]
+	iters: 2500, epoch: 6 | loss: 0.3056493
+
+
+
+
+
+
+
+
+2596it [06:42,  6.72it/s]
+	iters: 2600, epoch: 6 | loss: 0.3356827
+
+
+
+
+
+
+
+
+2701it [06:58,  6.22it/s]
+	iters: 2700, epoch: 6 | loss: 0.3151588
+
+
+
+
+
+
+
+
+2805it [07:14,  6.07it/s]
+	iters: 2800, epoch: 6 | loss: 0.2014580
+
+
+
+
+
+
+
+2898it [07:28,  6.71it/s]
+	iters: 2900, epoch: 6 | loss: 0.2770400
+
+
+
+
+
+
+
+
+3000it [07:44,  6.63it/s]
+	iters: 3000, epoch: 6 | loss: 0.2346865
+
+
+
+
+
+
+
+
+3101it [08:00,  6.15it/s]
+	iters: 3100, epoch: 6 | loss: 0.1995545
+
+
+
+
+
+
+
+
+3203it [08:16,  6.43it/s]
+	iters: 3200, epoch: 6 | loss: 0.2126053
+
+
+
+
+
+
+
+3293it [08:30,  6.33it/s]
+	iters: 3300, epoch: 6 | loss: 0.2620850
+
+
+
+
+
+
+
+
+3396it [08:46,  6.17it/s]
+	iters: 3400, epoch: 6 | loss: 0.2631505
+
+
+
+
+
+
+
+
+3500it [09:02,  6.36it/s]
+	iters: 3500, epoch: 6 | loss: 0.2509216
+
+3513it [09:04,  6.75it/s]
+Epoch: 6 cost time: 544.6397321224213
+3514it [09:04,  6.45it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.03it/s]
+4it [00:00, 10.13it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1207it [00:54, 22.42it/s]
+Epoch: 6 | Train Loss: 0.2612745 Vali Loss: 0.8970831 Test Loss: 0.4496497 MAE Loss: 0.4554396
+EarlyStopping counter: 4 out of 10
+1218it [00:55, 22.05it/s]
+
+
+
+
+
+
+
+97it [00:15,  6.32it/s]
+	iters: 100, epoch: 7 | loss: 0.2498514
+
+
+
+
+
+
+
+
+201it [00:31,  6.55it/s]
+	iters: 200, epoch: 7 | loss: 0.2287287
+
+
+
+
+
+
+
+
+305it [00:47,  6.58it/s]
+	iters: 300, epoch: 7 | loss: 0.2049068
+
+
+
+
+
+
+
+396it [01:01,  6.57it/s]
+	iters: 400, epoch: 7 | loss: 0.2335420
+
+
+
+
+
+
+
+
+500it [01:17,  6.34it/s]
+	iters: 500, epoch: 7 | loss: 0.2054194
+
+
+
+
+
+
+
+
+603it [01:33,  6.24it/s]
+	iters: 600, epoch: 7 | loss: 0.2933666
+
+
+
+
+
+
+
+694it [01:47,  6.72it/s]
+	iters: 700, epoch: 7 | loss: 0.3010865
+
+
+
+
+
+
+
+
+797it [02:03,  6.24it/s]
+	iters: 800, epoch: 7 | loss: 0.2980580
+
+
+
+
+
+
+
+
+901it [02:19,  6.44it/s]
+	iters: 900, epoch: 7 | loss: 0.2042257
+
+
+
+
+
+
+
+
+1001it [02:34,  6.21it/s]
+	iters: 1000, epoch: 7 | loss: 0.2570156
+
+
+
+
+
+
+
+
+1103it [02:50,  6.09it/s]
+	iters: 1100, epoch: 7 | loss: 0.2467956
+
+
+
+
+
+
+
+1193it [03:04,  6.58it/s]
+	iters: 1200, epoch: 7 | loss: 0.2270992
+
+
+
+
+
+
+
+
+1298it [03:20,  6.71it/s]
+	iters: 1300, epoch: 7 | loss: 0.3262888
+
+
+
+
+
+
+
+
+1402it [03:36,  6.39it/s]
+	iters: 1400, epoch: 7 | loss: 0.2816996
+
+
+
+
+
+
+
+1492it [03:50,  6.73it/s]
+	iters: 1500, epoch: 7 | loss: 0.2439162
+
+
+
+
+
+
+
+
+1593it [04:07,  6.02it/s]
+	iters: 1600, epoch: 7 | loss: 0.3252469
+
+
+
+
+
+
+
+
+1695it [04:23,  5.98it/s]
+	iters: 1700, epoch: 7 | loss: 0.3031923
+
+
+
+
+
+
+
+
+1799it [04:39,  6.65it/s]
+	iters: 1800, epoch: 7 | loss: 0.4013240
+
+
+
+
+
+
+
+
+1903it [04:55,  6.39it/s]
+	iters: 1900, epoch: 7 | loss: 0.2181418
+
+
+
+
+
+
+
+1995it [05:09,  6.75it/s]
+	iters: 2000, epoch: 7 | loss: 0.2511950
+
+
+
+
+
+
+
+
+2095it [05:25,  6.23it/s]
+	iters: 2100, epoch: 7 | loss: 0.3475632
+
+
+
+
+
+
+
+
+2198it [05:41,  6.57it/s]
+	iters: 2200, epoch: 7 | loss: 0.2843025
+
+
+
+
+
+
+
+
+2303it [05:57,  6.45it/s]
+	iters: 2300, epoch: 7 | loss: 0.2233920
+
+
+
+
+
+
+
+2395it [06:11,  6.72it/s]
+	iters: 2400, epoch: 7 | loss: 0.3382940
+
+
+
+
+
+
+
+
+2495it [06:27,  6.04it/s]
+	iters: 2500, epoch: 7 | loss: 0.2632889
+
+
+
+
+
+
+
+
+2597it [06:43,  5.92it/s]
+	iters: 2600, epoch: 7 | loss: 0.2402739
+
+
+
+
+
+
+
+
+2701it [06:59,  6.36it/s]
+	iters: 2700, epoch: 7 | loss: 0.1809341
+
+
+
+
+
+
+
+2793it [07:13,  6.74it/s]
+	iters: 2800, epoch: 7 | loss: 0.1784027
+
+
+
+
+
+
+
+
+2898it [07:29,  6.60it/s]
+	iters: 2900, epoch: 7 | loss: 0.2591392
+
+
+
+
+
+
+
+
+2998it [07:45,  6.25it/s]
+	iters: 3000, epoch: 7 | loss: 0.2604674
+
+
+
+
+
+
+
+
+3102it [08:01,  6.19it/s]
+	iters: 3100, epoch: 7 | loss: 0.3273077
+
+
+
+
+
+
+
+
+3202it [08:17,  6.24it/s]
+	iters: 3200, epoch: 7 | loss: 0.2600460
+
+
+
+
+
+
+
+3294it [08:31,  6.52it/s]
+	iters: 3300, epoch: 7 | loss: 0.3312967
+
+
+
+
+
+
+
+
+3398it [08:47,  6.11it/s]
+	iters: 3400, epoch: 7 | loss: 0.2000594
+
+
+
+
+
+
+
+
+3502it [09:03,  6.04it/s]
+	iters: 3500, epoch: 7 | loss: 0.3088223
+3514it [09:05,  6.44it/s]
+0it [00:00, ?it/s]
+Epoch: 7 cost time: 545.3268601894379
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1198it [00:54, 22.35it/s]
+1218it [00:55, 22.12it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.09it/s]
+0it [00:00, ?it/s]
+Epoch: 7 | Train Loss: 0.2535794 Vali Loss: 0.9006828 Test Loss: 0.4538948 MAE Loss: 0.4586533
+EarlyStopping counter: 5 out of 10
+
+
+
+
+
+
+
+
+100it [00:15,  6.37it/s]
+	iters: 100, epoch: 8 | loss: 0.2223758
+
+
+
+
+
+
+
+
+203it [00:31,  6.09it/s]
+	iters: 200, epoch: 8 | loss: 0.1572311
+
+
+
+
+
+
+
+294it [00:46,  6.66it/s]
+	iters: 300, epoch: 8 | loss: 0.3807749
+
+
+
+
+
+
+
+
+397it [01:02,  6.68it/s]
+	iters: 400, epoch: 8 | loss: 0.2347432
+
+
+
+
+
+
+
+
+501it [01:17,  6.50it/s]
+	iters: 500, epoch: 8 | loss: 0.2135684
+
+
+
+
+
+
+
+
+603it [01:34,  6.44it/s]
+	iters: 600, epoch: 8 | loss: 0.2038928
+
+
+
+
+
+
+
+
+704it [01:50,  5.82it/s]
+	iters: 700, epoch: 8 | loss: 0.2701006
+
+
+
+
+
+
+
+795it [02:04,  6.50it/s]
+	iters: 800, epoch: 8 | loss: 0.1773371
+
+
+
+
+
+
+
+
+897it [02:20,  6.41it/s]
+	iters: 900, epoch: 8 | loss: 0.2698854
+
+
+
+
+
+
+
+
+1001it [02:36,  6.23it/s]
+	iters: 1000, epoch: 8 | loss: 0.3314564
+
+
+
+
+
+
+
+
+1103it [02:52,  6.39it/s]
+	iters: 1100, epoch: 8 | loss: 0.3089530
+
+
+
+
+
+
+
+1194it [03:06,  6.59it/s]
+	iters: 1200, epoch: 8 | loss: 0.2460085
+
+
+
+
+
+
+
+
+1299it [03:22,  6.27it/s]
+	iters: 1300, epoch: 8 | loss: 0.2544833
+
+
+
+
+
+
+
+
+1403it [03:38,  6.52it/s]
+	iters: 1400, epoch: 8 | loss: 0.2709284
+
+
+
+
+
+
+
+
+1503it [03:54,  6.49it/s]
+	iters: 1500, epoch: 8 | loss: 0.1512331
+
+
+
+
+
+
+
+
+1607it [04:10,  6.67it/s]
+	iters: 1600, epoch: 8 | loss: 0.2975740
+
+
+
+
+
+
+
+1698it [04:24,  6.70it/s]
+	iters: 1700, epoch: 8 | loss: 0.2702802
+
+
+
+
+
+
+
+
+1799it [04:39,  6.46it/s]
+	iters: 1800, epoch: 8 | loss: 0.3108618
+
+
+
+
+
+
+
+
+1903it [04:55,  6.78it/s]
+	iters: 1900, epoch: 8 | loss: 0.2588053
+
+
+
+
+
+
+
+1995it [05:09,  6.33it/s]
+	iters: 2000, epoch: 8 | loss: 0.3078640
+
+
+
+
+
+
+
+
+2099it [05:25,  6.74it/s]
+	iters: 2100, epoch: 8 | loss: 0.3186972
+
+
+
+
+
+
+
+
+2203it [05:41,  6.66it/s]
+	iters: 2200, epoch: 8 | loss: 0.2453694
+
+
+
+
+
+
+
+2293it [05:55,  6.31it/s]
+	iters: 2300, epoch: 8 | loss: 0.3149502
+
+
+
+
+
+
+
+
+2396it [06:11,  6.54it/s]
+	iters: 2400, epoch: 8 | loss: 0.2228086
+
+
+
+
+
+
+
+
+2501it [06:27,  6.53it/s]
+	iters: 2500, epoch: 8 | loss: 0.1679118
+
+
+
+
+
+
+
+2593it [06:41,  6.23it/s]
+	iters: 2600, epoch: 8 | loss: 0.2940561
+
+
+
+
+
+
+
+
+2697it [06:57,  6.72it/s]
+	iters: 2700, epoch: 8 | loss: 0.3423530
+
+
+
+
+
+
+
+
+2801it [07:13,  6.56it/s]
+	iters: 2800, epoch: 8 | loss: 0.2122252
+
+
+
+
+
+
+
+2892it [07:27,  6.72it/s]
+	iters: 2900, epoch: 8 | loss: 0.2301022
+
+
+
+
+
+
+
+
+2995it [07:43,  6.33it/s]
+	iters: 3000, epoch: 8 | loss: 0.2902032
+
+
+
+
+
+
+
+
+3098it [07:59,  6.74it/s]
+	iters: 3100, epoch: 8 | loss: 0.2042243
+
+
+
+
+
+
+
+
+3201it [08:15,  6.21it/s]
+	iters: 3200, epoch: 8 | loss: 0.2330476
+
+
+
+
+
+
+
+
+3303it [08:31,  6.29it/s]
+	iters: 3300, epoch: 8 | loss: 0.2776915
+
+
+
+
+
+
+
+3392it [08:45,  6.21it/s]
+	iters: 3400, epoch: 8 | loss: 0.2326036
+
+
+
+
+
+
+
+
+3497it [09:02,  6.58it/s]
+	iters: 3500, epoch: 8 | loss: 0.2536017
+
+3509it [09:04,  6.22it/s]
+Epoch: 8 cost time: 544.9618170261383
+3514it [09:04,  6.45it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.13it/s]
+0it [00:00, ?it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1197it [00:54, 22.23it/s]
+Epoch: 8 | Train Loss: 0.2498323 Vali Loss: 0.8966875 Test Loss: 0.4529881 MAE Loss: 0.4573954
+EarlyStopping counter: 6 out of 10
+1218it [00:55, 22.10it/s]
+
+
+
+
+
+
+
+94it [00:14,  6.28it/s]
+	iters: 100, epoch: 9 | loss: 0.2521301
+
+
+
+
+
+
+
+
+199it [00:31,  6.48it/s]
+	iters: 200, epoch: 9 | loss: 0.1916867
+
+
+
+
+
+
+
+
+301it [00:46,  6.44it/s]
+	iters: 300, epoch: 9 | loss: 0.2319055
+
+
+
+
+
+
+
+
+405it [01:03,  5.97it/s]
+	iters: 400, epoch: 9 | loss: 0.3513257
+
+
+
+
+
+
+
+497it [01:17,  6.51it/s]
+	iters: 500, epoch: 9 | loss: 0.1988486
+
+
+
+
+
+
+
+
+602it [01:33,  6.37it/s]
+	iters: 600, epoch: 9 | loss: 0.2880596
+
+
+
+
+
+
+
+695it [01:47,  6.44it/s]
+	iters: 700, epoch: 9 | loss: 0.3730420
+
+
+
+
+
+
+
+
+796it [02:03,  6.63it/s]
+	iters: 800, epoch: 9 | loss: 0.2546417
+
+
+
+
+
+
+
+
+900it [02:19,  6.47it/s]
+	iters: 900, epoch: 9 | loss: 0.2200681
+
+
+
+
+
+
+
+
+1003it [02:35,  6.51it/s]
+	iters: 1000, epoch: 9 | loss: 0.1995005
+
+
+
+
+
+
+
+
+1105it [02:51,  6.37it/s]
+	iters: 1100, epoch: 9 | loss: 0.3132483
+
+
+
+
+
+
+
+1195it [03:05,  6.65it/s]
+	iters: 1200, epoch: 9 | loss: 0.2135520
+
+
+
+
+
+
+
+
+1298it [03:21,  6.74it/s]
+	iters: 1300, epoch: 9 | loss: 0.2962606
+
+
+
+
+
+
+
+
+1403it [03:37,  6.10it/s]
+	iters: 1400, epoch: 9 | loss: 0.2269561
+
+
+
+
+
+
+
+1494it [03:51,  6.22it/s]
+	iters: 1500, epoch: 9 | loss: 0.1926610
+
+
+
+
+
+
+
+
+1597it [04:07,  6.71it/s]
+	iters: 1600, epoch: 9 | loss: 0.3402274
+
+
+
+
+
+
+
+
+1702it [04:23,  6.54it/s]
+	iters: 1700, epoch: 9 | loss: 0.2077336
+
+
+
+
+
+
+
+
+1806it [04:39,  6.16it/s]
+	iters: 1800, epoch: 9 | loss: 0.2082833
+
+
+
+
+
+
+
+1897it [04:53,  6.72it/s]
+	iters: 1900, epoch: 9 | loss: 0.2820534
+
+
+
+
+
+
+
+
+2001it [05:09,  6.25it/s]
+	iters: 2000, epoch: 9 | loss: 0.3502690
+
+
+
+
+
+
+
+
+2106it [05:25,  6.64it/s]
+	iters: 2100, epoch: 9 | loss: 0.1703536
+
+
+
+
+
+
+
+2198it [05:39,  6.45it/s]
+	iters: 2200, epoch: 9 | loss: 0.2556734
+
+
+
+
+
+
+
+
+2302it [05:55,  6.63it/s]
+	iters: 2300, epoch: 9 | loss: 0.2758952
+
+
+
+
+
+
+
+
+2405it [06:11,  6.64it/s]
+	iters: 2400, epoch: 9 | loss: 0.2725582
+
+
+
+
+
+
+
+2496it [06:25,  6.22it/s]
+	iters: 2500, epoch: 9 | loss: 0.2176079
+
+
+
+
+
+
+
+
+2599it [06:41,  6.44it/s]
+	iters: 2600, epoch: 9 | loss: 0.1517721
+
+
+
+
+
+
+
+
+2703it [06:57,  6.44it/s]
+	iters: 2700, epoch: 9 | loss: 0.1787857
+
+
+
+
+
+
+
+2795it [07:11,  6.60it/s]
+	iters: 2800, epoch: 9 | loss: 0.2261920
+
+
+
+
+
+
+
+
+2897it [07:26,  6.73it/s]
+	iters: 2900, epoch: 9 | loss: 0.2236643
+
+
+
+
+
+
+
+
+3001it [07:43,  6.16it/s]
+	iters: 3000, epoch: 9 | loss: 0.3024208
+
+
+
+
+
+
+
+
+3104it [07:58,  6.75it/s]
+	iters: 3100, epoch: 9 | loss: 0.2470366
+
+
+
+
+
+
+
+3195it [08:12,  6.37it/s]
+	iters: 3200, epoch: 9 | loss: 0.2854128
+
+
+
+
+
+
+
+
+3298it [08:29,  6.19it/s]
+	iters: 3300, epoch: 9 | loss: 0.2013267
+
+
+
+
+
+
+
+
+3399it [08:44,  6.04it/s]
+	iters: 3400, epoch: 9 | loss: 0.2752708
+
+
+
+
+
+
+
+
+3499it [09:00,  6.08it/s]
+	iters: 3500, epoch: 9 | loss: 0.2072782
+
+3512it [09:02,  6.66it/s]
+Epoch: 9 cost time: 543.413726568222
+3514it [09:03,  6.47it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.03it/s]
+4it [00:00, 11.41it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1198it [00:54, 21.76it/s]
+Epoch: 9 | Train Loss: 0.2478160 Vali Loss: 0.8971533 Test Loss: 0.4543832 MAE Loss: 0.4590031
+EarlyStopping counter: 7 out of 10
+1218it [00:55, 21.94it/s]
+
+
+
+
+
+
+
+
+104it [00:16,  6.07it/s]
+	iters: 100, epoch: 10 | loss: 0.2669032
+
+
+
+
+
+
+
+194it [00:30,  6.69it/s]
+	iters: 200, epoch: 10 | loss: 0.2346570
+
+
+
+
+
+
+
+
+297it [00:46,  6.74it/s]
+	iters: 300, epoch: 10 | loss: 0.2416124
+
+
+
+
+
+
+
+
+400it [01:02,  6.07it/s]
+	iters: 400, epoch: 10 | loss: 0.1734352
+
+
+
+
+
+
+
+
+501it [01:18,  6.54it/s]
+	iters: 500, epoch: 10 | loss: 0.2471036
+
+
+
+
+
+
+
+
+603it [01:35,  5.97it/s]
+	iters: 600, epoch: 10 | loss: 0.2030600
+
+
+
+
+
+
+
+
+703it [01:51,  6.06it/s]
+	iters: 700, epoch: 10 | loss: 0.2390533
+
+
+
+
+
+
+
+
+803it [02:07,  6.24it/s]
+	iters: 800, epoch: 10 | loss: 0.2709944
+
+
+
+
+
+
+
+
+905it [02:23,  6.15it/s]
+	iters: 900, epoch: 10 | loss: 0.3021421
+
+
+
+
+
+
+
+993it [02:37,  6.48it/s]
+	iters: 1000, epoch: 10 | loss: 0.2401952
+
+
+
+
+
+
+
+
+1098it [02:53,  6.74it/s]
+	iters: 1100, epoch: 10 | loss: 0.2290032
+
+
+
+
+
+
+
+
+1203it [03:09,  6.47it/s]
+	iters: 1200, epoch: 10 | loss: 0.2391165
+
+
+
+
+
+
+
+1294it [03:23,  6.61it/s]
+	iters: 1300, epoch: 10 | loss: 0.2536036
+
+
+
+
+
+
+
+
+1398it [03:39,  6.41it/s]
+	iters: 1400, epoch: 10 | loss: 0.3150640
+
+
+
+
+
+
+
+
+1500it [03:55,  6.44it/s]
+	iters: 1500, epoch: 10 | loss: 0.1904138
+
+
+
+
+
+
+
+
+1605it [04:11,  6.43it/s]
+	iters: 1600, epoch: 10 | loss: 0.2950789
+
+
+
+
+
+
+
+1698it [04:25,  6.78it/s]
+	iters: 1700, epoch: 10 | loss: 0.3272899
+
+
+
+
+
+
+
+
+1801it [04:41,  6.43it/s]
+	iters: 1800, epoch: 10 | loss: 0.2617128
+
+
+
+
+
+
+
+
+1905it [04:57,  6.60it/s]
+	iters: 1900, epoch: 10 | loss: 0.1330027
+
+
+
+
+
+
+
+1995it [05:11,  6.20it/s]
+	iters: 2000, epoch: 10 | loss: 0.2290610
+
+
+
+
+
+
+
+
+2098it [05:27,  6.73it/s]
+	iters: 2100, epoch: 10 | loss: 0.2386630
+
+
+
+
+
+
+
+
+2203it [05:43,  6.19it/s]
+	iters: 2200, epoch: 10 | loss: 0.3325896
+
+
+
+
+
+
+
+
+2305it [05:59,  6.20it/s]
+	iters: 2300, epoch: 10 | loss: 0.2008941
+
+
+
+
+
+
+
+2394it [06:13,  6.50it/s]
+	iters: 2400, epoch: 10 | loss: 0.2684175
+
+
+
+
+
+
+
+
+2498it [06:29,  6.61it/s]
+	iters: 2500, epoch: 10 | loss: 0.1871830
+
+
+
+
+
+
+
+
+2601it [06:45,  6.42it/s]
+	iters: 2600, epoch: 10 | loss: 0.2260698
+
+
+
+
+
+
+
+2695it [06:59,  6.71it/s]
+	iters: 2700, epoch: 10 | loss: 0.2206592
+
+
+
+
+
+
+
+
+2799it [07:15,  6.76it/s]
+	iters: 2800, epoch: 10 | loss: 0.2895437
+
+
+
+
+
+
+
+
+2902it [07:31,  6.40it/s]
+	iters: 2900, epoch: 10 | loss: 0.4037446
+
+
+
+
+
+
+
+
+3006it [07:47,  6.70it/s]
+	iters: 3000, epoch: 10 | loss: 0.1606870
+
+
+
+
+
+
+
+3096it [08:01,  6.03it/s]
+	iters: 3100, epoch: 10 | loss: 0.1505848
+
+
+
+
+
+
+
+
+3200it [08:17,  6.30it/s]
+	iters: 3200, epoch: 10 | loss: 0.2410972
+
+
+
+
+
+
+
+
+3300it [08:32,  6.50it/s]
+	iters: 3300, epoch: 10 | loss: 0.2669781
+
+
+
+
+
+
+
+3392it [08:46,  6.75it/s]
+	iters: 3400, epoch: 10 | loss: 0.2435558
+
+
+
+
+
+
+
+
+3495it [09:02,  6.45it/s]
+	iters: 3500, epoch: 10 | loss: 0.1873015
+
+3514it [09:06,  6.43it/s]
+10it [00:00, 16.46it/s]
+Epoch: 10 cost time: 546.2271065711975
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1210it [00:54, 22.09it/s]
+1218it [00:55, 22.05it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.06it/s]
+1it [00:00,  2.40it/s]
+Epoch: 10 | Train Loss: 0.2466939 Vali Loss: 0.8987883 Test Loss: 0.4558814 MAE Loss: 0.4597293
+EarlyStopping counter: 8 out of 10
+
+
+
+
+
+
+
+
+103it [00:16,  6.33it/s]
+	iters: 100, epoch: 11 | loss: 0.2557206
+
+
+
+
+
+
+
+
+205it [00:32,  6.16it/s]
+	iters: 200, epoch: 11 | loss: 0.2507799
+
+
+
+
+
+
+
+296it [00:46,  6.75it/s]
+	iters: 300, epoch: 11 | loss: 0.3032207
+
+
+
+
+
+
+
+
+398it [01:02,  6.24it/s]
+	iters: 400, epoch: 11 | loss: 0.4268755
+
+
+
+
+
+
+
+
+502it [01:18,  6.30it/s]
+	iters: 500, epoch: 11 | loss: 0.2757916
+
+
+
+
+
+
+
+
+605it [01:34,  6.71it/s]
+	iters: 600, epoch: 11 | loss: 0.2862107
+
+
+
+
+
+
+
+694it [01:48,  6.38it/s]
+	iters: 700, epoch: 11 | loss: 0.2445639
+
+
+
+
+
+
+
+
+797it [02:04,  6.09it/s]
+	iters: 800, epoch: 11 | loss: 0.2577961
+
+
+
+
+
+
+
+
+899it [02:20,  6.56it/s]
+	iters: 900, epoch: 11 | loss: 0.2600009
+
+
+
+
+
+
+
+
+1002it [02:36,  6.45it/s]
+	iters: 1000, epoch: 11 | loss: 0.2316018
+
+
+
+
+
+
+
+1093it [02:50,  6.75it/s]
+	iters: 1100, epoch: 11 | loss: 0.3405101
+
+
+
+
+
+
+
+
+1199it [03:06,  6.70it/s]
+	iters: 1200, epoch: 11 | loss: 0.2728242
+
+
+
+
+
+
+
+
+1305it [03:22,  6.58it/s]
+	iters: 1300, epoch: 11 | loss: 0.2680726
+
+
+
+
+
+
+
+1397it [03:36,  6.54it/s]
+	iters: 1400, epoch: 11 | loss: 0.2295459
+
+
+
+
+
+
+
+
+1498it [03:52,  6.17it/s]
+	iters: 1500, epoch: 11 | loss: 0.3323874
+
+
+
+
+
+
+
+
+1603it [04:08,  6.55it/s]
+	iters: 1600, epoch: 11 | loss: 0.1865257
+
+
+
+
+
+
+
+1694it [04:22,  6.51it/s]
+	iters: 1700, epoch: 11 | loss: 0.2457292
+
+
+
+
+
+
+
+
+1799it [04:38,  6.74it/s]
+	iters: 1800, epoch: 11 | loss: 0.2706716
+
+
+
+
+
+
+
+
+1902it [04:54,  6.58it/s]
+	iters: 1900, epoch: 11 | loss: 0.3448764
+
+
+
+
+
+
+
+1994it [05:08,  6.70it/s]
+	iters: 2000, epoch: 11 | loss: 0.3435291
+
+
+
+
+
+
+
+
+2097it [05:24,  5.92it/s]
+	iters: 2100, epoch: 11 | loss: 0.2937376
+
+
+
+
+
+
+
+
+2202it [05:40,  6.51it/s]
+	iters: 2200, epoch: 11 | loss: 0.1738210
+
+
+
+
+
+
+
+
+2306it [05:56,  6.70it/s]
+	iters: 2300, epoch: 11 | loss: 0.2189595
+
+
+
+
+
+
+
+2397it [06:10,  6.69it/s]
+	iters: 2400, epoch: 11 | loss: 0.3161568
+
+
+
+
+
+
+
+
+2500it [06:26,  6.44it/s]
+	iters: 2500, epoch: 11 | loss: 0.2576374
+
+
+
+
+
+
+
+
+2605it [06:42,  6.59it/s]
+	iters: 2600, epoch: 11 | loss: 0.2265527
+
+
+
+
+
+
+
+2697it [06:56,  6.68it/s]
+	iters: 2700, epoch: 11 | loss: 0.2516595
+
+
+
+
+
+
+
+
+2801it [07:12,  6.15it/s]
+	iters: 2800, epoch: 11 | loss: 0.2044803
+
+
+
+
+
+
+
+
+2905it [07:28,  6.50it/s]
+	iters: 2900, epoch: 11 | loss: 0.2202342
+
+
+
+
+
+
+
+2995it [07:42,  6.76it/s]
+	iters: 3000, epoch: 11 | loss: 0.2132693
+
+
+
+
+
+
+
+
+3098it [07:58,  6.16it/s]
+	iters: 3100, epoch: 11 | loss: 0.2053931
+
+
+
+
+
+
+
+
+3203it [08:14,  6.52it/s]
+	iters: 3200, epoch: 11 | loss: 0.2388869
+
+
+
+
+
+
+
+3296it [08:28,  6.75it/s]
+	iters: 3300, epoch: 11 | loss: 0.2551877
+
+
+
+
+
+
+
+
+3400it [08:44,  6.74it/s]
+	iters: 3400, epoch: 11 | loss: 0.2156200
+
+
+
+
+
+
+
+
+3503it [09:00,  6.17it/s]
+	iters: 3500, epoch: 11 | loss: 0.2795173
+3514it [09:02,  6.47it/s]
+0it [00:00, ?it/s]
+Epoch: 11 cost time: 542.7312638759613
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.11it/s]
+18it [00:01, 20.33it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1215it [00:55, 21.66it/s]
+Epoch: 11 | Train Loss: 0.2464804 Vali Loss: 0.8978289 Test Loss: 0.4549140 MAE Loss: 0.4592062
+EarlyStopping counter: 9 out of 10
+1218it [00:55, 21.99it/s]
+
+
+
+
+
+
+
+98it [00:15,  6.71it/s]
+	iters: 100, epoch: 12 | loss: 0.2429249
+
+
+
+
+
+
+
+
+200it [00:31,  6.13it/s]
+	iters: 200, epoch: 12 | loss: 0.2404405
+
+
+
+
+
+
+
+
+303it [00:47,  6.74it/s]
+	iters: 300, epoch: 12 | loss: 0.1939860
+
+
+
+
+
+
+
+393it [01:01,  6.38it/s]
+	iters: 400, epoch: 12 | loss: 0.2274973
+
+
+
+
+
+
+
+
+497it [01:17,  6.48it/s]
+	iters: 500, epoch: 12 | loss: 0.1686185
+
+
+
+
+
+
+
+
+603it [01:33,  6.62it/s]
+	iters: 600, epoch: 12 | loss: 0.1782095
+
+
+
+
+
+
+
+
+704it [01:49,  6.09it/s]
+	iters: 700, epoch: 12 | loss: 0.2048799
+
+
+
+
+
+
+
+795it [02:03,  6.19it/s]
+	iters: 800, epoch: 12 | loss: 0.2115801
+
+
+
+
+
+
+
+
+896it [02:19,  6.25it/s]
+	iters: 900, epoch: 12 | loss: 0.1703711
+
+
+
+
+
+
+
+
+1000it [02:35,  6.45it/s]
+	iters: 1000, epoch: 12 | loss: 0.1765438
+
+
+
+
+
+
+
+
+1103it [02:51,  6.05it/s]
+	iters: 1100, epoch: 12 | loss: 0.1832911
+
+
+
+
+
+
+
+1193it [03:05,  6.43it/s]
+	iters: 1200, epoch: 12 | loss: 0.2484730
+
+
+
+
+
+
+
+
+1299it [03:21,  6.75it/s]
+	iters: 1300, epoch: 12 | loss: 0.2143505
+
+
+
+
+
+
+
+
+1403it [03:37,  5.94it/s]
+	iters: 1400, epoch: 12 | loss: 0.2305445
+
+
+
+
+
+
+
+
+1504it [03:53,  6.31it/s]
+	iters: 1500, epoch: 12 | loss: 0.2615076
+
+
+
+
+
+
+
+1596it [04:07,  6.36it/s]
+	iters: 1600, epoch: 12 | loss: 0.2591916
+
+
+
+
+
+
+
+
+1698it [04:23,  6.65it/s]
+	iters: 1700, epoch: 12 | loss: 0.1917120
+
+
+
+
+
+
+
+
+1801it [04:39,  6.35it/s]
+	iters: 1800, epoch: 12 | loss: 0.2992642
+
+
+
+
+
+
+
+
+1904it [04:55,  6.61it/s]
+	iters: 1900, epoch: 12 | loss: 0.1779486
+
+
+
+
+
+
+
+1994it [05:09,  6.54it/s]
+	iters: 2000, epoch: 12 | loss: 0.2509406
+
+
+
+
+
+
+
+
+2096it [05:25,  6.30it/s]
+	iters: 2100, epoch: 12 | loss: 0.1971859
+
+
+
+
+
+
+
+
+2201it [05:41,  6.44it/s]
+	iters: 2200, epoch: 12 | loss: 0.2107108
+
+
+
+
+
+
+
+
+2305it [05:57,  6.52it/s]
+	iters: 2300, epoch: 12 | loss: 0.2616102
+
+
+
+
+
+
+
+2396it [06:11,  6.71it/s]
+	iters: 2400, epoch: 12 | loss: 0.2198058
+
+
+
+
+
+
+
+
+2500it [06:27,  6.76it/s]
+	iters: 2500, epoch: 12 | loss: 0.2264963
+
+
+
+
+
+
+
+
+2606it [06:43,  6.12it/s]
+	iters: 2600, epoch: 12 | loss: 0.2845302
+
+
+
+
+
+
+
+2696it [06:57,  6.74it/s]
+	iters: 2700, epoch: 12 | loss: 0.1688368
+
+
+
+
+
+
+
+
+2799it [07:13,  6.67it/s]
+	iters: 2800, epoch: 12 | loss: 0.2673805
+
+
+
+
+
+
+
+
+2904it [07:29,  6.47it/s]
+	iters: 2900, epoch: 12 | loss: 0.3039677
+
+
+
+
+
+
+
+2994it [07:43,  6.35it/s]
+	iters: 3000, epoch: 12 | loss: 0.1744450
+
+
+
+
+
+
+
+
+3100it [07:59,  6.66it/s]
+	iters: 3100, epoch: 12 | loss: 0.2536075
+
+
+
+
+
+
+
+
+3202it [08:15,  6.30it/s]
+	iters: 3200, epoch: 12 | loss: 0.3213685
+
+
+
+
+
+
+
+
+3305it [08:31,  6.11it/s]
+	iters: 3300, epoch: 12 | loss: 0.2267399
+
+
+
+
+
+
+
+3398it [08:45,  6.72it/s]
+	iters: 3400, epoch: 12 | loss: 0.2641498
+
+
+
+
+
+
+
+
+3500it [09:01,  6.12it/s]
+	iters: 3500, epoch: 12 | loss: 0.1924317
+
+3512it [09:03,  6.19it/s]
+Epoch: 12 cost time: 544.2263352870941
+3514it [09:04,  6.46it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:55, 22.10it/s]
+7it [00:00, 15.61it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:56, 21.70it/s]
+4it [00:00,  9.91it/s]
+Epoch: 12 | Train Loss: 0.2462428 Vali Loss: 0.8979215 Test Loss: 0.4559585 MAE Loss: 0.4596744
+EarlyStopping counter: 10 out of 10
+Early stopping
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1218it [00:54, 22.24it/s]
+metrics:  (0.4198608444004883, 0.40481051635866866, 0.6362472132423597, 10.11559039235223, 41820.609112093276)
+success delete checkpoints
+done!

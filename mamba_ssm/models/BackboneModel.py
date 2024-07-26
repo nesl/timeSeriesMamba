@@ -48,13 +48,14 @@ class Model(nn.Module):
         self.patch_len = configs.patch_len
         self.stride = configs.stride
         self.num_params = configs.num_params
-        self.device = "cuda"
+        self.device = configs.device
         self.dtype = float
 
         print("configs.llm_model: ", configs.llm_model)
         configs.ssm_cfg={'layer': configs.llm_model}
 
-        if configs.llm_model in  ["Mamba", "Mamba2"]:
+        if configs.llm_model in  ["Mamba1", "Mamba2"]:            
+            #print("DEVICE: ", self.device)
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
             #self.llm_model = MambaTimeHeadModel.from_init(f"state-spaces/mamba2-{self.num_params}", device=self.device, dtype=self.dtype)
             self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
@@ -72,9 +73,12 @@ class Model(nn.Module):
             self.tokenizer.add_special_tokens({'pad_token': pad_token})
             self.tokenizer.pad_token = pad_token
 
+        print("self.llm_model.paramters() ", self.llm_model.parameters())
+        '''
         for param in self.llm_model.parameters():
             param.requires_grad = False
-
+        '''
+        
         if configs.prompt_domain:
             self.description = configs.content
         else:
@@ -121,7 +125,7 @@ class Model(nn.Module):
         medians = torch.median(x_enc, dim=1).values
         lags = self.calcute_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
-
+        '''
         prompt = []
         for b in range(x_enc.shape[0]):
             min_values_str = str(min_values[b].tolist()[0])
@@ -140,11 +144,11 @@ class Model(nn.Module):
             )
 
             prompt.append(prompt_)
-
+        '''
         x_enc = x_enc.reshape(B, N, T).permute(0, 2, 1).contiguous()
 
-        prompt = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True, max_length=2048).input_ids
-        prompt_embeddings = self.llm_model.get_input_embeddings()(prompt.to(x_enc.device))  # (batch, prompt_token, dim)
+        #prompt = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True, max_length=2048).input_ids
+        #prompt_embeddings = self.llm_model.get_input_embeddings()(prompt.to(x_enc.device))  # (batch, prompt_token, dim)
 
         source_embeddings = self.mapping_layer(self.word_embeddings.permute(1, 0)).permute(1, 0)
 

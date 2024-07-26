@@ -3,19 +3,19 @@ train_epochs=1
 learning_rate=0.01
 llama_layers=2
 
-master_port=01097
+master_port=01099
 num_process=1
 #2
 batch_size=16
 d_model=32
 d_ff=128
 
-
-
 comment='checkpoints/smallTest'
+gpu_id=1
+export CUDA_VISIBLE_DEVICES=$gpu_id
 
 
-accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port combine_main.py \
+accelerate launch --mixed_precision bf16 --num_processes $num_process --gpu_ids $gpu_id  --main_process_port $master_port combine_main.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -41,6 +41,8 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
   --train_epochs $train_epochs \
   --model_comment $comment \
   --early_break 1 \
+  --llm_model LLAMA \
+  --llm_dim 4096 \
   --use_wandb 0
   #--use_amp 
 

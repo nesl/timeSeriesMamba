@@ -3,12 +3,19 @@ train_epochs=3
 learning_rate=0.01
 llm_layers=6
 
-master_port=01097
+master_port=01096
 batch_size=16
 d_ff=128
-num_params='2.8b'
+num_params='2.7b'
 
 llm_dim=768
+
+gpu_id=1
+#see if this helps
+export CUDA_VISIBLE_DEVICES=$gpu_id
+
+#echo $CUDA_VISIBLE_DEVICES
+#so this is visible as 1, yet it doesnt make a difference...
 
 # Function to display usage information
 usage() {
@@ -43,7 +50,7 @@ do
   # Print the values to verify
   echo "Setting llm_layers to $llm_layers"
   echo "Setting d_model to $d_model"
-  echo "Setting train_epochs to $train_epochs"
+  echo "Setting train_epochs to $epochs"
   echo "Setting num_params to $num_params"
   echo "Setting save_checkpoints to $save_checkpoints"
   echo "Setting llm_model to $llm_model"
@@ -58,7 +65,7 @@ do
   log_file="results/${tag}.txt"
   exec > "$log_file" 2>&1
 
-  accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port train.py \
+  accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port train.py \
     --task_name long_term_forecast \
     --is_training 1 \
     --root_path ./dataset/ETT-small/ \

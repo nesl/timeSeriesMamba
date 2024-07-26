@@ -10,10 +10,11 @@ import transformers
 from layers.StandardNorm import Normalize
 
 import sys
-sys.path.insert(0, '/home/oliver/Desktop/mamba')
-
-from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
-
+#print("sys.path before:", sys.path)
+sys.path.insert(0, '/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/')
+#print("sys.path after:", sys.path)
+from mixer_seq_simple import MambaLMHeadModel,MambaTimeHeadModel
+sys.path.pop(0)
 
 
 transformers.logging.set_verbosity_error()
@@ -47,8 +48,10 @@ class Model(nn.Module):
         self.patch_len = configs.patch_len
         self.stride = configs.stride
         self.num_params = configs.num_params
-
+        self.llm_model_name = configs.llm_model
+        
         if configs.llm_model == "Mamba":
+            '''
             self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
             self.mamba_config.num_hidden_layers = configs.llm_layers
             self.mamba_config.output_attentions = True
@@ -59,18 +62,24 @@ class Model(nn.Module):
             config=self.mamba_config
             )
             self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
-
+            '''
+            self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba-{self.num_params}")#, device=device, dtype=dtype)
+            
         elif configs.llm_model == "Mamba2":
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
             self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")#, device=device, dtype=dtype)
             #self.llm_model = AutoModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             #print("Mamba2 info: ", self.llm_model.vocab_size)
+       
+
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
             self.llama_config.num_hidden_layers = configs.llm_layers
             self.llama_config.output_attentions = True
             self.llama_config.output_hidden_states = True
+            '''
             try:
                 self.llm_model = LlamaModel.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
@@ -100,6 +109,21 @@ class Model(nn.Module):
             except EnvironmentError:  # downloads the tokenizer from HF if not already done
                 print("Local tokenizer files not found. Atempting to download them..")
                 self.tokenizer = LlamaTokenizer.from_pretrained(
+                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
+                    'huggyllama/llama-7b',
+                    trust_remote_code=True,
+                    local_files_only=False
+                )
+                '''
+            self.llm_model = LlamaModel.from_pretrained(
+                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
+                    'huggyllama/llama-7b',
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config,
+                    # load_in_4bit=True
+                )
+            self.tokenizer = LlamaTokenizer.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
                     'huggyllama/llama-7b',
                     trust_remote_code=True,
@@ -267,7 +291,11 @@ class Model(nn.Module):
         enc_out, n_vars = self.patch_embedding(x_enc.to(torch.bfloat16))
         enc_out = self.reprogramming_layer(enc_out, source_embeddings, source_embeddings)
         llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)
-        dec_out = self.llm_model(llama_enc_out).last_hidden_state
+        
+        if "LLAMA" in self.llm_model_name: #i think this is fine, it just feeds embeddings instead of prompts?
+            dec_out = self.llm_model(inputs_embeds=llama_enc_out).last_hidden_state
+        else:
+            dec_out = self.llm_model(llama_enc_out).last_hidden_state
         
         #llama enc out is float tensor
         #dec_out = self.llm_model(input_ids=prompt).last_hidden_state
