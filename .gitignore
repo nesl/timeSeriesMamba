@@ -7,3 +7,4 @@ build/
 results/
 dataset/
 checkpoints/
+testCuda.py

@@ -16,6 +16,7 @@ sys.path.insert(0, '/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/')
 from mixer_seq_simple import MambaLMHeadModel,MambaTimeHeadModel
 sys.path.pop(0)
 
+from huggingface_hub import hf_hub_download
 
 transformers.logging.set_verbosity_error()
 
@@ -72,6 +73,32 @@ class Model(nn.Module):
             #self.llm_model = AutoModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             #print("Mamba2 info: ", self.llm_model.vocab_size)
        
+        elif configs.llm_model == "LLAMA3.1":
+            model_string = "meta-llama/Meta-Llama-3.1-8B"
+            
+            self.llama_config = LlamaConfig.from_pretrained(model_string)
+            self.llama_config.num_hidden_layers = configs.llm_layers
+            self.llama_config.output_attentions = True
+            self.llama_config.output_hidden_states = True
+            
+
+            self.llm_model = LlamaModel.from_pretrained(
+                    #"/home/nesl/oliver/timeSeriesMamba/TimeLLM/Meta-Llama-3.1-8B",
+                    model_string,
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config,
+                    # load_in_4bit=True
+                )
+            tokenizer_config_path = hf_hub_download(repo_id="meta-llama/Meta-Llama-3.1-8B", filename="tokenizer_config.json")
+            tokenizer_path = hf_hub_download(repo_id="meta-llama/Meta-Llama-3.1-8B", filename="tokenizer.json")
+            
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_string,
+                    trust_remote_code=False,
+                    local_files_only=True
+                )
+            
 
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')

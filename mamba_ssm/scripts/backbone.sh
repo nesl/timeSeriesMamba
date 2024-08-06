@@ -87,12 +87,12 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --d_ff $d_ff \
   --batch_size $batch_size \
   --learning_rate $learning_rate \
-  --llm_layers $llm_layers \
+  --n_layer $llm_layers \
   --train_epochs $train_epochs \
   --model_comment $comment \
   --save_checkpoints $save_checkpoints \
   --llm_model $llm_model \
-  --llm_dim $llm_dim \
+  --llm_dim 32 \
   --num_params $num_params
 
 echo "ETTh1 completed, saved to $comment"

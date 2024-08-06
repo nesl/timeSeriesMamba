@@ -3,7 +3,7 @@ train_epochs=1
 learning_rate=0.01
 llama_layers=2
 
-master_port=01099
+master_port=01070
 num_process=1
 #2
 batch_size=16
@@ -11,7 +11,7 @@ d_model=32
 d_ff=128
 
 comment='checkpoints/smallTest'
-gpu_id=1
+gpu_id=0
 export CUDA_VISIBLE_DEVICES=$gpu_id
 
 
@@ -41,7 +41,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --gpu_ids 
   --train_epochs $train_epochs \
   --model_comment $comment \
   --early_break 1 \
-  --llm_model LLAMA \
+  --llm_model LLAMA3.1 \
   --llm_dim 4096 \
   --use_wandb 0
   #--use_amp 

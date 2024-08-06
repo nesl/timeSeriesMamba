@@ -2,7 +2,7 @@ import os
 cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
 print(f'CUDA_VISIBLE_DEVICES: {cuda_visible_devices}')
 
-
+import gc
 import argparse
 import torch
 from accelerate import Accelerator, DeepSpeedPlugin
@@ -130,11 +130,14 @@ if args.use_wandb:
 all_metrics = []
 
 #seeds = [2,3,10,15,42,100,101,2021,2024,9999]
-seeds = [1,2]
-for ii in range(len(seeds)):
+#seeds = [1,2]
+#for ii in range(len(seeds)):
+seeds = 10
+for ii in range(seeds):
     accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
     print("accelerator device: ", accelerator.device)
-    fix_seed = seeds[ii]
+    #fix_seed = seeds[ii]
+    fix_seed = ii
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
@@ -339,7 +342,7 @@ for ii in range(len(seeds)):
     torch.cuda.empty_cache()
     unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
     
-    if ii==len(seeds)-1:
+    if ii==seeds-1:
         num_params = sum(p.numel() for p in unwrapped_model.parameters())
         print(f'Total number of parameters: {num_params}')
         if args.use_wandb:
@@ -372,17 +375,23 @@ for ii in range(len(seeds)):
         if args.use_wandb:
             wandb.log({f"mae {ii}":metrics[0],f"mse {ii}":metrics[1], f"rmse {ii}":metrics[2], f"mape {ii}":metrics[3], f"mspe {ii}":metrics[4]})
         all_metrics.append(metrics)
+    del accelerator
+    torch.cuda.empty_cache()
+    gc.collect()
+
 
 if args.use_wandb:
     all_metrics = np.mean(all_metrics, axis=0)
     wandb.log({f"mae":all_metrics[0],f"mse":all_metrics[1], f"rmse":all_metrics[2], f"mape":all_metrics[3], f"mspe":all_metrics[4]})
 
-accelerator.wait_for_everyone()
-if accelerator.is_local_main_process:
-    path = './checkpoints'  # unique checkpoint saving path
-    
-    if args.save_checkpoints == 0:
-        del_files(path)  # delete checkpoint files
-        accelerator.print('success delete checkpoints')
-        
-    accelerator.print('done!')
+#accelerator.wait_for_everyone()
+#if accelerator.is_local_main_process:
+    #path = './checkpoints'  # unique checkpoint saving path
+
+if args.save_checkpoints == 0:
+    #del_files(path)  # delete checkpoint files
+    os.remove(best_model_path)
+    #accelerator.print('success delete checkpoints at path : ', path)
+    print('success delete checkpoints at path : ', path)
+#accelerator.print('done!')
+print('done!')

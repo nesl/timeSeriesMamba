@@ -10,7 +10,7 @@ num_params='2.7b'
 
 llm_dim=768
 
-gpu_id=1
+gpu_id=0
 #see if this helps
 export CUDA_VISIBLE_DEVICES=$gpu_id
 
@@ -41,7 +41,8 @@ if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -
   usage
 fi
 # Array of d_model values
-d_model_values=(256 512 1024 2048)
+#d_model_values=(256 512 1024 2048)
+d_model_values=(512 2048)
 
 # Loop through each value in the array
 for d_model in "${d_model_values[@]}"

@@ -37,7 +37,7 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
 
 
 class EarlyStopping:
-    def __init__(self, accelerator=None, patience=7, verbose=False, delta=0, save_mode=True):
+    def __init__(self, accelerator=None, patience=7, verbose=True, delta=0, save_mode=True):
         self.accelerator = accelerator
         self.patience = patience
         self.verbose = verbose
@@ -53,7 +53,8 @@ class EarlyStopping:
         score = -val_loss
         if self.best_score is None:
             self.best_score = score
-            if self.save_mode:
+            #if self.save_mode:
+            if True:
                 self.save_checkpoint(val_loss, model, path)
         elif score < self.best_score + self.delta:
             self.counter += 1
@@ -65,7 +66,8 @@ class EarlyStopping:
                 self.early_stop = True
         else:
             self.best_score = score
-            if self.save_mode:
+            #if self.save_mode:
+            if True:
                 self.save_checkpoint(val_loss, model, path)
             self.counter = 0
 
