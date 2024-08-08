@@ -60,10 +60,10 @@ if [ "$num_params" = "7b" ]; then
 fi
 
 # Redirect output to a file named after the comment variable
-
+: '
 tag="ETTh1_${og_tag}"
 
-for seed in {6..10}; do
+for seed in {1..10}; do
   comment="checkpoints/${tag}_seed${seed}"
   log_file="results/${tag}_seed${seed}.txt"
   exec > "$log_file" 2>&1
@@ -102,83 +102,88 @@ for seed in {6..10}; do
   echo "ETTh1 completed for seed $seed, saved to $comment"
 done
 
-: '
-
+'
 tag="ETTh2_${og_tag}"
-comment="checkpoints/${tag}"
-log_file="results/${tag}.txt"
-exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_512_96 \
-  --model $model_name \
-  --data ETTh2 \
-  --features M \
-  --seq_len 512 \
-  --label_len 48 \
-  --pred_len 96 \
-  --factor 3 \
-  --enc_in 7 \
-  --dec_in 7 \
-  --c_out 7 \
-  --des 'Exp' \
-  --itr 1 \
-  --d_model $d_model \
-  --d_ff $d_ff \
-  --batch_size $batch_size \
-  --learning_rate $learning_rate \
-  --llm_layers $llm_layers \
-  --train_epochs $train_epochs \
-  --model_comment $comment \
-  --save_checkpoints $save_checkpoints \
-  --llm_model $llm_model \
-  --llm_dim $llm_dim \
-  --num_params $num_params
+for seed in {1..10}; do
+  comment="checkpoints/${tag}_seed${seed}"
+  log_file="results/${tag}_seed${seed}.txt"
+  exec > "$log_file" 2>&1
 
-echo "ETTh2 completed, saved to $comment"
+  accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port seed_process.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTh2.csv \
+    --model_id ETTh2_512_96 \
+    --model $model_name \
+    --data ETTh2 \
+    --features M \
+    --seq_len 512 \
+    --label_len 48 \
+    --pred_len 96 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --des 'Exp' \
+    --itr 1 \
+    --d_model $d_model \
+    --d_ff $d_ff \
+    --batch_size $batch_size \
+    --learning_rate $learning_rate \
+    --llm_layers $llm_layers \
+    --train_epochs $train_epochs \
+    --model_comment $comment \
+    --save_checkpoints $save_checkpoints \
+    --llm_model $llm_model \
+    --llm_dim $llm_dim \
+    --num_params $num_params
+  echo "ETTh2 completed for seed $seed, saved to $comment"
+done 
 
 tag="ETTm1_${og_tag}"
-comment="checkpoints/${tag}"
-log_file="results/${tag}.txt"
-exec > "$log_file" 2>&1
+for seed in {1..10}; do
+  comment="checkpoints/${tag}_seed${seed}"
+  log_file="results/${tag}_seed${seed}.txt"
+  exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm1.csv \
-  --model_id ETTm1_512_96 \
-  --model $model_name \
-  --data ETTm1 \
-  --features M \
-  --seq_len 512 \
-  --label_len 48 \
-  --pred_len 96 \
-  --factor 3 \
-  --enc_in 7 \
-  --dec_in 7 \
-  --c_out 7 \
-  --des 'Exp' \
-  --itr 1 \
-  --d_model $d_model \
-  --d_ff $d_ff \
-  --batch_size $batch_size \
-  --lradj 'TST'\
-  --learning_rate 0.001 \
-  --llm_layers $llm_layers \
-  --train_epochs $train_epochs \
-  --model_comment $comment \
-  --save_checkpoints $save_checkpoints \
-  --llm_model $llm_model \
-  --llm_dim $llm_dim \
-  --num_params $num_params
 
-echo "ETTm1 completed, saved to $comment"
+  accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port seed_process.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTm1.csv \
+    --model_id ETTm1_512_96 \
+    --model $model_name \
+    --data ETTm1 \
+    --features M \
+    --seq_len 512 \
+    --label_len 48 \
+    --pred_len 96 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --des 'Exp' \
+    --itr 1 \
+    --d_model $d_model \
+    --d_ff $d_ff \
+    --batch_size $batch_size \
+    --lradj 'TST'\
+    --learning_rate 0.001 \
+    --llm_layers $llm_layers \
+    --train_epochs $train_epochs \
+    --model_comment $comment \
+    --save_checkpoints $save_checkpoints \
+    --llm_model $llm_model \
+    --llm_dim $llm_dim \
+    --num_params $num_params
 
+  echo "ETTm1 completed for seed $seed, saved to $comment"
+done 
+
+: '
 
 tag="ETTm2_${og_tag}"
 comment="checkpoints/${tag}"
