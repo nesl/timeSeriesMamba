@@ -12,6 +12,9 @@ num_params='2.8b'
 
 llm_dim=768
 
+gpu_id=0
+export CUDA_VISIBLE_DEVICES=$gpu_id
+
 # Function to display usage information
 usage() {
   echo "Usage: $0 -l <llm_layers> -d <d_model> -e <train_epochs> -n <num_params> -c <save_checkpoints> -m <llm_model>"
@@ -60,44 +63,47 @@ fi
 
 # Redirect output to a file named after the comment variable
 
-tag="ETTh1_${og_tag}"
-comment="checkpoints/${tag}"
-log_file="results/${tag}.txt"
-exec > "$log_file" 2>&1
+tag="backboneETTh1_${og_tag}"
+for seed in {1..10}; do
+  comment="checkpoints/${tag}_seed${seed}"
+  log_file="results/${tag}_seed${seed}.txt"
+  exec > "$log_file" 2>&1
 
-accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port train.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTh1.csv \
-  --model_id ETTh1_512_96 \
-  --model $model_name \
-  --data ETTh1 \
-  --features M \
-  --seq_len 512 \
-  --label_len 48 \
-  --pred_len 96 \
-  --factor 3 \
-  --enc_in 7 \
-  --dec_in 7 \
-  --c_out 7 \
-  --des 'Exp' \
-  --itr 1 \
-  --d_model $d_model \
-  --d_ff $d_ff \
-  --batch_size $batch_size \
-  --learning_rate $learning_rate \
-  --n_layer $llm_layers \
-  --train_epochs $train_epochs \
-  --model_comment $comment \
-  --save_checkpoints $save_checkpoints \
-  --llm_model $llm_model \
-  --llm_dim 32 \
-  --num_params $num_params
+  accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $master_port train.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTh1.csv \
+    --model_id ETTh1_512_96 \
+    --model $model_name \
+    --data ETTh1 \
+    --features M \
+    --seq_len 512 \
+    --label_len 48 \
+    --pred_len 96 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --des 'Exp' \
+    --itr 1 \
+    --d_model $d_model \
+    --d_ff $d_ff \
+    --batch_size $batch_size \
+    --learning_rate $learning_rate \
+    --n_layer $llm_layers \
+    --train_epochs $train_epochs \
+    --model_comment $comment \
+    --save_checkpoints $save_checkpoints \
+    --llm_model $llm_model \
+    --llm_dim $d_model \
+    --num_params $num_params \
+    --seed $seed \
+    --use_wandb 0
 
-echo "ETTh1 completed, saved to $comment"
-
-
+  echo "ETTh1 completed, saved to $comment"
+done
+: '
 tag="ETTh2_${og_tag}"
 comment="checkpoints/${tag}"
 log_file="results/${tag}.txt"
@@ -320,3 +326,4 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --main_process_port $
   --num_params $num_params
 
 echo "Traffic completed, saved to $comment"
+'

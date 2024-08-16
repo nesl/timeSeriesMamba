@@ -215,7 +215,8 @@ for seed in {1..10}; do
     --save_checkpoints $save_checkpoints \
     --llm_model $llm_model \
     --llm_dim $llm_dim \
-    --num_params $num_params
+    --num_params $num_params \
+    --seed $seed
 
   echo "ETTm2 completed for seed $seed, saved to $comment"
 done
@@ -253,7 +254,8 @@ for seed in {1..10}; do
     --save_checkpoints $save_checkpoints \
     --llm_model $llm_model \
     --llm_dim $llm_dim \
-    --num_params $num_params
+    --num_params $num_params \
+    --seed $seed
 
   echo "ECL completed for seed $seed, saved to $comment"
 done

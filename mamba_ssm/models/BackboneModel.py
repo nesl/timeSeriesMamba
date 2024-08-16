@@ -50,6 +50,7 @@ class Model(nn.Module):
         self.num_params = configs.num_params
         self.device = configs.device
         self.dtype = float
+        self.model_name = configs.llm_model
 
         print("configs.llm_model: ", configs.llm_model)
         configs.ssm_cfg={'layer': configs.llm_model}
@@ -61,6 +62,27 @@ class Model(nn.Module):
             self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
             
             #might need to change this name...
+        elif configs.llm_model in  ["LLAMA"]:
+
+            configs.ssm_cfg=None
+            configs.attn_layer_idx=range(0,configs.n_layer)
+
+            '''
+            self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
+            self.llama_config.num_hidden_layers = configs.llm_layers
+            self.llama_config.output_attentions = True
+            self.llama_config.output_hidden_states = True
+            '''
+            configs.attn_cfg = {
+                #"embed_dim":768,
+                "num_heads":16,
+                "mlp_dim":1536,
+                "causal":True }
+            
+            
+            self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
+            
         else:
             raise Exception('LLM model is not defined')
 
@@ -73,7 +95,7 @@ class Model(nn.Module):
             self.tokenizer.add_special_tokens({'pad_token': pad_token})
             self.tokenizer.pad_token = pad_token
 
-        print("self.llm_model.paramters() ", self.llm_model.parameters())
+        print("self.llm_model.parameters() ", self.llm_model)
         '''
         for param in self.llm_model.parameters():
             param.requires_grad = False
@@ -158,8 +180,11 @@ class Model(nn.Module):
         #llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)
         #MAIN CHANGE HERE
         llama_enc_out = enc_out
+        #if "LLAMA" in self.model_name: #i think this is fine, it just feeds embeddings instead of prompts?
+        #    dec_out = self.llm_model(inputs_embeds=llama_enc_out).last_hidden_state
+        #else:
+        #    dec_out = self.llm_model(llama_enc_out).last_hidden_state
         dec_out = self.llm_model(llama_enc_out).last_hidden_state
-        
         #llama enc out is float tensor
         #dec_out = self.llm_model(input_ids=prompt).last_hidden_state
         #dec_out = self.llm_model(input_ids=llama_enc_out, inputs_embeds=llama_enc_out).last_hidden_state

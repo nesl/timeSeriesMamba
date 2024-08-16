@@ -13,6 +13,10 @@ import time
 import random
 import numpy as np
 import os
+import wandb 
+
+import pandas as pd
+from utils.metrics import metric
 
 os.environ['CURL_CA_BUNDLE'] = ''
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
@@ -109,6 +113,17 @@ ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
+wandb.init(project = 'TimeMamba')
+#log the hyperparameters
+wandb.config.update({
+    'layer count': args.llm_layers,
+    'd_model': args.d_model,
+    'train epochs': args.train_epochs,
+    'model id': args.model_id,
+    'model' : args.model,
+    'LLM used': args.llm_model,
+    #'num params': args.num_params
+})
 
 for ii in range(args.itr):
     # setting record of experiments
@@ -231,7 +246,7 @@ for ii in range(args.itr):
                 accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                 iter_count = 0
                 time_now = time.time()
-
+                
             if args.use_amp:
                 scaler.scale(loss).backward()
                 scaler.step(model_optim)
@@ -269,7 +284,48 @@ for ii in range(args.itr):
 
         else:
             accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
+    accelerator.wait_for_everyone()
+    
+    best_model_path = path + '/' + 'checkpoint'
+    accelerator.wait_for_everyone()
+    unwrapped_model = accelerator.unwrap_model(model)
 
+    num_params = sum(p.numel() for p in unwrapped_model.parameters())
+    print(f'Total number of parameters: {num_params}')
+    
+    wandb.config.update({'num_params':num_params})
+    torch.cuda.synchronize()
+    torch.cuda.empty_cache()
+    unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
+    
+    print(f'Total number of parameters: {sum(p.numel() for p in unwrapped_model.parameters())}')
+
+    unwrapped_model.eval()
+    with torch.no_grad():
+
+        iter_count = 0
+        train_loss = []
+        
+        #vali_loss, vali_mae_loss = vali(args, accelerator, unwrapped_model, vali_data, vali_loader, criterion, mae_metric)
+        test_loss, test_mae_loss = vali(args, accelerator, unwrapped_model, test_data, test_loader, criterion, mae_metric,path)
+        
+        file = path+'/valiResults/'
+        # Read the CSV file into a pandas DataFrame for predictions
+        predictions_df = pd.read_csv(file+'forecasts.csv')
+
+        # Convert DataFrame to a NumPy array and discard the first row
+        predictions_array = predictions_df.iloc[1:, 1:].to_numpy().astype(float)
+
+        # Read the CSV file into a pandas DataFrame for test set
+        test_df = pd.read_csv(file+'trues.csv')
+
+        # Convert DataFrame to a NumPy array and discard the first row
+        test_array = test_df.iloc[1:, 1:].to_numpy().astype(float)
+
+        metrics = metric(predictions_array, test_array)
+        print("metrics: ", metrics)
+        wandb.log({"mae": metrics[0], "mse":metrics[1], "rmse":metrics[2], "mape":metrics[3], "mspe":metrics[4]})
+    
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:
     path = './checkpoints'  # unique checkpoint saving path

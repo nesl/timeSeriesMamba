@@ -3,14 +3,14 @@ train_epochs=3
 learning_rate=0.01
 llm_layers=6
 
-master_port=01096
+master_port=01091
 batch_size=16
 d_ff=128
 num_params='2.7b'
 
 llm_dim=768
 
-gpu_id=0
+gpu_id=1
 #see if this helps
 export CUDA_VISIBLE_DEVICES=$gpu_id
 
@@ -42,7 +42,7 @@ if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -
 fi
 # Array of d_model values
 #d_model_values=(256 512 1024 2048)
-d_model_values=(512 2048)
+d_model_values=(256 512 1024 2048)
 
 # Loop through each value in the array
 for d_model in "${d_model_values[@]}"
@@ -62,41 +62,44 @@ do
   # Redirect output to a file named after the comment variable
 
   tag="dsweep_${og_tag}"
-  comment="checkpoints/${tag}"
-  log_file="results/${tag}.txt"
-  exec > "$log_file" 2>&1
+  for seed in {1..10}; do
+    comment="checkpoints/${tag}_seed${seed}"
+    log_file="results/${tag}_seed${seed}.txt"
+    exec > "$log_file" 2>&1
 
-  accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port train.py \
-    --task_name long_term_forecast \
-    --is_training 1 \
-    --root_path ./dataset/ETT-small/ \
-    --data_path ETTh1.csv \
-    --model_id ETTh1_512_96 \
-    --model $model_name \
-    --data ETTh1 \
-    --features M \
-    --seq_len 512 \
-    --label_len 48 \
-    --pred_len 96 \
-    --factor 3 \
-    --enc_in 7 \
-    --dec_in 7 \
-    --c_out 7 \
-    --des 'Exp' \
-    --itr 1 \
-    --d_model $d_model \
-    --d_ff $d_ff \
-    --batch_size $batch_size \
-    --learning_rate $learning_rate \
-    --n_layer $llm_layers \
-    --train_epochs $train_epochs \
-    --model_comment $comment \
-    --save_checkpoints $save_checkpoints \
-    --llm_model $llm_model \
-    --llm_dim $d_model \
-    --num_params $num_params \
-    --use_wandb 1
+    accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port train.py \
+      --task_name long_term_forecast \
+      --is_training 1 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh1.csv \
+      --model_id ETTh1_512_96 \
+      --model $model_name \
+      --data ETTh1 \
+      --features M \
+      --seq_len 512 \
+      --label_len 48 \
+      --pred_len 96 \
+      --factor 3 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
+      --des 'Exp' \
+      --itr 1 \
+      --d_model $d_model \
+      --d_ff $d_ff \
+      --batch_size $batch_size \
+      --learning_rate $learning_rate \
+      --n_layer $llm_layers \
+      --train_epochs $train_epochs \
+      --model_comment $comment \
+      --save_checkpoints $save_checkpoints \
+      --llm_model $llm_model \
+      --llm_dim $d_model \
+      --num_params $num_params \
+      --use_wandb 1 \
+      --seed $seed
 
 
-  echo "ETTh1 completed, saved to $comment"
-done 
+    echo "ETTh1 completed, saved to $comment"
+  done 
+done

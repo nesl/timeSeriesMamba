@@ -332,6 +332,7 @@ class Model(nn.Module):
         dec_out = torch.reshape(
             dec_out, (-1, n_vars, dec_out.shape[-2], dec_out.shape[-1]))
         dec_out = dec_out.permute(0, 1, 3, 2).contiguous()
+        dec_out = dec_out.to(torch.bfloat16)
 
         dec_out = self.output_projection(dec_out[:, :, :, -self.patch_nums:])
         dec_out = dec_out.permute(0, 2, 1).contiguous()
