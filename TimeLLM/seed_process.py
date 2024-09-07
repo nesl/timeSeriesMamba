@@ -62,6 +62,7 @@ parser.add_argument('--seq_len', type=int, default=96, help='input sequence leng
 parser.add_argument('--label_len', type=int, default=48, help='start token length')
 parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
 parser.add_argument('--seasonal_patterns', type=str, default='Monthly', help='subset for M4')
+parser.add_argument('--period_of_interest', type=str, default='None', help='for downsampling purposes')
 
 # model define
 parser.add_argument('--enc_in', type=int, default=7, help='encoder input size')
@@ -108,9 +109,11 @@ parser.add_argument('--use_wandb', type=int, default=1)
 parser.add_argument('--early_break', type=int, default=0)
 parser.add_argument('--save_checkpoints', type=int, default=0)
 
+
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
+print("period of interest", args.period_of_interest)
 if args.use_wandb:
     wandb.init(project = 'TimeMamba')
     #log the hyperparameters
@@ -121,6 +124,7 @@ if args.use_wandb:
         'model id': args.model_id,
         'model' : args.model,
         'LLM used': args.llm_model,
+        'period of interest': args.period_of_interest
         #'num params': args.num_params
     })
 
@@ -196,8 +200,11 @@ for p in model.parameters():
 model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
 
 earlyUnwrap = accelerator.unwrap_model(model)
-print(f'Total number of parameters: {sum(p.numel() for p in earlyUnwrap.parameters())}')
+num_params=sum(p.numel() for p in earlyUnwrap.parameters())
+print(f'Total number of parameters: {num_params}')
 #summary(earlyUnwrap, ((1,2),(3,4),(5,6),(7,8)))
+if args.use_wandb:
+    wandb.config.update({'num_params':num_params})
 
 if args.lradj == 'COS':
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)

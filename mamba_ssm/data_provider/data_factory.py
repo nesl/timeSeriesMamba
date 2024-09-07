@@ -11,6 +11,7 @@ data_dict = {
     'Traffic': Dataset_Custom,
     'Weather': Dataset_Custom,
     'm4': Dataset_M4,
+    'Illness': Dataset_Custom
 }
 
 

@@ -10,11 +10,46 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
+def calculate_downsampling_factor(root_path, data_path, period_of_interest='1 year', timesteps=96):
+    # Read the dataset to determine frequency
+    timestamp_col = pd.to_datetime(pd.read_csv(os.path.join(root_path, data_path))['date'])
+    sample_frequency = (timestamp_col[1] - timestamp_col[0]).total_seconds() / (60 * 60 * 24)  # samples per day
+
+    # Calculate total samples in the period of interest
+    if period_of_interest.lower() == '1 year':
+        period_days = 365
+    elif period_of_interest.lower() == '6 months':
+        period_days = 182
+    elif period_of_interest.lower() == '1 month':
+        period_days = 30
+    elif period_of_interest.lower() == '1 week':
+        period_days = 7
+    elif period_of_interest.lower() == '1 day':
+        period_days = 1
+    elif period_of_interest.lower() == '12 hours':
+        period_days = 0.5  # Half a day
+    elif period_of_interest.lower() == '6 hours':
+        period_days = 0.25  # Quarter of a day
+    # Add more cases as needed
+    else:
+        print(f"Unsupported period_of_interest: {period_of_interest}")
+        return 1
+
+    print(f"period days:{period_days}")
+    print(f'sample freq{sample_frequency}')
+    total_samples_in_period = period_days / sample_frequency
+    
+    # Calculate the downsampling factor to get the desired number of timesteps
+    print("total_samples_in_period", total_samples_in_period)
+    print("timesteps", timesteps)
+    downsampling_factor = max(1, int(np.floor(total_samples_in_period / timesteps)))    
+    return downsampling_factor
+
 class Dataset_ETT_hour(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h', percent=100,
-                 seasonal_patterns=None):
+                 seasonal_patterns=None, period_of_interest=None):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -35,12 +70,25 @@ class Dataset_ETT_hour(Dataset):
         self.timeenc = timeenc
         self.freq = freq
 
+        # New parameters for dynamic downsampling
+        self.period_of_interest = period_of_interest
+        print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
+        self.timesteps = self.pred_len
         # self.percent = percent
         self.root_path = root_path
         self.data_path = data_path
+       
+        # Calculate dynamic downsampling factor using the external function
+        self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
+        print("downsampling factor: ", self.downsampling_factor)
         self.__read_data__()
 
+        self.data_x = self.data_x[::self.downsampling_factor]
+        self.data_y = self.data_y[::self.downsampling_factor]
+        self.data_stamp = self.data_stamp[::self.downsampling_factor]
+        
         self.enc_in = self.data_x.shape[-1]
+        print("len data_x",len(self.data_x))
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
 
     def __read_data__(self):
@@ -48,10 +96,10 @@ class Dataset_ETT_hour(Dataset):
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
 
-        border1s = [0, 12 * 30 * 24 - self.seq_len, 12 * 30 * 24 + 4 * 30 * 24 - self.seq_len]
-        border2s = [12 * 30 * 24, 12 * 30 * 24 + 4 * 30 * 24, 12 * 30 * 24 + 8 * 30 * 24]
+        border1s = [0, 12 * 30 * 24 - self.seq_len, 12 * 30 * 24 + 4 * 30 * 24 - self.seq_len] 
+        border2s = [12 * 30 * 24, 12 * 30 * 24 + 4 * 30 * 24, 12 * 30 * 24 + 8 * 30 * 24]  
 
-        border1 = border1s[self.set_type]
+        border1 = border1s[self.set_type] 
         border2 = border2s[self.set_type]
 
         if self.set_type == 0:
@@ -112,7 +160,7 @@ class Dataset_ETT_minute(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTm1.csv',
                  target='OT', scale=True, timeenc=0, freq='t', percent=100,
-                 seasonal_patterns=None):
+                 seasonal_patterns=None, period_of_interest='None'):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -210,7 +258,7 @@ class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h', percent=100,
-                 seasonal_patterns=None):
+                 seasonal_patterns=None, period_of_interest='None'):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4

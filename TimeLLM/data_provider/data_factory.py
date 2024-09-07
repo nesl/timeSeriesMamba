@@ -10,6 +10,7 @@ data_dict = {
     'Traffic': Dataset_Custom,
     'Weather': Dataset_Custom,
     'm4': Dataset_M4,
+    'Illness': Dataset_Custom
 }
 
 
@@ -53,7 +54,8 @@ def data_provider(args, flag):
             timeenc=timeenc,
             freq=freq,
             percent=percent,
-            seasonal_patterns=args.seasonal_patterns
+            seasonal_patterns=args.seasonal_patterns,
+            period_of_interest=args.period_of_interest,
         )
     data_loader = DataLoader(
         data_set,

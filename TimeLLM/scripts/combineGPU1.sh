@@ -261,7 +261,7 @@ for seed in {1..10}; do
   log_file="results/${tag}_seed${seed}.txt"
   exec > "$log_file" 2>&1
 
-  accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port combine_main.py \
+  accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port seed_process.py \
     --task_name long_term_forecast \
     --is_training 1 \
     --root_path ./dataset/weather/ \
@@ -289,7 +289,8 @@ for seed in {1..10}; do
     --save_checkpoints $save_checkpoints \
     --llm_model $llm_model \
     --llm_dim $llm_dim \
-    --num_params $num_params
+    --num_params $num_params \
+    --seed $seed
 
   echo "Weather completed, seed $seed saved to $comment"
 done
