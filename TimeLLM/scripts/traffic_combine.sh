@@ -66,23 +66,23 @@ if [ "$num_params" = "7b" ]; then
 fi
 
 # Define trials for different pred_len values
-for pred_len in 64; do
+for pred_len in 96 128; do
   for seed in {1..3}; do
-    tag="ETTh1_${og_tag}_pred${pred_len}_seed${seed}"
+    tag="Traffic_${og_tag}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
     log_file="results/${tag}.txt"
     exec > "$log_file" 2>&1
 
-    accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
+    accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port seed_process.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/ETT-small/ \
-      --data_path ETTh1.csv \
-      --model_id "ETTh1_128_${pred_len}" \
+      --root_path ./dataset/traffic/ \
+      --data_path traffic.csv \
+      --model_id "traffic_96_${pred_len}" \
       --model $model_name \
-      --data ETTh1 \
+      --data Traffic \
       --features M \
-      --seq_len 128 \
+      --seq_len 96 \
       --label_len 24 \
       --pred_len $pred_len \
       --factor 3 \

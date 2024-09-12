@@ -105,7 +105,7 @@ done
 '
 
 tag="ETTm1_${og_tag}"
-for seed in {3..10}; do
+for seed in {1..10}; do
   comment="checkpoints/${tag}_seed${seed}"
   log_file="results/${tag}_seed${seed}.txt"
   exec > "$log_file" 2>&1

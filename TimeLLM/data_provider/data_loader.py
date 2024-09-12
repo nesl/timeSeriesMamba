@@ -279,10 +279,21 @@ class Dataset_Custom(Dataset):
         self.freq = freq
         self.percent = percent
 
+        # New parameters for dynamic downsampling
+        self.period_of_interest = period_of_interest
+        print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
+        self.timesteps = self.pred_len
+
         self.root_path = root_path
         self.data_path = data_path
         self.__read_data__()
 
+        self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
+        print("downsampling factor: ", self.downsampling_factor)
+        self.data_x = self.data_x[::self.downsampling_factor]
+        self.data_y = self.data_y[::self.downsampling_factor]
+        self.data_stamp = self.data_stamp[::self.downsampling_factor]
+        
         self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
 

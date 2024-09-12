@@ -8,4 +8,4 @@ results/
 dataset/
 checkpoints/
 testCuda.py
-mamba_ssm/wandb/*
+*wandb/*

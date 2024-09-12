@@ -12,7 +12,7 @@ d_ff=128
 comment='checkpoints/smallTest'
 gpu_id=3
 export CUDA_VISIBLE_DEVICES=$gpu_id
-
+: '
  accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
       --task_name long_term_forecast \
       --is_training 1 \
@@ -40,9 +40,10 @@ export CUDA_VISIBLE_DEVICES=$gpu_id
       --model_comment "$comment" \
       --llm_model Mamba2 \
       --llm_dim 768 \
-      --period_of_interest "1 month" \
+      --period_of_interest "None" \
       --use_wandb 0
-: ' 
+      '
+
 accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port seed_process.py \
   --task_name long_term_forecast \
   --is_training 1 \
@@ -52,9 +53,9 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --m
   --model $model_name \
   --data Traffic \
   --features M \
-  --seq_len 512 \
+  --seq_len 96 \
   --label_len 48 \
-  --pred_len 96 \
+  --pred_len 128\
   --e_layers 2 \
   --d_layers 1 \
   --factor 3 \
@@ -72,7 +73,7 @@ accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --m
   --period_of_interest "1 month" \
   --use_wandb 0
 
-
+: '
 accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port seed_process.py \
   --task_name long_term_forecast \
   --is_training 1 \
