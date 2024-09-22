@@ -4,7 +4,7 @@ build/
 **.so
 *.hip
 *_hip.*
-results/
-dataset/
-checkpoints/
-wandb/
+*results/
+*dataset/
+*checkpoints/
+*wandb/
