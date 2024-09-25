@@ -9,3 +9,4 @@ dataset/
 checkpoints/
 testCuda.py
 *wandb/*
+TimeLLM/Meta-Llama-3.1-8B
