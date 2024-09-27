@@ -316,6 +316,9 @@ for epoch in range(args.train_epochs):
         wandb.log({f"train loss {args.seed}":train_loss, f"vali loss {args.seed}": vali_loss, f"test loss {args.seed}": test_loss, f"MAE loss {args.seed}": test_mae_loss})
     #for param_tensor in model.state_dict():
     #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
+    if not os.path.exists(path):
+        # Create directory if it does not exist
+        os.makedirs(path)
     early_stopping(vali_loss, model, path)
     if early_stopping.early_stop:
         accelerator.print("Early stopping")
@@ -384,8 +387,10 @@ accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:
     path = './checkpoints'  # unique checkpoint saving path
 
-if args.save_checkpoints == 0:
-    del_files(path)  # delete checkpoint files
-    accelerator.print('success delete checkpoints')
-    
+    if args.save_checkpoints == 0:
+            #del_files(path)  # delete checkpoint files
+            os.remove(best_model_path)
+            accelerator.print('success delete checkpoints at path : ', path)
+            #print('success delete checkpoints at path : ', path)
+        
 accelerator.print('done!')

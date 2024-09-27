@@ -5,7 +5,7 @@ learning_rate=0.01
 llm_layers=6
 
 # Default values for variables
-master_port_base=1091  # Base for master port calculation
+master_port_base=1071  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -44,7 +44,7 @@ master_port=$((master_port_base + (gpu_id % 10)))
 echo "Using master_port $master_port"
 
 # Array of d_model values
-d_model_values=(512 1024 2048)
+d_model_values=(256 512 1024 2048)
 
 # Loop through each value in the array
 for d_model in "${d_model_values[@]}"
@@ -61,7 +61,7 @@ do
 
   # Redirect output to a file named after the comment variable
 
-  tag="dsweep_weather_${og_tag}"
+  tag="dsweep_ECL_${og_tag}"
   for seed in {1..5}; do
     comment="checkpoints/${tag}_seed${seed}"
     log_file="results/${tag}_seed${seed}.txt"
@@ -70,11 +70,11 @@ do
     accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port train.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/weather/ \
-      --data_path weather.csv \
-      --model_id weather_512_96 \
+      --root_path ./dataset/electricity/ \
+      --data_path electricity.csv \
+      --model_id ECL_512_96 \
       --model $model_name \
-      --data Weather \
+      --data ECL \
       --features M \
       --seq_len 512 \
       --label_len 48 \
@@ -82,11 +82,9 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 21 \
-      --dec_in 21 \
-      --c_out 21 \
-      --d_model 32 \
-      --d_ff 32 \
+      --enc_in 321 \
+      --dec_in 321 \
+      --c_out 321 \
       --d_model $d_model \
       --d_ff $d_ff \
       --batch_size $batch_size \
@@ -102,6 +100,6 @@ do
       --seed $seed
 
 
-    echo "weather completed, saved to $comment"
+    echo "ECL completed, saved to $comment"
   done 
 done

@@ -62,7 +62,7 @@ class Model(nn.Module):
             self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
             
             #might need to change this name...
-        elif configs.llm_model in  ["LLAMA"]:
+        elif configs.llm_model in  ["LLAMA", "MHA"]:
 
             configs.ssm_cfg=None
             configs.attn_layer_idx=range(0,configs.n_layer)

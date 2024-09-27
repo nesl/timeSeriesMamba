@@ -5,7 +5,7 @@ learning_rate=0.01
 llm_layers=6
 
 # Default values for variables
-master_port_base=1091  # Base for master port calculation
+master_port_base=1061  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -62,7 +62,7 @@ do
   # Redirect output to a file named after the comment variable
 
   tag="dsweep_weather_${og_tag}"
-  for seed in {1..5}; do
+  for seed in {6..10}; do
     comment="checkpoints/${tag}_seed${seed}"
     log_file="results/${tag}_seed${seed}.txt"
     exec > "$log_file" 2>&1
