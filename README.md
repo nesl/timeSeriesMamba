@@ -1,4 +1,20 @@
-# Mamba
+
+## About
+
+Mamba is a new state space model architecture showing promising performance on information-dense data such as language modeling, where previous subquadratic models fall short of Transformers.
+It is based on the line of progress on [structured state space models](https://github.com/state-spaces/s4),
+with an efficient hardware-aware design and implementation in the spirit of [FlashAttention](https://github.com/Dao-AILab/flash-attention).
+# Time Series Mamba
+In the `TimeLLM` directory are experiments that examine what happens if you replace the transformer LLM in TimeLLM with pretrained LLAMA3.1, Mamba, and Mamba2 LLMs from huggingface. 
+In the `mamba_ssm` directory are experiments that use what we learned from the `TimeLLM` codebase and try with backbone-only approaches. Local models are defined in the `model` and `module` directories.
+
+Datasets were not uploaded to this remote repo but should be downloaded from [this Google Drive link provided by the Time-LLM github](https://drive.google.com/file/d/1NF7VEefXCmXuWNbnNe858WvQAkJ_7wuP/view) and installed in a directory titled `dataset` at the same level as the directory `data_provider` (this applies to both `TimeLLM` and `mamba_ssm`). 
+
+## Installation
+
+- [Option] `pip install causal-conv1d>=1.2.0`: an efficient implementation of a simple causal Conv1d layer used inside the Mamba block.
+- `pip install mamba-ssm`: the core Mamba package.
+
 Installation guide:
 '''
 conda create -n Mamba2 python=3.9
@@ -6,138 +22,6 @@ pip install packaging
 pip install torch
 pip install .
 '''
-
-
-
-![Mamba](assets/selection.png "Selective State Space")
-> **Mamba: Linear-Time Sequence Modeling with Selective State Spaces**\
-> Albert Gu*, Tri Dao*\
-> Paper: https://arxiv.org/abs/2312.00752
-
-![Mamba-2](assets/ssd_algorithm.png "State Space Dual Model")
-> **Transformers are SSMs: Generalized Models and Efficient Algorithms**\
->     **Through Structured State Space Duality**\
-> Tri Dao*, Albert Gu*\
-> Paper: https://arxiv.org/abs/2405.21060
-
-## About
-
-Mamba is a new state space model architecture showing promising performance on information-dense data such as language modeling, where previous subquadratic models fall short of Transformers.
-It is based on the line of progress on [structured state space models](https://github.com/state-spaces/s4),
-with an efficient hardware-aware design and implementation in the spirit of [FlashAttention](https://github.com/Dao-AILab/flash-attention).
-
-## Installation
-
-- [Option] `pip install causal-conv1d>=1.2.0`: an efficient implementation of a simple causal Conv1d layer used inside the Mamba block.
-- `pip install mamba-ssm`: the core Mamba package.
-
-It can also be built from source with `pip install .` from this repository.
-
-If `pip` complains about PyTorch versions, try passing `--no-build-isolation` to `pip`.
-
-Other requirements:
-- Linux
-- NVIDIA GPU
-- PyTorch 1.12+
-- CUDA 11.6+
-
-For AMD cards, see additional prerequisites below.
-
-## Usage
-
-We expose several levels of interface with the Mamba model.
-
-### Selective SSM
-
-Mamba is based on a selective SSM layer, which is the focus of the paper (Section 3; Algorithm 2).
-
-Source: [ops/selective_scan_interface.py](mamba_ssm/ops/selective_scan_interface.py).
-
-### Mamba Block
-
-The main module of this repository is the Mamba architecture block wrapping the selective SSM.
-
-Source: [modules/mamba_simple.py](mamba_ssm/modules/mamba_simple.py).
-
-Usage:
-``` python
-import torch
-from mamba_ssm import Mamba
-
-batch, length, dim = 2, 64, 16
-x = torch.randn(batch, length, dim).to("cuda")
-model = Mamba(
-    # This module uses roughly 3 * expand * d_model^2 parameters
-    d_model=dim, # Model dimension d_model
-    d_state=16,  # SSM state expansion factor
-    d_conv=4,    # Local convolution width
-    expand=2,    # Block expansion factor
-).to("cuda")
-y = model(x)
-assert y.shape == x.shape
-```
-
-### Mamba-2
-
-The Mamba-2 block is implemented at [modules/mamba2.py](mamba_ssm/modules/mamba2.py).
-
-A simpler version is at [modules/mamba2_simple.py](mamba_ssm/modules/mamba2_simple.py)
-
-The usage is similar to Mamba(-1):
-``` python
-from mamba_ssm import Mamba2
-model = Mamba2(
-    # This module uses roughly 3 * expand * d_model^2 parameters
-    d_model=dim, # Model dimension d_model
-    d_state=64,  # SSM state expansion factor, typically 64 or 128
-    d_conv=4,    # Local convolution width
-    expand=2,    # Block expansion factor
-).to("cuda")
-y = model(x)
-assert y.shape == x.shape
-```
-
-#### SSD
-
-A minimal version of the inner SSD module (Listing 1 from the Mamba-2 paper) with conversion between "discrete" and "continuous" SSM versions
-is at [modules/ssd_minimal.py](mamba_ssm/modules/ssd_minimal.py).
-
-### Mamba Language Model
-
-Finally, we provide an example of a complete language model: a deep sequence model backbone (with repeating Mamba blocks) + language model head.
-
-Source: [models/mixer_seq_simple.py](mamba_ssm/models/mixer_seq_simple.py).
-
-This is an example of how to integrate Mamba into an end-to-end neural network.
-This example is used in the generation scripts below.
-
-
-## Pretrained Models
-
-Pretrained models are uploaded to
-[Hugging Face](https://huggingface.co/state-spaces): `mamba-130m`, `mamba-370m`,
-`mamba-790m`, `mamba-1.4b`, `mamba-2.8b`, `mamba2-130m`, `mamba2-370m`,
-`mamba2-780m`, `mamba2-1.3b`, `mamba2-2.7b`, `transformerpp-2.7b`, `mamba2attn-2.7b`, trained on 300B tokens on the Pile, as well as `mamba-2.8b-slimpj`
-(trained on 600B tokens on the SlimPajama dataset).
-
-
-The models will be autodownloaded by the generation script below.
-
-These models were trained on the [Pile](https://huggingface.co/datasets/EleutherAI/pile), and follow the standard model dimensions described by GPT-3 and followed by many open source models:
-
-| Parameters | Layers | Model dim. | 
-|------------|--------|------------|
-| 130M       | 24     | 768        |
-| 370M       | 48     | 1024       |
-| 790M       | 48     | 1536       |
-| 1.4B       | 48     | 2048       |
-| 2.8B       | 64     | 2560       |
-
-(The layer count of Mamba doubles that of a Transformer with similar size, as two Mamba blocks are needed for each "layer" (MHA block + MLP block) of a Transformer.)
-
-Note: these are base models trained only for 300B tokens, without any form of downstream modification (instruction tuning, etc.).
-Performance is expected to be comparable or better than other architectures trained on similar data, but not to match larger or fine-tuned models.
-
 
 ## Evaluations
 
