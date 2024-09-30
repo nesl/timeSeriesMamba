@@ -1,0 +1,84 @@
+./scripts/dsweep.sh: line 62: CUDA_VISIBLE_DEVICES: command not found
+[2024-07-23 22:25:28,829] [INFO] [real_accelerator.py:191:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-07-23 22:25:28,935] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-07-23 22:25:28,935] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.17.5 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.4
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/mamba_ssm/wandb/run-20240723_222529-26zxruk1
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run comic-sun-97
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/26zxruk1
+Using Framework:  BackboneModel
+args.device:  cuda:0
+configs.llm_model:  Mamba
+DEVICE:  cuda:0
+defined config MambaConfig(d_model=512, d_intermediate=0, n_layer=32, vocab_size=50277, ssm_cfg={'layer': 'Mamba'}, attn_layer_idx=[], attn_cfg={}, rms_norm=True, residual_in_fp32=True, fused_add_norm=True, pad_vocab_size_multiple=8, tie_embeddings=True)
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/train.py", line 164, in <module>
+    model = BackboneModel.Model(args).float()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/BackboneModel.py", line 61, in __init__
+    self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/mixer_seq_simple.py", line 425, in from_init
+    model = cls(config, device=device, dtype=dtype, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/mixer_seq_simple.py", line 349, in __init__
+    self.backbone = MixerModel(
+                    ^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/mixer_seq_simple.py", line 153, in __init__
+    [
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/mixer_seq_simple.py", line 154, in <listcomp>
+    create_block(
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/mixer_seq_simple.py", line 55, in create_block
+    raise ValueError(f"Invalid ssm_layer: {ssm_layer}, only support Mamba1 and Mamba2")
+ValueError: Invalid ssm_layer: Mamba, only support Mamba1 and Mamba2
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.022 MB of 0.022 MB uploadedwandb: 🚀 View run comic-sun-97 at: https://wandb.ai/owucla/TimeMamba/runs/26zxruk1
+wandb: ⭐️ View project at: https://wandb.ai/owucla/TimeMamba
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240723_222529-26zxruk1/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.
+[2024-07-23 22:25:40,918] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 571310) of binary: /home/nesl/anaconda3/envs/TimeMamba/bin/python
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 268, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-07-23_22:25:40
+  host      : sn4622120321
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 571310)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+ETTh1 completed, saved to checkpoints/dsweep_l32_d512_e30_mMamba_n2
+Setting llm_layers to 32
+Setting d_model to 1024
+Setting train_epochs to 30
+Setting num_params to 2
+Setting save_checkpoints to 0
+Setting llm_model to Mamba

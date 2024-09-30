@@ -1,0 +1,95 @@
+CUDA_VISIBLE_DEVICES: 1
+[2024-09-16 23:50:02,655] torch.distributed.elastic.agent.server.api: [WARNING] Received 2 death signal, shutting down workers
+[2024-09-16 23:50:02,656] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2194036 closing signal SIGINT
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/train.py", line 17, in <module>
+    from mamba_ssm.models import BackboneModel
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/__init__.py", line 6, in <module>
+    from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel, MambaTimeHeadModel
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/mixer_seq_simple.py", line 20, in <module>
+    from mamba_ssm.utils.generation import GenerationMixin
+  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/utils/generation.py", line 14, in <module>
+    from transformers.generation import GreedySearchDecoderOnlyOutput, SampleDecoderOnlyOutput, TextStreamer
+  File "<frozen importlib._bootstrap>", line 1229, in _handle_fromlist
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/utils/import_utils.py", line 1576, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/utils/import_utils.py", line 1586, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/generation/utils.py", line 43, in <module>
+    from ..models.auto import (
+  File "<frozen importlib._bootstrap>", line 1229, in _handle_fromlist
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/utils/import_utils.py", line 1576, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/utils/import_utils.py", line 1586, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/models/auto/modeling_auto.py", line 21, in <module>
+    from .auto_factory import (
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/transformers/models/auto/auto_factory.py", line 36, in <module>
+    from .configuration_auto import AutoConfig, model_type_to_module_name, replace_list_option_in_docstrings
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1069, in get_code
+  File "<frozen importlib._bootstrap_external>", line 729, in _compile_bytecode
+KeyboardInterrupt
+[2024-09-16 23:50:02,813] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2194036 closing signal SIGTERM
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 727, in run
+    result = self._invoke_run(role)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 868, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2193954 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 259, in launch_agent
+    result = agent.run()
+             ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/metrics/api.py", line 123, in wrapper
+    result = f(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 734, in run
+    self._shutdown(e.sigval)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 311, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 318, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 706, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 2047, in _wait
+    time.sleep(delay)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2193954 got signal: 2

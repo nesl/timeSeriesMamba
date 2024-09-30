@@ -1,0 +1,72 @@
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 5, in <module>
+    from accelerate.commands.accelerate_cli import main
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/__init__.py", line 16, in <module>
+    from .accelerator import Accelerator
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/accelerator.py", line 35, in <module>
+    from .checkpointing import load_accelerator_state, load_custom_state, save_accelerator_state, save_custom_state
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/checkpointing.py", line 24, in <module>
+    from .utils import (
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/__init__.py", line 172, in <module>
+    from .fsdp_utils import load_fsdp_model, load_fsdp_optimizer, save_fsdp_model, save_fsdp_optimizer
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/fsdp_utils.py", line 26, in <module>
+    import torch.distributed.checkpoint as dist_cp
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/checkpoint/__init__.py", line 7, in <module>
+    from .state_dict_loader import load_state_dict, load
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/checkpoint/state_dict_loader.py", line 12, in <module>
+    from .default_planner import DefaultLoadPlanner
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/checkpoint/default_planner.py", line 14, in <module>
+    from torch.distributed._tensor import DTensor
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/__init__.py", line 6, in <module>
+    import torch.distributed._tensor.ops
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/ops/__init__.py", line 2, in <module>
+    from .embedding_ops import *  # noqa: F403
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/ops/embedding_ops.py", line 5, in <module>
+    from torch.distributed._tensor.op_schema import OpSchema, OutputSharding
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/op_schema.py", line 6, in <module>
+    from torch.distributed._tensor.placement_types import DTensorSpec
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/placement_types.py", line 7, in <module>
+    import torch.distributed._functional_collectives as funcol
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_functional_collectives.py", line 26, in <module>
+    from torch._dynamo.external_utils import is_compiling as is_torchdynamo_compiling
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/__init__.py", line 2, in <module>
+    from . import allowed_functions, convert_frame, eval_frame, resume_execution
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/convert_frame.py", line 45, in <module>
+    from .eval_frame import always_optimize_code_objects, skip_code, TorchPatcher
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py", line 69, in <module>
+    from . import config, convert_frame, external_utils, skipfiles, utils
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/skipfiles.py", line 410, in <module>
+    add(_name)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/skipfiles.py", line 295, in add
+    _recompile_re()
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/skipfiles.py", line 278, in _recompile_re
+    SKIP_DIRS_RE = re.compile(f"^({'|'.join(map(re.escape, SKIP_DIRS))})")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/__init__.py", line 227, in compile
+    return _compile(pattern, flags)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/__init__.py", line 294, in _compile
+    p = _compiler.compile(pattern, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_compiler.py", line 745, in compile
+    p = _parser.parse(p, flags)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_parser.py", line 989, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_parser.py", line 464, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_parser.py", line 872, in _parse
+    p = _parse_sub(source, state, sub_verbose, nested + 1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_parser.py", line 464, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_parser.py", line 534, in _parse
+    sourceget()
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/re/_parser.py", line 261, in get
+    def get(self):
+
+KeyboardInterrupt

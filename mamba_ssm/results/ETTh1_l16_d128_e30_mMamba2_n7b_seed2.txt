@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 5, in <module>
+    from accelerate.commands.accelerate_cli import main
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/__init__.py", line 16, in <module>
+    from .accelerator import Accelerator
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/accelerator.py", line 32, in <module>
+    import torch
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/__init__.py", line 1215, in <module>
+    from .storage import _StorageBase, TypedStorage, _LegacyStorage, UntypedStorage, _warn_typed_storage_removal
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/storage.py", line 14, in <module>
+    import numpy as np
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/numpy/__init__.py", line 159, in <module>
+    from . import ma
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/numpy/ma/__init__.py", line 45, in <module>
+    from . import extras
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1069, in get_code
+  File "<frozen importlib._bootstrap_external>", line 729, in _compile_bytecode
+KeyboardInterrupt

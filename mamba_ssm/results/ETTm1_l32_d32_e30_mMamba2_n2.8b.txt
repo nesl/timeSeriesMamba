@@ -1,0 +1,61 @@
+CUDA_VISIBLE_DEVICES: None
+usage: train.py [-h] --task_name TASK_NAME --is_training IS_TRAINING
+                --model_id MODEL_ID --model_comment MODEL_COMMENT --model
+                MODEL [--seed SEED] --data DATA [--root_path ROOT_PATH]
+                [--data_path DATA_PATH] [--features FEATURES]
+                [--target TARGET] [--loader LOADER] [--freq FREQ]
+                [--checkpoints CHECKPOINTS] [--seq_len SEQ_LEN]
+                [--label_len LABEL_LEN] [--pred_len PRED_LEN]
+                [--seasonal_patterns SEASONAL_PATTERNS] [--enc_in ENC_IN]
+                [--dec_in DEC_IN] [--c_out C_OUT] [--d_model D_MODEL]
+                [--n_heads N_HEADS] [--e_layers E_LAYERS]
+                [--d_layers D_LAYERS] [--d_ff D_FF] [--moving_avg MOVING_AVG]
+                [--factor FACTOR] [--dropout DROPOUT] [--embed EMBED]
+                [--activation ACTIVATION] [--output_attention]
+                [--patch_len PATCH_LEN] [--stride STRIDE]
+                [--prompt_domain PROMPT_DOMAIN] [--llm_model LLM_MODEL]
+                [--llm_dim LLM_DIM] [--num_params NUM_PARAMS]
+                [--n_layer N_LAYER] [--num_workers NUM_WORKERS] [--itr ITR]
+                [--train_epochs TRAIN_EPOCHS] [--align_epochs ALIGN_EPOCHS]
+                [--batch_size BATCH_SIZE] [--eval_batch_size EVAL_BATCH_SIZE]
+                [--patience PATIENCE] [--learning_rate LEARNING_RATE]
+                [--des DES] [--loss LOSS] [--lradj LRADJ]
+                [--pct_start PCT_START] [--use_amp] [--percent PERCENT]
+                [--use_wandb USE_WANDB] [--early_break EARLY_BREAK]
+                [--save_checkpoints SAVE_CHECKPOINTS]
+train.py: error: unrecognized arguments: --llm_layers 32
+[2024-07-29 22:29:04,352] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 2) local_rank: 0 (pid: 66460) of binary: /home/nesl/anaconda3/envs/TimeMamba/bin/python
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 268, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-07-29_22:29:04
+  host      : sn4622120321
+  rank      : 0 (local_rank: 0)
+  exitcode  : 2 (pid: 66460)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+ETTm1 completed, saved to checkpoints/ETTm1_l32_d32_e30_mMamba2_n2.8b

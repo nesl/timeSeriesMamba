@@ -1,0 +1,66 @@
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 5, in <module>
+    from accelerate.commands.accelerate_cli import main
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/__init__.py", line 16, in <module>
+    from .accelerator import Accelerator
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/accelerator.py", line 35, in <module>
+    from .checkpointing import load_accelerator_state, load_custom_state, save_accelerator_state, save_custom_state
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/checkpointing.py", line 24, in <module>
+    from .utils import (
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/__init__.py", line 172, in <module>
+    from .fsdp_utils import load_fsdp_model, load_fsdp_optimizer, save_fsdp_model, save_fsdp_optimizer
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/fsdp_utils.py", line 26, in <module>
+    import torch.distributed.checkpoint as dist_cp
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/checkpoint/__init__.py", line 7, in <module>
+    from .state_dict_loader import load_state_dict, load
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/checkpoint/state_dict_loader.py", line 12, in <module>
+    from .default_planner import DefaultLoadPlanner
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/checkpoint/default_planner.py", line 14, in <module>
+    from torch.distributed._tensor import DTensor
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/__init__.py", line 6, in <module>
+    import torch.distributed._tensor.ops
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/ops/__init__.py", line 2, in <module>
+    from .embedding_ops import *  # noqa: F403
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/ops/embedding_ops.py", line 5, in <module>
+    from torch.distributed._tensor.op_schema import OpSchema, OutputSharding
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/op_schema.py", line 6, in <module>
+    from torch.distributed._tensor.placement_types import DTensorSpec
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_tensor/placement_types.py", line 7, in <module>
+    import torch.distributed._functional_collectives as funcol
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/_functional_collectives.py", line 26, in <module>
+    from torch._dynamo.external_utils import is_compiling as is_torchdynamo_compiling
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/__init__.py", line 2, in <module>
+    from . import allowed_functions, convert_frame, eval_frame, resume_execution
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/allowed_functions.py", line 30, in <module>
+    from .utils import hashable, is_safe_constant, NP_SUPPORTED_MODULES
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_dynamo/utils.py", line 89, in <module>
+    import torch.fx.experimental.symbolic_shapes
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/fx/experimental/symbolic_shapes.py", line 38, in <module>
+    from torch.utils._sympy.functions import FloorDiv, Mod, IsNonOverlappingAndDenseIndicator
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/_sympy/functions.py", line 1, in <module>
+    import sympy
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/__init__.py", line 74, in <module>
+    from .polys import (Poly, PurePoly, poly_from_expr, parallel_poly_from_expr,
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/polys/__init__.py", line 123, in <module>
+    from .partfrac import apart, apart_list, assemble_partfrac_list
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/polys/partfrac.py", line 13, in <module>
+    @xthreaded
+     ^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/utilities/decorator.py", line 76, in xthreaded
+    return threaded_factory(func, False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/utilities/decorator.py", line 13, in threaded_factory
+    from sympy.matrices import MatrixBase
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/matrices/__init__.py", line 21, in <module>
+    from .immutable import ImmutableDenseMatrix, ImmutableSparseMatrix
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/matrices/immutable.py", line 8, in <module>
+    from sympy.matrices.expressions import MatrixExpr
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/matrices/expressions/__init__.py", line 15, in <module>
+    from .adjoint import Adjoint
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/matrices/expressions/adjoint.py", line 7, in <module>
+    class Adjoint(MatrixExpr):
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/sympy/core/basic.py", line 116, in __init_subclass__
+    def __init_subclass__(cls):
+
+KeyboardInterrupt
