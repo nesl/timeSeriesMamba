@@ -23,6 +23,12 @@ pip install torch
 pip install .
 '''
 
+## Runs
+Connect to a wandb project first with `wandb login`. 
+
+To run `TimeLLM` scripts, navigate to that directory. Then call ./scripts/clean_combine.sh and provide the required arguments for layers, epochs, model type, etc. in the command line. This will repeat for different seeds.
+
+To run `mamba_ssm` scripts, navigate to that directory. Then call ./scripts/dsweep.sh with the appropriate required arguments. This will run a set of experiments on different model dimensions in addition to the seeds.
 ## Evaluations
 
 To run zero-shot evaluations of models (corresponding to Table 3 of the paper),
