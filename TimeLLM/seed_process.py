@@ -282,7 +282,7 @@ for epoch in range(args.train_epochs):
             loss = criterion(outputs, batch_y)
             train_loss.append(loss.item())
             
-        if (i + 1) % 100 == 0:
+        if (i + 1) % 10000 == 0:
             #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
             accelerator.print(
                 "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))

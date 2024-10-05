@@ -102,7 +102,7 @@ parser.add_argument('--train_epochs', type=int, default=10, help='train epochs')
 parser.add_argument('--align_epochs', type=int, default=10, help='alignment epochs')
 parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
 parser.add_argument('--eval_batch_size', type=int, default=8, help='batch size of model evaluation')
-parser.add_argument('--patience', type=int, default=10, help='early stopping patience')
+parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
 parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')
 parser.add_argument('--des', type=str, default='test', help='exp description')
 parser.add_argument('--loss', type=str, default='MSE', help='loss function')
@@ -177,16 +177,6 @@ args.content = load_content(args)
 if not os.path.exists(path) and accelerator.is_local_main_process:
     os.makedirs(path)
 
-'''
-#this is to allow for repeat trials without overwriting old stuff        
-else: 
-    i = 1
-    while os.path.exists(path):
-        path = path + f'{i}'
-        i+=1
-    print("path already exists! making path at ", path)
-    os.makedirs(path)
-'''
 
 time_now = time.time()
 train_steps = len(train_loader)
@@ -280,7 +270,7 @@ for epoch in range(args.train_epochs):
             loss = criterion(outputs, batch_y)
             train_loss.append(loss.item())
             
-        if (i + 1) % 100 == 0:
+        if (i + 1) % 10000 == 0:
             #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
             accelerator.print(
                 "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -322,6 +312,8 @@ for epoch in range(args.train_epochs):
     early_stopping(vali_loss, model, path)
     if early_stopping.early_stop:
         accelerator.print("Early stopping")
+        if args.use_wandb:
+            wandb.log({f"actual epochs": epoch+1})
         break
 
     if args.lradj != 'TST':

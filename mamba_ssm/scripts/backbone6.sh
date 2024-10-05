@@ -5,7 +5,7 @@ learning_rate=0.01
 llm_layers=6
 
 # Default values for variables
-master_port_base=1051  # Base for master port calculation
+master_port_base=1151  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -57,8 +57,8 @@ og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}
 
 # Redirect output to a file named after the comment variable
 
-tag="smalltest_weather_${og_tag}"
-for seed in {1,,1}; do
+tag="backbone_weather_${og_tag}"
+for seed in {6..10}; do
   comment="checkpoints/${tag}_seed${seed}"
   log_file="results/${tag}_seed${seed}.txt"
   exec > "$log_file" 2>&1
