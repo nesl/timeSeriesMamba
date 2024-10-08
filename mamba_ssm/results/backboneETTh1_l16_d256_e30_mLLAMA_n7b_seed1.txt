@@ -1,311 +1,0 @@
-CUDA_VISIBLE_DEVICES: 0
-[2024-08-12 22:13:57,742] [INFO] [real_accelerator.py:191:get_accelerator] Setting ds_accelerator to cuda (auto detect)
-[2024-08-12 22:13:57,849] [INFO] [comm.py:637:init_distributed] cdb=None
-[2024-08-12 22:13:57,849] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
-Using Framework:  BackboneModel
-configs.llm_model:  LLAMA
-defined config MambaConfig(d_model=256, d_intermediate=0, n_layer=16, vocab_size=50277, ssm_cfg=None, attn_layer_idx=range(0, 16), attn_cfg={'num_heads': 16, 'mlp_dim': 1536, 'causal': True}, rms_norm=True, residual_in_fp32=True, fused_add_norm=True, pad_vocab_size_multiple=8, tie_embeddings=True)
-LLM model used is:  LLAMA
-self.llm_model.parameters()  MambaTimeHeadModel(
-  (backbone): MixerModel(
-    (embedding): Embedding(50277, 256)
-    (layers): ModuleList(
-      (0-15): 16 x Block(
-        (norm): RMSNorm()
-        (mixer): MHA(
-          (in_proj): Linear(in_features=256, out_features=2304, bias=True)
-          (out_proj): Linear(in_features=1024, out_features=256, bias=True)
-        )
-      )
-    )
-    (norm_f): RMSNorm()
-  )
-  (time_head): Linear(in_features=256, out_features=50277, bias=False)
-)
-Total number of parameters: 78676432
-[2024-08-12 22:13:58,867] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed info: version=0.14.0, git-hash=unknown, git-branch=unknown
-[2024-08-12 22:14:00,354] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Flops Profiler Enabled: False
-[2024-08-12 22:14:00,354] [INFO] [logging.py:96:log_dist] [Rank 0] Using client Optimizer as basic optimizer
-[2024-08-12 22:14:00,355] [INFO] [logging.py:96:log_dist] [Rank 0] Removing param_group that has no 'params' in the basic Optimizer
-[2024-08-12 22:14:00,356] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Basic Optimizer = Adam
-[2024-08-12 22:14:00,357] [INFO] [utils.py:56:is_zero_supported_optimizer] Checking ZeRO support for optimizer=Adam type=<class 'torch.optim.adam.Adam'>
-[2024-08-12 22:14:00,357] [INFO] [logging.py:96:log_dist] [Rank 0] Creating torch.bfloat16 ZeRO stage 2 optimizer
-[2024-08-12 22:14:00,357] [INFO] [stage_1_and_2.py:149:__init__] Reduce bucket size 200000000
-[2024-08-12 22:14:00,357] [INFO] [stage_1_and_2.py:150:__init__] Allgather bucket size 200000000
-[2024-08-12 22:14:00,357] [INFO] [stage_1_and_2.py:151:__init__] CPU Offload: False
-[2024-08-12 22:14:00,357] [INFO] [stage_1_and_2.py:152:__init__] Round robin gradient partitioning: False
-[2024-08-12 22:14:00,779] [INFO] [utils.py:800:see_memory_usage] Before initializing optimizer states
-[2024-08-12 22:14:00,780] [INFO] [utils.py:801:see_memory_usage] MA 0.44 GB         Max_MA 0.59 GB         CA 0.59 GB         Max_CA 1 GB 
-[2024-08-12 22:14:00,780] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 27.05 GB, percent = 1.8%
-[2024-08-12 22:14:00,880] [INFO] [utils.py:800:see_memory_usage] After initializing optimizer states
-[2024-08-12 22:14:00,881] [INFO] [utils.py:801:see_memory_usage] MA 0.44 GB         Max_MA 0.74 GB         CA 0.89 GB         Max_CA 1 GB 
-[2024-08-12 22:14:00,881] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 27.05 GB, percent = 1.8%
-[2024-08-12 22:14:00,881] [INFO] [stage_1_and_2.py:539:__init__] optimizer state initialized
-[2024-08-12 22:14:00,979] [INFO] [utils.py:800:see_memory_usage] After initializing ZeRO optimizer
-[2024-08-12 22:14:00,979] [INFO] [utils.py:801:see_memory_usage] MA 0.44 GB         Max_MA 0.44 GB         CA 0.89 GB         Max_CA 1 GB 
-[2024-08-12 22:14:00,980] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 27.05 GB, percent = 1.8%
-[2024-08-12 22:14:00,981] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Final Optimizer = Adam
-[2024-08-12 22:14:00,981] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed using client LR scheduler
-[2024-08-12 22:14:00,981] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed LR Scheduler = None
-[2024-08-12 22:14:00,981] [INFO] [logging.py:96:log_dist] [Rank 0] step=0, skipped=0, lr=[0.0003999999999999993], mom=[(0.95, 0.999)]
-[2024-08-12 22:14:00,981] [INFO] [config.py:996:print] DeepSpeedEngine configuration:
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   activation_checkpointing_config  {
-    "partition_activations": false, 
-    "contiguous_memory_optimization": false, 
-    "cpu_checkpointing": false, 
-    "number_checkpoints": null, 
-    "synchronize_checkpoint_boundary": false, 
-    "profile": false
-}
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   aio_config ................... {'block_size': 1048576, 'queue_depth': 8, 'thread_count': 1, 'single_submit': False, 'overlap_events': True}
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   amp_enabled .................. False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   amp_params ................... False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   autotuning_config ............ {
-    "enabled": false, 
-    "start_step": null, 
-    "end_step": null, 
-    "metric_path": null, 
-    "arg_mappings": null, 
-    "metric": "throughput", 
-    "model_info": null, 
-    "results_dir": "autotuning_results", 
-    "exps_dir": "autotuning_exps", 
-    "overwrite": true, 
-    "fast": true, 
-    "start_profile_step": 3, 
-    "end_profile_step": 5, 
-    "tuner_type": "gridsearch", 
-    "tuner_early_stopping": 5, 
-    "tuner_num_trials": 50, 
-    "model_info_path": null, 
-    "mp_size": 1, 
-    "max_train_batch_size": null, 
-    "min_train_batch_size": 1, 
-    "max_train_micro_batch_size_per_gpu": 1.024000e+03, 
-    "min_train_micro_batch_size_per_gpu": 1, 
-    "num_tuning_micro_batch_sizes": 3
-}
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   bfloat16_enabled ............. True
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   bfloat16_immediate_grad_update  False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   checkpoint_parallel_write_pipeline  False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   checkpoint_tag_validation_enabled  True
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   checkpoint_tag_validation_fail  False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   comms_config ................. <deepspeed.comm.config.DeepSpeedCommsConfig object at 0x7fc4ddb669d0>
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   communication_data_type ...... None
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   compile_config ............... enabled=False backend='inductor' kwargs={}
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   compression_config ........... {'weight_quantization': {'shared_parameters': {'enabled': False, 'quantizer_kernel': False, 'schedule_offset': 0, 'quantize_groups': 1, 'quantize_verbose': False, 'quantization_type': 'symmetric', 'quantize_weight_in_forward': False, 'rounding': 'nearest', 'fp16_mixed_quantize': False, 'quantize_change_ratio': 0.001}, 'different_groups': {}}, 'activation_quantization': {'shared_parameters': {'enabled': False, 'quantization_type': 'symmetric', 'range_calibration': 'dynamic', 'schedule_offset': 1000}, 'different_groups': {}}, 'sparse_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'row_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'head_pruning': {'shared_parameters': {'enabled': False, 'method': 'topk', 'schedule_offset': 1000}, 'different_groups': {}}, 'channel_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'layer_reduction': {'enabled': False}}
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   curriculum_enabled_legacy .... False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   curriculum_params_legacy ..... False
-[2024-08-12 22:14:00,981] [INFO] [config.py:1000:print]   data_efficiency_config ....... {'enabled': False, 'seed': 1234, 'data_sampling': {'enabled': False, 'num_epochs': 1000, 'num_workers': 0, 'curriculum_learning': {'enabled': False}}, 'data_routing': {'enabled': False, 'random_ltd': {'enabled': False, 'layer_token_lr_schedule': {'enabled': False}}}}
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   data_efficiency_enabled ...... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   dataloader_drop_last ......... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   disable_allgather ............ False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   dump_state ................... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   dynamic_loss_scale_args ...... None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_enabled ........... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_gas_boundary_resolution  1
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_layer_name ........ bert.encoder.layer
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_layer_num ......... 0
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_max_iter .......... 100
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_stability ......... 1e-06
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_tol ............... 0.01
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   eigenvalue_verbose ........... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   elasticity_enabled ........... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   flops_profiler_config ........ {
-    "enabled": false, 
-    "recompute_fwd_factor": 0.0, 
-    "profile_step": 1, 
-    "module_depth": -1, 
-    "top_modules": 1, 
-    "detailed": true, 
-    "output_file": null
-}
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   fp16_auto_cast ............... None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   fp16_enabled ................. False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   fp16_master_weights_and_gradients  False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   global_rank .................. 0
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   grad_accum_dtype ............. None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   gradient_accumulation_steps .. 1
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   gradient_clipping ............ 0.0
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   gradient_predivide_factor .... 1.0
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   graph_harvesting ............. False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   hybrid_engine ................ enabled=False max_out_tokens=512 inference_tp_size=1 release_inference_cache=False pin_parameters=True tp_gather_partition_size=8
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   initial_dynamic_scale ........ 1
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   load_universal_checkpoint .... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   loss_scale ................... 1.0
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   memory_breakdown ............. False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   mics_hierarchial_params_gather  False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   mics_shard_size .............. -1
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   monitor_config ............... tensorboard=TensorBoardConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') wandb=WandbConfig(enabled=False, group=None, team=None, project='deepspeed') csv_monitor=CSVConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') enabled=False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   nebula_config ................ {
-    "enabled": false, 
-    "persistent_storage_path": null, 
-    "persistent_time_interval": 100, 
-    "num_of_version_in_retention": 2, 
-    "enable_nebula_load": true, 
-    "load_path": null
-}
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   optimizer_legacy_fusion ...... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   optimizer_name ............... None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   optimizer_params ............. None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   pipeline ..................... {'stages': 'auto', 'partition': 'best', 'seed_layers': False, 'activation_checkpoint_interval': 0, 'pipe_partitioned': True, 'grad_partitioned': True}
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   pld_enabled .................. False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   pld_params ................... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   prescale_gradients ........... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   scheduler_name ............... None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   scheduler_params ............. None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   seq_parallel_communication_data_type  torch.float32
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   sparse_attention ............. None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   sparse_gradients_enabled ..... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   steps_per_print .............. inf
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   train_batch_size ............. 16
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   train_micro_batch_size_per_gpu  16
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   use_data_before_expert_parallel_  False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   use_node_local_storage ....... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   wall_clock_breakdown ......... False
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   weight_quantization_config ... None
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   world_size ................... 1
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   zero_allow_untested_optimizer  True
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   zero_config .................. stage=2 contiguous_gradients=True reduce_scatter=True reduce_bucket_size=200000000 use_multi_rank_bucket_allreduce=True allgather_partitions=True allgather_bucket_size=200000000 overlap_comm=True load_from_fp32_weights=True elastic_checkpoint=False offload_param=None offload_optimizer=None sub_group_size=1000000000 cpu_offload_param=None cpu_offload_use_pin_memory=None cpu_offload=None prefetch_bucket_size=50,000,000 param_persistence_threshold=100,000 model_persistence_threshold=sys.maxsize max_live_parameters=1,000,000,000 max_reuse_distance=1,000,000,000 gather_16bit_weights_on_model_save=False stage3_gather_fp16_weights_on_model_save=False ignore_unused_parameters=True legacy_stage1=False round_robin_gradients=False zero_hpz_partition_size=1 zero_quantized_weights=False zero_quantized_nontrainable_weights=False zero_quantized_gradients=False mics_shard_size=-1 mics_hierarchical_params_gather=False memory_efficient_linear=True pipeline_loading_checkpoint=False override_module_apply=True
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   zero_enabled ................. True
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   zero_force_ds_cpu_optimizer .. True
-[2024-08-12 22:14:00,982] [INFO] [config.py:1000:print]   zero_optimization_stage ...... 2
-[2024-08-12 22:14:00,982] [INFO] [config.py:986:print_user_config]   json = {
-    "bf16": {
-        "enabled": true, 
-        "auto_cast": true
-    }, 
-    "zero_optimization": {
-        "stage": 2, 
-        "allgather_partitions": true, 
-        "allgather_bucket_size": 2.000000e+08, 
-        "overlap_comm": true, 
-        "reduce_scatter": true, 
-        "reduce_bucket_size": 2.000000e+08, 
-        "contiguous_gradients": true, 
-        "sub_group_size": 1.000000e+09
-    }, 
-    "gradient_accumulation_steps": 1, 
-    "train_batch_size": 16, 
-    "train_micro_batch_size_per_gpu": 16, 
-    "steps_per_print": inf, 
-    "wall_clock_breakdown": false, 
-    "fp16": {
-        "enabled": false
-    }, 
-    "zero_allow_untested_optimizer": true
-}
-0it [00:00, ?it/s]1it [00:08,  8.49s/it]4it [00:08,  1.65s/it]6it [00:08,  1.05it/s]9it [00:08,  1.94it/s]11it [00:09,  2.70it/s]13it [00:09,  3.69it/s]15it [00:09,  4.90it/s]17it [00:09,  6.32it/s]19it [00:09,  7.95it/s]21it [00:09,  9.71it/s]23it [00:09, 11.44it/s]25it [00:09, 13.04it/s]27it [00:09, 14.52it/s]29it [00:09, 15.72it/s]31it [00:10, 16.69it/s]34it [00:10, 18.16it/s]36it [00:10, 18.45it/s]38it [00:10, 18.67it/s]40it [00:10, 18.85it/s]42it [00:10, 18.96it/s]44it [00:10, 19.10it/s]46it [00:10, 19.28it/s]48it [00:10, 19.29it/s]50it [00:11, 19.45it/s]52it [00:11, 19.44it/s]54it [00:11, 19.44it/s]56it [00:11, 19.44it/s]58it [00:11, 19.50it/s]60it [00:11, 19.46it/s]62it [00:11, 19.43it/s]65it [00:11, 19.61it/s]67it [00:11, 19.58it/s]70it [00:12, 20.10it/s]73it [00:12, 19.84it/s]75it [00:12, 19.66it/s]77it [00:12, 19.62it/s]79it [00:12, 19.56it/s]81it [00:12, 19.55it/s]83it [00:12, 19.60it/s]85it [00:12, 19.37it/s]87it [00:12, 19.37it/s]90it [00:13, 19.53it/s]92it [00:13, 19.48it/s]94it [00:13, 19.62it/s]96it [00:13, 19.45it/s]98it [00:13, 19.42it/s]	iters: 100, epoch: 1 | loss: 0.5070953
-	speed: 0.1565s/iter; left time: 16483.0947s
-100it [00:13, 19.48it/s]102it [00:13, 19.45it/s]104it [00:13, 19.47it/s]107it [00:13, 19.93it/s]109it [00:14, 19.78it/s]111it [00:14, 19.64it/s]113it [00:14, 19.56it/s]115it [00:14, 19.50it/s]117it [00:14, 19.47it/s]119it [00:14, 19.56it/s]121it [00:14, 19.24it/s]123it [00:14, 19.25it/s]125it [00:14, 19.19it/s]127it [00:14, 18.97it/s]129it [00:15, 19.09it/s]132it [00:15, 19.46it/s]134it [00:15, 19.30it/s]136it [00:15, 19.27it/s]138it [00:15, 19.34it/s]140it [00:15, 19.37it/s]142it [00:15, 19.38it/s]145it [00:15, 19.55it/s]147it [00:15, 19.48it/s]149it [00:16, 19.46it/s]151it [00:16, 19.46it/s]153it [00:16, 19.47it/s]155it [00:16, 19.52it/s]157it [00:16, 19.48it/s]159it [00:16, 19.25it/s]161it [00:16, 19.30it/s]163it [00:16, 19.21it/s]165it [00:16, 19.30it/s]167it [00:17, 19.49it/s]169it [00:17, 19.48it/s]171it [00:17, 19.44it/s]173it [00:17, 19.44it/s]175it [00:17, 19.45it/s]177it [00:17, 19.47it/s]180it [00:17, 19.88it/s]182it [00:17, 19.75it/s]184it [00:17, 19.62it/s]186it [00:17, 19.49it/s]188it [00:18, 19.47it/s]190it [00:18, 19.46it/s]193it [00:18, 19.71it/s]195it [00:18, 19.61it/s]197it [00:18, 19.63it/s]199it [00:18, 19.73it/s]	iters: 200, epoch: 1 | loss: 0.9990457
-	speed: 0.2078s/iter; left time: 21868.8140s
-201it [00:18, 19.63it/s]203it [00:18, 19.46it/s]206it [00:18, 20.03it/s]208it [00:19, 19.83it/s]210it [00:19, 19.69it/s]212it [00:19, 19.63it/s]214it [00:19, 19.61it/s]216it [00:19, 19.56it/s]218it [00:19, 19.64it/s]220it [00:19, 19.57it/s]222it [00:19, 19.50it/s]224it [00:19, 19.60it/s]226it [00:20, 19.42it/s]228it [00:20, 19.44it/s]231it [00:20, 20.02it/s]233it [00:20, 19.84it/s]235it [00:20, 19.84it/s]237it [00:20, 19.71it/s]239it [00:20, 19.48it/s]241it [00:20, 19.46it/s]244it [00:20, 20.04it/s]246it [00:21, 19.85it/s]248it [00:21, 19.68it/s]250it [00:21, 19.59it/s]252it [00:21, 19.54it/s]254it [00:21, 19.66it/s]257it [00:21, 19.83it/s]259it [00:21, 19.70it/s]261it [00:21, 19.70it/s]263it [00:21, 19.63it/s]265it [00:22, 19.59it/s]267it [00:22, 19.64it/s]270it [00:22, 19.68it/s]272it [00:22, 19.59it/s]275it [00:22, 19.72it/s]277it [00:22, 19.65it/s]279it [00:22, 19.63it/s]282it [00:22, 20.20it/s]285it [00:23, 19.84it/s]287it [00:23, 19.68it/s]289it [00:23, 19.62it/s]291it [00:23, 19.56it/s]294it [00:23, 19.74it/s]296it [00:23, 19.63it/s]298it [00:23, 19.50it/s]	iters: 300, epoch: 1 | loss: 0.4869791
-	speed: 0.2587s/iter; left time: 27192.6532s
-300it [00:23, 19.48it/s]302it [00:23, 19.46it/s]304it [00:23, 19.46it/s]306it [00:24, 19.58it/s]308it [00:24, 19.20it/s]310it [00:24, 19.10it/s]312it [00:24, 19.18it/s]314it [00:24, 19.28it/s]316it [00:24, 19.35it/s]318it [00:24, 19.41it/s]320it [00:24, 19.36it/s]322it [00:24, 19.34it/s]325it [00:25, 19.56it/s]327it [00:25, 19.54it/s]329it [00:25, 19.33it/s]331it [00:25, 19.39it/s]333it [00:25, 19.39it/s]335it [00:25, 19.47it/s]337it [00:25, 19.44it/s]339it [00:25, 19.46it/s]342it [00:25, 19.95it/s]344it [00:26, 19.68it/s]346it [00:26, 19.57it/s]348it [00:26, 19.41it/s]350it [00:26, 19.27it/s]352it [00:26, 19.30it/s]355it [00:26, 19.68it/s]357it [00:26, 19.48it/s]359it [00:26, 19.56it/s]361it [00:26, 19.53it/s]363it [00:27, 19.53it/s]365it [00:27, 19.52it/s]368it [00:27, 19.75it/s]370it [00:27, 19.63it/s]372it [00:27, 19.38it/s]374it [00:27, 19.41it/s]376it [00:27, 18.88it/s]378it [00:27, 18.92it/s]380it [00:27, 19.05it/s]382it [00:28, 19.13it/s]385it [00:28, 19.47it/s]387it [00:28, 19.45it/s]389it [00:28, 19.46it/s]392it [00:28, 20.14it/s]395it [00:28, 19.85it/s]397it [00:28, 19.72it/s]399it [00:28, 19.53it/s]	iters: 400, epoch: 1 | loss: 1.1197468
-	speed: 0.3101s/iter; left time: 32564.4972s
-401it [00:28, 19.49it/s]403it [00:29, 19.62it/s]405it [00:29, 19.44it/s]407it [00:29, 19.40it/s]409it [00:29, 19.38it/s]411it [00:29, 19.42it/s]413it [00:29, 19.43it/s]416it [00:29, 19.71it/s]418it [00:29, 19.59it/s]420it [00:29, 19.60it/s]423it [00:30, 19.77it/s]425it [00:30, 19.68it/s]428it [00:30, 20.21it/s]431it [00:30, 19.91it/s]433it [00:30, 19.70it/s]435it [00:30, 19.65it/s]437it [00:30, 19.60it/s]439it [00:30, 19.55it/s]442it [00:31, 19.65it/s]444it [00:31, 19.56it/s]446it [00:31, 19.55it/s]448it [00:31, 19.51it/s]450it [00:31, 19.50it/s]452it [00:31, 19.49it/s]454it [00:31, 19.48it/s]456it [00:31, 19.44it/s]458it [00:31, 19.47it/s]460it [00:31, 19.46it/s]462it [00:32, 19.45it/s]464it [00:32, 19.42it/s]466it [00:32, 19.40it/s]468it [00:32, 19.37it/s]470it [00:32, 19.48it/s]472it [00:32, 19.44it/s]474it [00:32, 19.40it/s]476it [00:32, 19.47it/s]478it [00:32, 19.42it/s]480it [00:33, 19.38it/s]482it [00:33, 19.54it/s]484it [00:33, 19.53it/s]486it [00:33, 19.51it/s]488it [00:33, 19.56it/s]490it [00:33, 19.51it/s]492it [00:33, 19.42it/s]495it [00:33, 19.73it/s]497it [00:33, 19.66it/s]499it [00:33, 19.60it/s]	iters: 500, epoch: 1 | loss: 0.4503720
-	speed: 0.3612s/iter; left time: 37898.7306s
-502it [00:34, 19.55it/s]504it [00:34, 19.48it/s]506it [00:34, 19.51it/s]508it [00:34, 19.48it/s]510it [00:34, 19.43it/s]513it [00:34, 19.79it/s]515it [00:34, 19.52it/s]517it [00:34, 19.45it/s]519it [00:35, 19.48it/s]521it [00:35, 19.46it/s]523it [00:35, 19.29it/s]526it [00:35, 19.92it/s]528it [00:35, 19.63it/s]530it [00:35, 19.50it/s]532it [00:35, 19.47it/s]534it [00:35, 19.44it/s]537it [00:35, 20.03it/s]539it [00:36, 19.85it/s]541it [00:36, 19.68it/s]543it [00:36, 19.59it/s]545it [00:36, 19.54it/s]547it [00:36, 19.52it/s]549it [00:36, 19.54it/s]551it [00:36, 19.53it/s]553it [00:36, 19.47it/s]555it [00:36, 19.47it/s]557it [00:36, 19.47it/s]559it [00:37, 19.46it/s]561it [00:37, 19.43it/s]563it [00:37, 19.42it/s]565it [00:37, 19.40it/s]567it [00:37, 19.33it/s]569it [00:37, 19.36it/s]571it [00:37, 19.26it/s]574it [00:37, 19.85it/s]576it [00:37, 19.72it/s]578it [00:38, 19.60it/s]580it [00:38, 19.53it/s]582it [00:38, 19.51it/s]584it [00:38, 19.51it/s]586it [00:38, 19.64it/s]588it [00:38, 19.57it/s]590it [00:38, 19.48it/s]592it [00:38, 19.62it/s]594it [00:38, 19.56it/s]596it [00:38, 19.54it/s]598it [00:39, 19.59it/s]	iters: 600, epoch: 1 | loss: 0.3671417
-	speed: 0.4124s/iter; left time: 43225.9829s
-600it [00:39, 19.52it/s]602it [00:39, 19.44it/s]605it [00:39, 19.66it/s]607it [00:39, 19.59it/s]609it [00:39, 19.57it/s]611it [00:39, 19.48it/s]613it [00:39, 19.40it/s]615it [00:39, 19.38it/s]617it [00:40, 19.54it/s]619it [00:40, 19.53it/s]621it [00:40, 19.52it/s]624it [00:40, 19.65it/s]626it [00:40, 19.56it/s]628it [00:40, 19.55it/s]630it [00:40, 19.54it/s]632it [00:40, 19.52it/s]634it [00:40, 19.61it/s]637it [00:41, 19.82it/s]639it [00:41, 19.68it/s]641it [00:41, 19.64it/s]643it [00:41, 19.57it/s]645it [00:41, 19.51it/s]647it [00:41, 19.49it/s]649it [00:41, 19.46it/s]651it [00:41, 19.42it/s]653it [00:41, 19.30it/s]655it [00:41, 19.32it/s]657it [00:42, 19.35it/s]660it [00:42, 19.55it/s]662it [00:42, 19.49it/s]664it [00:42, 19.47it/s]666it [00:42, 19.45it/s]668it [00:42, 19.47it/s]670it [00:42, 19.35it/s]672it [00:42, 19.44it/s]674it [00:42, 19.39it/s]676it [00:43, 19.38it/s]678it [00:43, 19.46it/s]680it [00:43, 19.46it/s]682it [00:43, 19.43it/s]685it [00:43, 19.85it/s]687it [00:43, 19.71it/s]689it [00:43, 19.75it/s]691it [00:43, 19.66it/s]693it [00:43, 19.61it/s]695it [00:44, 19.44it/s]698it [00:44, 19.85it/s]	iters: 700, epoch: 1 | loss: 0.2823661
-	speed: 0.4635s/iter; left time: 48542.4046s
-700it [00:44, 19.70it/s]702it [00:44, 19.54it/s]704it [00:44, 19.51it/s]706it [00:44, 19.49it/s]709it [00:44, 20.11it/s]711it [00:44, 19.93it/s]713it [00:44, 19.78it/s]715it [00:45, 19.60it/s]717it [00:45, 19.56it/s]719it [00:45, 19.53it/s]721it [00:45, 19.53it/s]723it [00:45, 19.48it/s]725it [00:45, 19.44it/s]728it [00:45, 19.46it/s]730it [00:45, 19.49it/s]732it [00:45, 19.47it/s]735it [00:46, 20.02it/s]737it [00:46, 19.82it/s]739it [00:46, 19.60it/s]741it [00:46, 19.53it/s]743it [00:46, 19.49it/s]746it [00:46, 19.84it/s]748it [00:46, 19.72it/s]750it [00:46, 19.62it/s]753it [00:46, 19.72it/s]755it [00:47, 19.66it/s]757it [00:47, 19.60it/s]760it [00:47, 20.04it/s]762it [00:47, 19.83it/s]764it [00:47, 19.62it/s]766it [00:47, 19.57it/s]768it [00:47, 19.55it/s]771it [00:47, 20.18it/s]774it [00:48, 19.89it/s]776it [00:48, 19.72it/s]778it [00:48, 19.66it/s]780it [00:48, 19.58it/s]782it [00:48, 19.55it/s]784it [00:48, 19.62it/s]786it [00:48, 19.53it/s]788it [00:48, 19.48it/s]790it [00:48, 19.43it/s]792it [00:48, 19.31it/s]794it [00:49, 19.35it/s]796it [00:49, 19.48it/s]798it [00:49, 19.33it/s]	iters: 800, epoch: 1 | loss: 0.3798754
-	speed: 0.5145s/iter; left time: 53831.0685s
-800it [00:49, 19.32it/s]802it [00:49, 19.34it/s]804it [00:49, 19.38it/s]806it [00:49, 19.24it/s]809it [00:49, 19.60it/s]811it [00:49, 19.52it/s]813it [00:50, 19.51it/s]815it [00:50, 19.33it/s]817it [00:50, 19.35it/s]819it [00:50, 19.36it/s]821it [00:50, 19.50it/s]823it [00:50, 19.41it/s]825it [00:50, 19.34it/s]827it [00:50, 19.35it/s]829it [00:50, 19.35it/s]831it [00:50, 19.37it/s]833it [00:51, 19.53it/s]835it [00:51, 19.46it/s]837it [00:51, 19.60it/s]839it [00:51, 19.52it/s]841it [00:51, 19.51it/s]843it [00:51, 19.51it/s]845it [00:51, 19.63it/s]847it [00:51, 19.55it/s]849it [00:51, 19.52it/s]851it [00:51, 19.46it/s]853it [00:52, 19.41it/s]855it [00:52, 19.39it/s]857it [00:52, 19.41it/s]859it [00:52, 19.39it/s]861it [00:52, 19.39it/s]863it [00:52, 19.45it/s]865it [00:52, 19.33it/s]867it [00:52, 19.37it/s]869it [00:52, 19.44it/s]871it [00:53, 19.44it/s]873it [00:53, 19.43it/s]875it [00:53, 19.24it/s]877it [00:53, 19.29it/s]879it [00:53, 19.32it/s]882it [00:53, 19.56it/s]884it [00:53, 19.51it/s]886it [00:53, 19.48it/s]888it [00:53, 19.48it/s]890it [00:53, 19.49it/s]892it [00:54, 19.48it/s]895it [00:54, 19.73it/s]897it [00:54, 19.63it/s]899it [00:54, 19.63it/s]	iters: 900, epoch: 1 | loss: 0.3964743
-	speed: 0.5659s/iter; left time: 59149.2519s
-901it [00:54, 19.60it/s]903it [00:54, 19.58it/s]905it [00:54, 19.57it/s]908it [00:54, 19.73it/s]910it [00:55, 19.47it/s]912it [00:55, 19.40it/s]914it [00:55, 19.42it/s]916it [00:55, 19.43it/s]919it [00:55, 19.61it/s]921it [00:55, 19.56it/s]923it [00:55, 19.66it/s]925it [00:55, 19.60it/s]927it [00:55, 19.55it/s]929it [00:55, 19.52it/s]932it [00:56, 20.18it/s]935it [00:56, 19.87it/s]937it [00:56, 19.63it/s]939it [00:56, 19.59it/s]941it [00:56, 19.55it/s]943it [00:56, 19.55it/s]945it [00:56, 19.53it/s]947it [00:56, 19.47it/s]950it [00:57, 19.61it/s]952it [00:57, 19.58it/s]954it [00:57, 19.55it/s]957it [00:57, 20.15it/s]960it [00:57, 19.87it/s]962it [00:57, 19.72it/s]964it [00:57, 19.64it/s]966it [00:57, 19.59it/s]968it [00:57, 19.60it/s]970it [00:58, 19.41it/s]972it [00:58, 19.37it/s]975it [00:58, 19.70it/s]977it [00:58, 19.60it/s]979it [00:58, 19.54it/s]982it [00:58, 19.75it/s]984it [00:58, 19.63it/s]986it [00:58, 19.47it/s]988it [00:58, 19.43it/s]990it [00:59, 19.44it/s]993it [00:59, 20.03it/s]995it [00:59, 19.86it/s]997it [00:59, 19.71it/s]999it [00:59, 19.78it/s]	iters: 1000, epoch: 1 | loss: 0.2910368
-	speed: 0.6168s/iter; left time: 64410.2527s
-1001it [00:59, 19.68it/s]1003it [00:59, 19.59it/s]1006it [00:59, 20.08it/s]1008it [01:00, 19.91it/s]1010it [01:00, 19.75it/s]1012it [01:00, 19.60it/s]1014it [01:00, 19.41it/s]1016it [01:00, 19.43it/s][2024-08-12 22:15:01,424] torch.distributed.elastic.agent.server.api: [WARNING] Received 2 death signal, shutting down workers
-[2024-08-12 22:15:01,424] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 1339729 closing signal SIGINT
-1016it [01:00, 16.81it/s]
-Traceback (most recent call last):
-  File "/home/nesl/oliver/timeSeriesMamba/mamba_ssm/train.py", line 298, in <module>
-    accelerator.backward(loss)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/accelerator.py", line 1995, in backward
-    self.deepspeed_engine_wrapped.backward(loss, **kwargs)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/deepspeed.py", line 166, in backward
-    self.engine.backward(loss, **kwargs)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/deepspeed/utils/nvtx.py", line 15, in wrapped_fn
-    ret_val = func(*args, **kwargs)
-              ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/deepspeed/runtime/engine.py", line 1976, in backward
-    self.optimizer.backward(loss, retain_graph=retain_graph)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/deepspeed/runtime/zero/stage_1_and_2.py", line 2051, in backward
-    self.loss_scaler.backward(loss.float(), retain_graph=retain_graph)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/deepspeed/runtime/fp16/loss_scaler.py", line 63, in backward
-    scaled_loss.backward(retain_graph=retain_graph)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/_tensor.py", line 522, in backward
-    torch.autograd.backward(
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/autograd/__init__.py", line 266, in backward
-    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-KeyboardInterrupt
-[2024-08-12 22:15:01,582] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 1339729 closing signal SIGTERM
-Traceback (most recent call last):
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 727, in run
-    result = self._invoke_run(role)
-             ^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 868, in _invoke_run
-    time.sleep(monitor_interval)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
-    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
-torch.distributed.elastic.multiprocessing.api.SignalException: Process 1339645 got signal: 2
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 734, in run
-    self._shutdown(e.sigval)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 311, in _shutdown
-    self._pcontext.close(death_sig)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 318, in close
-    self._close(death_sig=death_sig, timeout=timeout)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 706, in _close
-    handler.proc.wait(time_to_wait)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 1264, in wait
-    return self._wait(timeout=timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 2047, in _wait
-    time.sleep(delay)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
-    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
-torch.distributed.elastic.multiprocessing.api.SignalException: Process 1339645 got signal: 2
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
-    args.func(args)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
-    deepspeed_launcher(args)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
-    distrib_run.run(args)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
-    elastic_launch(
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 259, in launch_agent
-    result = agent.run()
-             ^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/metrics/api.py", line 123, in wrapper
-    result = f(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 739, in run
-    self._shutdown()
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 311, in _shutdown
-    self._pcontext.close(death_sig)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 318, in close
-    self._close(death_sig=death_sig, timeout=timeout)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 706, in _close
-    handler.proc.wait(time_to_wait)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 1264, in wait
-    return self._wait(timeout=timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 2047, in _wait
-    time.sleep(delay)
-  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
-    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
-torch.distributed.elastic.multiprocessing.api.SignalException: Process 1339645 got signal: 2

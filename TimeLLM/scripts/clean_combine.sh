@@ -52,9 +52,9 @@ echo "Setting llm_model to $llm_model"
 echo "Setting period_of_interest to $period_of_interest"
 echo "Setting master_port to $master_port"  # Print master_port for debugging
 
-og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${period_of_interest// /_}"
+og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${period_of_interest}"
 
-llm_dim=0
+llm_dim=10
 if [ "$num_params" = "130m" ]; then
   llm_dim=768
 fi
@@ -64,10 +64,13 @@ fi
 if [ "$num_params" = "7b" ]; then
   llm_dim=4096
 fi
+if [ "$num_params" = "1b" ]; then
+  llm_dim=2048
+fi
 
 # Define trials for different pred_len values
-for pred_len in 64; do
-  for seed in {1..3}; do
+for pred_len in 96; do
+  for seed in {6..10}; do
     tag="ETTh1_${og_tag}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
     log_file="results/${tag}.txt"
@@ -78,7 +81,7 @@ for pred_len in 64; do
       --is_training 1 \
       --root_path ./dataset/ETT-small/ \
       --data_path ETTh1.csv \
-      --model_id "ETTh1_128_${pred_len}" \
+      --model_id "ETTh1_${pred_len}" \
       --model $model_name \
       --data ETTh1 \
       --features M \
@@ -92,7 +95,7 @@ for pred_len in 64; do
       --des 'Exp' \
       --itr 1 \
       --d_model $d_model \
-      --d_ff $d_ff \
+      --d_ff 32 \
       --batch_size $batch_size \
       --learning_rate $learning_rate \
       --llm_layers $llm_layers \

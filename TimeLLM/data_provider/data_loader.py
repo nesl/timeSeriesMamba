@@ -72,7 +72,7 @@ class Dataset_ETT_hour(Dataset):
 
         # New parameters for dynamic downsampling
         self.period_of_interest = period_of_interest
-        print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
+        #print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
         self.timesteps = self.pred_len
         # self.percent = percent
         self.root_path = root_path
@@ -80,7 +80,7 @@ class Dataset_ETT_hour(Dataset):
        
         # Calculate dynamic downsampling factor using the external function
         self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
-        print("downsampling factor: ", self.downsampling_factor)
+        #print("downsampling factor: ", self.downsampling_factor)
         self.__read_data__()
 
         self.data_x = self.data_x[::self.downsampling_factor]

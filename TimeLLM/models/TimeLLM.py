@@ -51,6 +51,7 @@ class Model(nn.Module):
         self.num_params = configs.num_params
         self.llm_model_name = configs.llm_model
         
+        print("self.num_params in TimeLLM.py: ", self.num_params)
         if configs.llm_model == "Mamba":
             '''
             self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
@@ -99,7 +100,46 @@ class Model(nn.Module):
                     local_files_only=True
                 )
             
+        elif configs.llm_model == "LLAMA3.2":
+            model_string = "meta-llama/Llama-3.2-1B"
+            
+            self.llama_config = LlamaConfig.from_pretrained(model_string)
+            self.llama_config.num_hidden_layers = configs.llm_layers
+            self.llama_config.output_attentions = True
+            self.llama_config.output_hidden_states = True
+            
 
+            self.llm_model = LlamaModel.from_pretrained(
+                    #"/home/nesl/oliver/timeSeriesMamba/TimeLLM/Meta-Llama-3.1-8B",
+                    model_string,
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config,
+                    # load_in_4bit=True
+                )
+            tokenizer_config_path = hf_hub_download(repo_id="meta-llama/Llama-3.2-1B", filename="tokenizer_config.json")
+            tokenizer_path = hf_hub_download(repo_id="meta-llama/Llama-3.2-1B", filename="tokenizer.json")
+            
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_string,
+                    trust_remote_code=False,
+                    local_files_only=True
+                )
+
+            total_params = 0
+            
+            #print("Model Parameter Sizes:\n")
+            
+            for name, param in self.llm_model.named_parameters():
+                if param.requires_grad:
+                    param_size = param.numel()  # Total number of elements in the parameter
+                    #print(f"Parameter: {name}")
+                    #print(f" - Shape: {param.shape}")
+                    #print(f" - Size: {param_size}\n")
+                    total_params += param_size
+
+            print(f"Total number of parameters: {total_params}")
+            '''
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')

@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "/home/nesl/anaconda3/bin/accelerate", line 5, in <module>
-    from accelerate.commands.accelerate_cli import main
-  File "/home/nesl/anaconda3/lib/python3.11/site-packages/accelerate/__init__.py", line 16, in <module>
-    from .accelerator import Accelerator
-  File "/home/nesl/anaconda3/lib/python3.11/site-packages/accelerate/accelerator.py", line 33, in <module>
-    import torch.utils.hooks as hooks
-ModuleNotFoundError: No module named 'torch.utils.hooks'
-weather completed, saved to checkpoints/dsweep_weather_l16_d1024_e30_mMHA_n2.7b_seed3
