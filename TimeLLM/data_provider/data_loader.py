@@ -49,7 +49,7 @@ class Dataset_ETT_hour(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h', percent=100,
-                 seasonal_patterns=None, period_of_interest=None):
+                 seasonal_patterns=None, dsampfactor=None):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -71,7 +71,7 @@ class Dataset_ETT_hour(Dataset):
         self.freq = freq
 
         # New parameters for dynamic downsampling
-        self.period_of_interest = period_of_interest
+        #self.dsampfactor = dsampfactor
         #print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
         self.timesteps = self.pred_len
         # self.percent = percent
@@ -79,7 +79,8 @@ class Dataset_ETT_hour(Dataset):
         self.data_path = data_path
        
         # Calculate dynamic downsampling factor using the external function
-        self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
+        #self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
+        self.downsampling_factor=dsampfactor
         #print("downsampling factor: ", self.downsampling_factor)
         self.__read_data__()
 
@@ -257,8 +258,8 @@ class Dataset_ETT_minute(Dataset):
 class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
-                 target='OT', scale=True, timeenc=0, freq='h', percent=100,
-                 seasonal_patterns=None, period_of_interest='None'):
+                 target='OT', scale=True, timeenc=0, freq='h', percent=100, col_percent=100,
+                 seasonal_patterns=None, dsampfactor='None'):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -278,23 +279,29 @@ class Dataset_Custom(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.percent = percent
+        self.col_percent = col_percent 
+
 
         # New parameters for dynamic downsampling
-        self.period_of_interest = period_of_interest
-        print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
+        #self.period_of_interest = period_of_interest
+        #print(f"period of interest in dataset_ett_hour: {self.period_of_interest}")
         self.timesteps = self.pred_len
 
         self.root_path = root_path
         self.data_path = data_path
         self.__read_data__()
 
-        self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
+        #self.downsampling_factor = calculate_downsampling_factor(self.root_path, self.data_path, self.period_of_interest, self.timesteps)
+        self.downsampling_factor = dsampfactor
         print("downsampling factor: ", self.downsampling_factor)
         self.data_x = self.data_x[::self.downsampling_factor]
         self.data_y = self.data_y[::self.downsampling_factor]
         self.data_stamp = self.data_stamp[::self.downsampling_factor]
         
         self.enc_in = self.data_x.shape[-1]
+        print("data x len", len(self.data_x))
+        print("data seq len", self.seq_len)
+        print("data pred len", self.pred_len)
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
 
     def __read_data__(self):
@@ -308,7 +315,22 @@ class Dataset_Custom(Dataset):
         cols = list(df_raw.columns)
         cols.remove(self.target)
         cols.remove('date')
+
+        # Set percentage of columns to keep
+        num_cols_to_keep = int(len(cols) * (self.col_percent / 100))
+
+        # Keep only the first num_cols_to_keep columns
+        cols = cols[:num_cols_to_keep]
+
+        
+
         df_raw = df_raw[['date'] + cols + [self.target]]
+
+        # Reduce rows based on percent (time dimension)
+        if self.percent < 100:  # Only reduce if less than 100%
+            num_rows_to_keep = int(len(df_raw) * (self.percent / 100))
+            df_raw = df_raw.iloc[:num_rows_to_keep]  # Keep first X% rows
+
         num_train = int(len(df_raw) * 0.7)
         num_test = int(len(df_raw) * 0.2)
         num_vali = len(df_raw) - num_train - num_test
@@ -317,9 +339,13 @@ class Dataset_Custom(Dataset):
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 
-        if self.set_type == 0:
-            border2 = (border2 - self.seq_len) * self.percent // 100 + self.seq_len
+        #if self.set_type == 0:
+        #    border2 = (border2 - self.seq_len) * self.percent // 100 + self.seq_len
 
+        # Print dataset size info after adjusting borders
+        print(f"border1: {border1}, border2: {border2}, percent: {self.percent}")
+        print(f"Number of rows selected: {border2 - border1}")
+        print(f"Original data shape: {df_raw.shape}")
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
             df_data = df_raw[cols_data]
@@ -348,6 +374,9 @@ class Dataset_Custom(Dataset):
         self.data_x = data[border1:border2]
         self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
+        
+        print(f"self.data_x shape (rows, covariates): {self.data_x.shape}")
+
 
     def __getitem__(self, index):
         feat_id = index // self.tot_len

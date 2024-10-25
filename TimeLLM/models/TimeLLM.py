@@ -139,7 +139,7 @@ class Model(nn.Module):
                     total_params += param_size
 
             print(f"Total number of parameters: {total_params}")
-            '''
+            
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
