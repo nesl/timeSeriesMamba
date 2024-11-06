@@ -19,10 +19,11 @@ usage() {
 
 # Default values
 master_port_base=01180
-downsampling_factor=1  # Default downsampling factor is 1
-percent=100            # Default percent is 100 (no columns removed)
+downsampling_factor=1
+percent=100
 col_percent=100
 save_checkpoints=0
+
 # Parse command-line arguments
 while getopts "l:d:e:n:c:m:f:g:t:p:" opt; do
   case $opt in
@@ -32,16 +33,16 @@ while getopts "l:d:e:n:c:m:f:g:t:p:" opt; do
     n) num_params=$OPTARG ;;
     c) col_percent=$OPTARG ;;
     m) llm_model=$OPTARG ;;
-    f) downsampling_factor=$OPTARG ;;  # Optional downsampling factor
+    f) downsampling_factor=$OPTARG ;;
     g) gpu_id=$OPTARG ;;
-    t) percent=$OPTARG ;;              # Optional percent argument
-    p) master_port=$OPTARG ;;          # Optional master port argument
+    t) percent=$OPTARG ;;
+    p) master_port=$OPTARG ;;
     *) usage ;;
   esac
 done
 
 # Check if required arguments are provided
-if [ -z "$llm_layers" ] || [ -z "$d_model" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -z "$save_checkpoints" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
+if [ -z "$llm_layers" ] || [ -z "$d_model" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
   usage
 fi
 
@@ -73,38 +74,37 @@ elif [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560
 elif [ "$num_params" = "7b" ]; then
   llm_dim=4096
-elif [ "$num_params" = "1b" ]; then
+elif [[ "$num_params" == "1b"  || "$num_params" == "1.3b" ]]; then
   llm_dim=2048
 fi
 
 seq_len=$((512 / downsampling_factor))
 
 # Define trials for different pred_len values
-for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
-#for pred_len in 336; do
+for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)); do
   for seed in {1..10}; do
-    tag="Weather_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
+    tag="Traffic_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
-    log_file="results/Weather/${tag}.txt"
+    log_file="results/Traffic/${tag}.txt"
     exec > "$log_file" 2>&1
 
     accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/weather/ \
-      --data_path weather.csv \
-      --model_id Weather_${seq_len}_${pred_len} \
+      --root_path ./dataset/traffic/ \
+      --data_path traffic.csv \
+      --model_id Traffic_${seq_len}_${pred_len} \
       --model $model_name \
-      --data Weather \
+      --data Traffic \
       --features M \
       --seq_len $seq_len \
       --label_len 48 \
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 21 \
-      --dec_in 21 \
-      --c_out 21 \
+      --enc_in 862 \
+      --dec_in 862 \
+      --c_out 862 \
       --pred_len $pred_len \
       --dsampfactor $downsampling_factor \
       --percent $percent \
@@ -123,6 +123,6 @@ for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((
       --num_params $num_params \
       --seed $seed
 
-    echo "Weather with pred_len $pred_len and seed $seed completed, saved to $comment"
+    echo "Traffic with pred_len $pred_len and seed $seed completed, saved to $comment"
   done
 done

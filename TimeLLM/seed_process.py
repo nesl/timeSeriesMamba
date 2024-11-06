@@ -187,7 +187,9 @@ print("accel local main process: ", accelerator.is_local_main_process)
 if not os.path.exists(path) and accelerator.is_local_main_process:
     os.makedirs(path)
 
-time_now = time.time()
+start_event = torch.cuda.Event(enable_timing=True)
+end_event = torch.cuda.Event(enable_timing=True)
+start_event.record()
 #train_loader = train_loader[0:120]#try this to shorten
 train_steps = len(train_loader)
 #train_steps = 120
@@ -289,10 +291,10 @@ for epoch in range(args.train_epochs):
             #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
             accelerator.print(
                 "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
-            speed = (time.time() - time_now) / iter_count
-            left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
-            accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
-            iter_count = 0
+            #speed = (time.time() - time_now) / iter_count
+            #left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
+            #accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
+            #iter_count = 0
             
 
         if args.use_amp:
@@ -351,6 +353,10 @@ accelerator.wait_for_everyone()
 unwrapped_model = accelerator.unwrap_model(model)
 torch.cuda.synchronize()
 torch.cuda.empty_cache()
+
+end_event.record()
+elapsed_time = start_event.elapsed_time(end_event)
+print("gpu time:", elapsed_time)
 unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
 
 
@@ -358,6 +364,7 @@ num_params = sum(p.numel() for p in unwrapped_model.parameters())
 print(f'Total number of parameters: {num_params}')
 if args.use_wandb:
     wandb.config.update({'num_params':num_params})
+    wandb.config.update({'gpu time':elapsed_time})
 
 unwrapped_model.eval()
 with torch.no_grad():

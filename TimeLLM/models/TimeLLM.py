@@ -3,7 +3,7 @@ from math import sqrt
 import torch
 import torch.nn as nn
 
-from transformers import AutoModel,MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
+from transformers import AutoModel,MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaForCausalLM, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
     BertModel, BertTokenizer
 from layers.Embed import PatchEmbedding
 import transformers
@@ -102,9 +102,8 @@ class Model(nn.Module):
             
         elif configs.llm_model == "LLAMA3.2":
             model_string = "meta-llama/Llama-3.2-1B"
-            
             self.llama_config = LlamaConfig.from_pretrained(model_string)
-            self.llama_config.num_hidden_layers = configs.llm_layers
+            #self.llama_config.num_hidden_layers = configs.llm_layers
             self.llama_config.output_attentions = True
             self.llama_config.output_hidden_states = True
             
@@ -114,7 +113,7 @@ class Model(nn.Module):
                     model_string,
                     trust_remote_code=True,
                     local_files_only=False,
-                    config=self.llama_config,
+                    config=self.llama_config
                     # load_in_4bit=True
                 )
             tokenizer_config_path = hf_hub_download(repo_id="meta-llama/Llama-3.2-1B", filename="tokenizer_config.json")
@@ -127,7 +126,7 @@ class Model(nn.Module):
                 )
 
             total_params = 0
-            
+            total_el = 0
             #print("Model Parameter Sizes:\n")
             
             for name, param in self.llm_model.named_parameters():
@@ -136,10 +135,25 @@ class Model(nn.Module):
                     #print(f"Parameter: {name}")
                     #print(f" - Shape: {param.shape}")
                     #print(f" - Size: {param_size}\n")
-                    total_params += param_size
+                    total_params += 1
+                    total_el += param_size
 
-            print(f"Total number of parameters: {total_params}")
+            print(f"Total number of named param groups: {total_params}")
+            print(f"Total number of params downloaded off huggingface: {total_el}")
+
+            '''
+            print("Testing LLAMA3.2 causal on 'Hey how are you doing?', response: ")
+            input_ids = self.tokenizer("Hey how are you doing?", return_tensors="pt")["input_ids"]
+            self.llama_config.num_hidden_layers = 2
             
+            self.languagellm_model =  LlamaForCausalLM.from_pretrained(
+                    model_string,
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config)
+            out = self.languagellm_model.generate(input_ids, max_new_tokens=10)
+            print(self.tokenizer.batch_decode(out))
+            '''
         elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
@@ -199,13 +213,25 @@ class Model(nn.Module):
         elif configs.llm_model == 'GPT2':
             self.gpt2_config = GPT2Config.from_pretrained('openai-community/gpt2')
 
-            self.gpt2_config.num_hidden_layers = configs.llm_layers
+            #self.gpt2_config.num_hidden_layers = configs.llm_layers
             self.gpt2_config.output_attentions = True
             self.gpt2_config.output_hidden_states = True
+            self.llm_model = GPT2Model.from_pretrained(
+                    'openai-community/gpt2',
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.gpt2_config,
+                )
+            self.tokenizer = GPT2Tokenizer.from_pretrained(
+                    'openai-community/gpt2',
+                    trust_remote_code=True,
+                    local_files_only=False
+                )
+            '''
             try:
                 self.llm_model = GPT2Model.from_pretrained(
                     'openai-community/gpt2',
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                     local_files_only=True,
                     config=self.gpt2_config,
                 )
@@ -231,6 +257,7 @@ class Model(nn.Module):
                     trust_remote_code=True,
                     local_files_only=False
                 )
+            '''
         elif configs.llm_model == 'BERT':
             self.bert_config = BertConfig.from_pretrained('google-bert/bert-base-uncased')
 
@@ -270,6 +297,7 @@ class Model(nn.Module):
             raise Exception('LLM model is not defined')
 
         print("LLM model used is: ", configs.llm_model)
+
 
         if self.tokenizer.eos_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -359,7 +387,7 @@ class Model(nn.Module):
         enc_out = self.reprogramming_layer(enc_out, source_embeddings, source_embeddings)
         llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)
         
-        if "LLAMA" in self.llm_model_name: #i think this is fine, it just feeds embeddings instead of prompts?
+        if "Mamba" not in self.llm_model_name: #i think this is fine, it just feeds embeddings instead of prompts?
             dec_out = self.llm_model(inputs_embeds=llama_enc_out).last_hidden_state
         else:
             dec_out = self.llm_model(llama_enc_out).last_hidden_state

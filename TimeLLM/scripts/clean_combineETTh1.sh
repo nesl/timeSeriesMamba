@@ -71,9 +71,9 @@ if [ "$num_params" = "130m" ]; then
   llm_dim=768
 elif [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560
-elif [ "$num_params" = "7b" ]; then
+elif [ "$num_params" == "7b" ]; then
   llm_dim=4096
-elif [ "$num_params" = "1b" ]; then
+elif [[ "$num_params" == "1b" || "$num_params" == "1.3b" ]]; then
   llm_dim=2048
 fi
 
@@ -83,28 +83,26 @@ seq_len=$((512 / downsampling_factor))
 for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
   for seed in {1..10}; do
-    tag="Weather_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
+    tag="ETTh1_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
-    log_file="results/Weather/${tag}.txt"
+    log_file="results/ETTh1/${tag}.txt"
     exec > "$log_file" 2>&1
 
     accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/weather/ \
-      --data_path weather.csv \
-      --model_id Weather_${seq_len}_${pred_len} \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh1.csv \
+      --model_id ETTh1_${seq_len}_${pred_len} \
       --model $model_name \
-      --data Weather \
+      --data ETTh1 \
       --features M \
       --seq_len $seq_len \
       --label_len 48 \
-      --e_layers 2 \
-      --d_layers 1 \
       --factor 3 \
-      --enc_in 21 \
-      --dec_in 21 \
-      --c_out 21 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --pred_len $pred_len \
       --dsampfactor $downsampling_factor \
       --percent $percent \
@@ -123,6 +121,6 @@ for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((
       --num_params $num_params \
       --seed $seed
 
-    echo "Weather with pred_len $pred_len and seed $seed completed, saved to $comment"
+    echo "ETTh1 with pred_len $pred_len and seed $seed completed, saved to $comment"
   done
 done

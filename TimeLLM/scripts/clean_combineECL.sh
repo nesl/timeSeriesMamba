@@ -83,7 +83,7 @@ for pred_len in 96 192 336 ; do
   for seed in {1..10}; do
     tag="ECL_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
-    log_file="results/${tag}.txt"
+    log_file="results/ECL/${tag}.txt"
     exec > "$log_file" 2>&1
 
     accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \

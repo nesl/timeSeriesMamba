@@ -1,13 +1,12 @@
 model_name=TimeLLM
 train_epochs=1
 learning_rate=0.01
-llama_layers=2
+llama_layers=32
 
 master_port=01079
 num_process=1
 batch_size=16
 d_model=32
-d_ff=128
 
 comment='checkpoints/smallTest'
 gpu_id=3
@@ -33,13 +32,14 @@ export CUDA_VISIBLE_DEVICES=$gpu_id
     --c_out 21 \
     --d_model 32 \
     --d_ff 32 \
+    --llm_layers $llama_layers \
     --batch_size $batch_size \
     --learning_rate $learning_rate \
     --train_epochs $train_epochs \
     --model_comment $comment \
     --save_checkpoints 0 \
-    --llm_model LLAMA3.1 \
-    --llm_dim $d_model \
-    --num_params "7b" \
+    --llm_model LLAMA3.2 \
+    --llm_dim 2048 \
+    --num_params "1b" \
     --use_wandb 0 \
     --seed 1

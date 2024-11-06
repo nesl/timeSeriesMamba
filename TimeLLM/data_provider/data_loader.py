@@ -48,7 +48,7 @@ def calculate_downsampling_factor(root_path, data_path, period_of_interest='1 ye
 class Dataset_ETT_hour(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
-                 target='OT', scale=True, timeenc=0, freq='h', percent=100,
+                 target='OT', scale=True, timeenc=0, freq='h', col_percent=100, percent=100,
                  seasonal_patterns=None, dsampfactor=None):
         if size == None:
             self.seq_len = 24 * 4 * 4
@@ -160,8 +160,8 @@ class Dataset_ETT_hour(Dataset):
 class Dataset_ETT_minute(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTm1.csv',
-                 target='OT', scale=True, timeenc=0, freq='t', percent=100,
-                 seasonal_patterns=None, period_of_interest='None'):
+                 target='OT', scale=True, timeenc=0, freq='t', percent=100, col_percent=100,
+                 seasonal_patterns=None, dsampfactor='None'):
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -175,6 +175,7 @@ class Dataset_ETT_minute(Dataset):
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
 
+        self.col_percent = col_percent
         self.percent = percent
         self.features = features
         self.target = target
@@ -193,6 +194,25 @@ class Dataset_ETT_minute(Dataset):
         self.scaler = StandardScaler()
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
+        cols = list(df_raw.columns)
+        cols.remove(self.target)
+        cols.remove('date')
+
+        # Set percentage of columns to keep
+        num_cols_to_keep = int(len(cols) * (self.col_percent / 100))
+
+        # Keep only the first num_cols_to_keep columns
+        cols = cols[:num_cols_to_keep]
+
+        
+
+        df_raw = df_raw[['date'] + cols + [self.target]]
+
+        # Reduce rows based on percent (time dimension)
+        if self.percent < 100:  # Only reduce if less than 100%
+            num_rows_to_keep = int(len(df_raw) * (self.percent / 100))
+            df_raw = df_raw.iloc[:num_rows_to_keep]  # Keep first X% rows
+
 
         border1s = [0, 12 * 30 * 24 * 4 - self.seq_len, 12 * 30 * 24 * 4 + 4 * 30 * 24 * 4 - self.seq_len]
         border2s = [12 * 30 * 24 * 4, 12 * 30 * 24 * 4 + 4 * 30 * 24 * 4, 12 * 30 * 24 * 4 + 8 * 30 * 24 * 4]
@@ -200,8 +220,8 @@ class Dataset_ETT_minute(Dataset):
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 
-        if self.set_type == 0:
-            border2 = (border2 - self.seq_len) * self.percent // 100 + self.seq_len
+        #if self.set_type == 0:
+        #    border2 = (border2 - self.seq_len) * self.percent // 100 + self.seq_len
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
