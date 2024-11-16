@@ -206,8 +206,9 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
         trues_stacked = torch.stack(trues, dim=0)  # Resulting shape: [32, 96, 1]
 
         # Convert the PyTorch tensor to a NumPy array
-        preds_numpy = preds_stacked.cpu().numpy()
-        trues_numpy = trues_stacked.cpu().numpy()
+        preds_numpy = preds_stacked.float().cpu().numpy()
+        trues_numpy = trues_stacked.float().cpu().numpy()
+
 
         # Reshape the array to 2D shape [32, 96]
         preds_reshaped = preds_numpy.reshape(preds_numpy.shape[0], -1)

@@ -169,6 +169,7 @@ train_data, train_loader = data_provider(args, 'train')
 vali_data, vali_loader = data_provider(args, 'val')
 test_data, test_loader = data_provider(args, 'test')
 
+
 print("Using Framework: ", args.model)
 if args.model == 'TimeLLM':
     model = TimeLLM.Model(args).float()
@@ -284,7 +285,15 @@ for epoch in range(args.train_epochs):
             f_dim = -1 if args.features == 'MS' else 0
             outputs = outputs[:, -args.pred_len:, f_dim:]
             batch_y = batch_y[:, -args.pred_len:, f_dim:]
+            if args.model == "DLinear":
+                batch_y = batch_y.to(torch.bfloat16)
+            #print("outputs dtype: ", outputs.dtype)
+            #print("batch_Y dtype: ", batch_y.dtype)
+            
             loss = criterion(outputs, batch_y)
+            if args.model == "DLinear":
+                loss = loss.to(torch.bfloat16)
+            #print("loss dtype", loss.dtype)
             train_loss.append(loss.item())
             
         if (i + 1) % 10000 == 0:
@@ -316,6 +325,7 @@ for epoch in range(args.train_epochs):
     vali_loss, vali_mae_loss = vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric)
     print("calculating test loss")
     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
+    
     accelerator.print(
         "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
             epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
@@ -351,12 +361,14 @@ accelerator.wait_for_everyone()
 best_model_path = path + '/' + 'checkpoint'
 accelerator.wait_for_everyone()
 unwrapped_model = accelerator.unwrap_model(model)
-torch.cuda.synchronize()
-torch.cuda.empty_cache()
 
 end_event.record()
+torch.cuda.synchronize()
+
 elapsed_time = start_event.elapsed_time(end_event)
 print("gpu time:", elapsed_time)
+torch.cuda.empty_cache()
+
 unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
 
 
@@ -366,12 +378,12 @@ if args.use_wandb:
     wandb.config.update({'num_params':num_params})
     wandb.config.update({'gpu time':elapsed_time})
 
+
 unwrapped_model.eval()
 with torch.no_grad():
 
     iter_count = 0
     train_loss = []
-    
     #vali_loss, vali_mae_loss = vali(args, accelerator, unwrapped_model, vali_data, vali_loader, criterion, mae_metric)
     test_loss, test_mae_loss = vali(args, accelerator, unwrapped_model, test_data, test_loader, criterion, mae_metric,path)
     
