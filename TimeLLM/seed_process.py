@@ -10,8 +10,9 @@ from accelerate import DistributedDataParallelKwargs
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
+import pmdarima as pm
 
-from models import Autoformer, DLinear, TimeMamba, TimeLLM
+from models import Autoformer, DLinear, TimeMamba, TimeLLM, ARIMA
 
 from data_provider.data_factory import data_provider
 import time
@@ -177,6 +178,27 @@ elif args.model == 'Autoformer':
     model = Autoformer.Model(args).float()
 elif args.model == 'DLinear':
     model = DLinear.Model(args).float()
+elif args.model == 'ARIMA':
+    #print(train_data.data_x[:, 7])
+    
+    #seq len and pred len are 96
+    model = pm.auto_arima(test_data.data_x[0:args.seq_len, 7], 
+                        m=1, seasonal=False,
+                      start_p=0, start_q=0, max_order=4, test='adf',error_action='ignore',  
+                           suppress_warnings=True,
+                      stepwise=False, trace=True)
+    #model.fit(test_data.data_x[0:args.seq_len, 7])
+    model.fit(train_data.data_x[0:args.seq_len, 7])
+    forecast=model.predict(n_periods=args.pred_len, return_conf_int=True)[0]
+    print("forecast:", forecast)
+    actual = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 7]
+    print("actual:", actual)
+    metrics = metric(forecast, actual)
+    print("metrics: ", metrics)
+    if args.use_wandb:
+        wandb.log({f"mae {args.seed}":metrics[0],f"mse {args.seed}":metrics[1], f"rmse {args.seed}":metrics[2], f"mape {args.seed}":metrics[3], f"mspe {args.seed}":metrics[4]})
+    exit()
+
 
 print_gpu_memory_usage()
 #path = os.path.join(args.checkpoints,setting + '-' + args.model_comment)  # unique checkpoint saving path

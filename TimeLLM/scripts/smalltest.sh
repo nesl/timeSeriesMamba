@@ -1,4 +1,4 @@
-model_name=DLinear
+model_name=ARIMA
 train_epochs=1
 learning_rate=0.01
 llama_layers=32
@@ -14,17 +14,15 @@ export CUDA_VISIBLE_DEVICES=$gpu_id
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
    --task_name long_term_forecast \
    --is_training 1 \
-   --root_path ./dataset/illness/ \
-   --data_path national_illness.csv \
-   --model_id ILI_60_24 \
+   --root_path ./dataset/ETTh1/ \
+   --data_path ETTh1.csv \
+   --model_id ETTh1_96_96 \
    --model $model_name \
-   --data Illness \
+   --data ETTh1 \
    --features M \
-   --seq_len 60 \
-   --label_len 18 \
-   --pred_len 24 \
-   --e_layers 2 \
-   --d_layers 1 \
+   --seq_len 96 \
+   --label_len 96 \
+   --pred_len 96 \
    --factor 3 \
    --enc_in 7 \
    --dec_in 7 \
@@ -37,7 +35,7 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
    --train_epochs $train_epochs \
    --model_comment $comment \
    --save_checkpoints 0 \
-   --llm_model DLinear \
+   --llm_model ARIMA \
    --llm_dim 768 \
    --num_params "none" \
    --use_wandb 0 \
