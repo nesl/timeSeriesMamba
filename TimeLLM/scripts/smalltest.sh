@@ -14,13 +14,13 @@ export CUDA_VISIBLE_DEVICES=$gpu_id
 accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
    --task_name long_term_forecast \
    --is_training 1 \
-   --root_path ./dataset/ETTh1/ \
+   --root_path ./dataset/ETT-small/ \
    --data_path ETTh1.csv \
-   --model_id ETTh1_96_96 \
+   --model_id ETTh1_512_96 \
    --model $model_name \
    --data ETTh1 \
    --features M \
-   --seq_len 96 \
+   --seq_len 512 \
    --label_len 96 \
    --pred_len 96 \
    --factor 3 \
@@ -42,4 +42,5 @@ accelerate launch --mixed_precision bf16 --num_processes $num_process --main_pro
    --seed 1 \
    --dsampfactor 1 \
    --percent 100 \
-   --col_percent 100 
+   --col_percent 100 \
+   --rand_init 0

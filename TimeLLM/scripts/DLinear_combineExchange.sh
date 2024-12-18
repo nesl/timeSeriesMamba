@@ -68,8 +68,8 @@ for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((
     accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/Exchange/ \
-      --data_path Exchange.csv \
+      --root_path ./dataset/exchange_rate/ \
+      --data_path exchange_rate.csv \
       --model_id Exchange_${seq_len}_${pred_len} \
       --model $model_name \
       --data Exchange \

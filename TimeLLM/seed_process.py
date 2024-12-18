@@ -11,8 +11,11 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 import pmdarima as pm
+from statsforecast import StatsForecast
+from statsforecast.models import AutoARIMA
+from statsforecast.arima import arima_string
 
-from models import Autoformer, DLinear, TimeMamba, TimeLLM, ARIMA
+from models import Autoformer, DLinear, TimeMamba, TimeLLM
 
 from data_provider.data_factory import data_provider
 import time
@@ -87,6 +90,7 @@ parser.add_argument('--prompt_domain', type=int, default=0, help='')
 parser.add_argument('--llm_model', type=str, default='Mamba', help='LLM model') # LLAMA, GPT2, BERT, Mamba
 parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
 parser.add_argument('--num_params', type=str, default='130m', help='string of our param size to append to huggingface')
+parser.add_argument('--rand_init', type=int, default=0, help='if nonzero, initialize weights of LLM randomly')
 
 # optimization
 parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -128,8 +132,8 @@ if args.use_wandb:
         'LLM used': args.llm_model,
         'dsampfactor': args.dsampfactor,
         'percent': args.percent,
-        'col_percent': args.col_percent
-        #'num params': args.num_params
+        'col_percent': args.col_percent,
+        'rand_init': args.rand_init
     })
 
 def print_gpu_memory_usage():
@@ -180,18 +184,50 @@ elif args.model == 'DLinear':
     model = DLinear.Model(args).float()
 elif args.model == 'ARIMA':
     #print(train_data.data_x[:, 7])
+    season_length = 12 # Monthly data 
+    Y_test = (test_data.data_x)
+    #print("ytest size: ",Y_test.shape)
+
+    #stamp = test_data.data_stamp
+    #print("datastamp: ", stamp)
+    #print("dstamp shape: ", stamp.shape)
+    #Y_test = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 6]
+    #Y_train = test_data.data_x[0:args.seq_len, 6]
+    #print("Y_test", Y_test)
+
+    # Extract the last series (7th column)
+    print("taking in series of length: ", args.seq_len)
+    print("predicting for the next steps of horizon length: ", args.pred_len)
+
+    input_seq = Y_test[0:args.seq_len, -1]
+    actual = Y_test[args.seq_len+1:args.seq_len+1+args.pred_len, -1]
     
-    #seq len and pred len are 96
-    model = pm.auto_arima(test_data.data_x[0:args.seq_len, 7], 
+    # Create a DataFrame for statsforecast
+    df = pd.DataFrame({
+        'unique_id': 1,  # Single series identifier
+        'ds': pd.date_range(start='2022-01-01', periods=len(input_seq), freq='MS'), #the start date and freq don't affect anything
+        'y': input_seq
+    })
+    horizon = len(actual) # number of predictions
+    models = [AutoARIMA(season_length=season_length)]
+    sf = StatsForecast(models=models, freq='MS')
+    Y_hat_df = sf.forecast(df=df, h=horizon, fitted=True)
+    print("y_hat head:", Y_hat_df.head())
+    forecast = Y_hat_df.to_numpy()[:,2]
+    
+    """ #seq len and pred len are 96
+    #model = pm.auto_arima(test_data.data_x[0:args.seq_len, 6], 
+    model = pm.auto_arima(train_data.data_x[0:2000, 6], 
                         m=1, seasonal=False,
                       start_p=0, start_q=0, max_order=4, test='adf',error_action='ignore',  
                            suppress_warnings=True,
-                      stepwise=False, trace=True)
-    #model.fit(test_data.data_x[0:args.seq_len, 7])
-    model.fit(train_data.data_x[0:args.seq_len, 7])
-    forecast=model.predict(n_periods=args.pred_len, return_conf_int=True)[0]
+                      stepwise=True, trace=True)
+    print("initializing complete")
+    #model.fit(test_data.data_x[0:args.seq_len, 6])
+    #model.fit(train_data.data_x[0:args.seq_len, 7])
+    forecast=model.predict(n_periods=args.pred_len, return_conf_int=True)[0] """
     print("forecast:", forecast)
-    actual = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 7]
+    actual = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 6]
     print("actual:", actual)
     metrics = metric(forecast, actual)
     print("metrics: ", metrics)

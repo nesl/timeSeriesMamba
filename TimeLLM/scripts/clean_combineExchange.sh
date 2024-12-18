@@ -20,11 +20,10 @@ usage() {
 
 # Default values
 master_port_base=01180
-downsampling_factor=1
-percent=100
+downsampling_factor=1  # Default downsampling factor is 1
+percent=100            # Default percent is 100 (no columns removed)
 col_percent=100
 save_checkpoints=0
-
 # Parse command-line arguments
 while getopts "l:d:e:n:c:m:f:g:t:p:r:" opt; do
   case $opt in
@@ -34,17 +33,17 @@ while getopts "l:d:e:n:c:m:f:g:t:p:r:" opt; do
     n) num_params=$OPTARG ;;
     c) col_percent=$OPTARG ;;
     m) llm_model=$OPTARG ;;
-    f) downsampling_factor=$OPTARG ;;
+    f) downsampling_factor=$OPTARG ;;  # Optional downsampling factor
     g) gpu_id=$OPTARG ;;
-    t) percent=$OPTARG ;;
-    p) master_port=$OPTARG ;;
+    t) percent=$OPTARG ;;              # Optional percent argument
+    p) master_port=$OPTARG ;;          # Optional master port argument
     r) rand_init=$OPTARG ;;            # Optional rand_init argument
     *) usage ;;
   esac
 done
 
 # Check if required arguments are provided
-if [ -z "$llm_layers" ] || [ -z "$d_model" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
+if [ -z "$llm_layers" ] || [ -z "$d_model" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -z "$save_checkpoints" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
   usage
 fi
 
@@ -73,6 +72,7 @@ echo "Setting col_percent to $col_percent"
 echo "Setting master_port to $master_port"
 echo "Setting rand_init to $rand_init"
 
+
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 
 llm_dim=10
@@ -80,39 +80,40 @@ if [ "$num_params" = "130m" ]; then
   llm_dim=768
 elif [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560
-elif [ "$num_params" = "7b" ]; then
+elif [ "$num_params" == "7b" ]; then
   llm_dim=4096
-elif [[ "$num_params" == "1b"  || "$num_params" == "1.3b" ]]; then
+elif [[ "$num_params" == "1b" || "$num_params" == "1.3b" ]]; then
   llm_dim=2048
 fi
 
 seq_len=$((512 / downsampling_factor))
 
 # Define trials for different pred_len values
-for pred_len in $((96 / downsampling_factor)); do # $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)); do
+for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
+#for pred_len in 336; do
   for seed in {1..10}; do
-    tag="Traffic_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
+    tag="Exchange_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
-    log_file="results/Traffic/${tag}.txt"
+    log_file="results/Exchange/${tag}.txt"
     exec > "$log_file" 2>&1
 
     accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/traffic/ \
-      --data_path traffic.csv \
-      --model_id Traffic_${seq_len}_${pred_len} \
+      --root_path ./dataset/exchange_rate/ \
+      --data_path exchange_rate.csv \
+      --model_id Exchange_${seq_len}_${pred_len} \
       --model $model_name \
-      --data Traffic \
+      --data Exchange \
       --features M \
       --seq_len $seq_len \
       --label_len 48 \
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 862 \
-      --dec_in 862 \
-      --c_out 862 \
+      --enc_in 8 \
+      --dec_in 8 \
+      --c_out 8 \
       --pred_len $pred_len \
       --dsampfactor $downsampling_factor \
       --percent $percent \
@@ -125,13 +126,13 @@ for pred_len in $((96 / downsampling_factor)); do # $((192 / downsampling_factor
       --learning_rate $learning_rate \
       --llm_layers $llm_layers \
       --train_epochs $train_epochs \
-      --rand_init $rand_init \
       --model_comment "$comment" \
       --llm_model $llm_model \
       --llm_dim $llm_dim \
       --num_params $num_params \
+      --rand_init $rand_init \
       --seed $seed
 
-    echo "Traffic with pred_len $pred_len and seed $seed completed, saved to $comment"
+    echo "Exchange with pred_len $pred_len and seed $seed completed, saved to $comment"
   done
 done

@@ -2,6 +2,7 @@ from math import sqrt
 
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 
 from transformers import AutoModel,MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaForCausalLM, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
     BertModel, BertTokenizer
@@ -297,6 +298,15 @@ class Model(nn.Module):
             raise Exception('LLM model is not defined')
 
         print("LLM model used is: ", configs.llm_model)
+        if configs.rand_init:
+            # Reinitialize all parameters with random weights
+            for name, param in self.llm_model.named_parameters():
+                if param.requires_grad:
+                    if "weight" in name:
+                        init.normal_(param.data, mean=0.0, std=0.02)  
+                    elif "bias" in name:
+                        init.constant_(param.data, 0)
+            print("llm weights randomly initialized!")
 
 
         if self.tokenizer.eos_token:

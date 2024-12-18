@@ -3,7 +3,8 @@
 model_name="TimeLLM"
 train_epochs=3
 learning_rate=0.01
-llm_layers=6
+llm_layers=0
+rand_init=0 # Default value for rand_init
 
 num_params='2.8b'
 batch_size=16
@@ -13,7 +14,7 @@ num_process=1
 
 # Function to display usage information
 usage() {
-  echo "Usage: $0 -l <llm_layers> -d <d_model> -e <train_epochs> -n <num_params> -c <col_percent> -m <llm_model> [-f <downsampling_factor>] -g <gpu_id> [-t <percent>] [-p <master_port>]"
+  echo "Usage: $0 -l <llm_layers> -d <d_model> -e <train_epochs> -n <num_params> -c <col_percent> -m <llm_model> [-f <downsampling_factor>] -g <gpu_id> [-t <percent>] [-p <master_port>] [-r <rand_init>]"
   exit 1
 }
 
@@ -23,8 +24,9 @@ downsampling_factor=1  # Default downsampling factor is 1
 percent=100            # Default percent is 100 (no columns removed)
 col_percent=100
 save_checkpoints=0
+
 # Parse command-line arguments
-while getopts "l:d:e:n:c:m:f:g:t:p:" opt; do
+while getopts "l:d:e:n:c:m:f:g:t:p:r:" opt; do
   case $opt in
     l) llm_layers=$OPTARG ;;
     d) d_model=$OPTARG ;;
@@ -36,6 +38,7 @@ while getopts "l:d:e:n:c:m:f:g:t:p:" opt; do
     g) gpu_id=$OPTARG ;;
     t) percent=$OPTARG ;;              # Optional percent argument
     p) master_port=$OPTARG ;;          # Optional master port argument
+    r) rand_init=$OPTARG ;;            # Optional rand_init argument
     *) usage ;;
   esac
 done
@@ -43,6 +46,11 @@ done
 # Check if required arguments are provided
 if [ -z "$llm_layers" ] || [ -z "$d_model" ] || [ -z "$train_epochs" ] || [ -z "$num_params" ] || [ -z "$save_checkpoints" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
   usage
+fi
+
+# Update model_name based on llm_model
+if [ "$llm_model" == "ARIMA" ]; then
+  model_name="ARIMA"
 fi
 
 # Set default master_port if not provided
@@ -63,8 +71,9 @@ echo "Setting downsampling_factor to $downsampling_factor"
 echo "Setting percent to $percent"
 echo "Setting col_percent to $col_percent"
 echo "Setting master_port to $master_port"
+echo "Setting rand_init to $rand_init"
 
-og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}"
+og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 
 llm_dim=10
 if [ "$num_params" = "130m" ]; then
@@ -119,6 +128,7 @@ for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((
       --llm_model $llm_model \
       --llm_dim $llm_dim \
       --num_params $num_params \
+      --rand_init $rand_init \
       --seed $seed
 
     echo "ETTh1 with pred_len $pred_len and seed $seed completed, saved to $comment"
