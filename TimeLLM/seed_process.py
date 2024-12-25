@@ -112,6 +112,7 @@ parser.add_argument('--col_percent', type=int, default=100)
 
 
 parser.add_argument('--use_wandb', type=int, default=1)
+parser.add_argument('--verbose', type=int, default=0)
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
 parser.add_argument('--save_checkpoints', type=int, default=0)
@@ -144,7 +145,6 @@ def print_gpu_memory_usage():
 
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 print("accelerator device: ", accelerator.device)
-#fix_seed = seeds[args.seed]
 fix_seed = args.seed
 random.seed(fix_seed)
 torch.manual_seed(fix_seed)
@@ -167,8 +167,6 @@ setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}
     args.factor,
     args.embed,
     args.des, args.seed)
-#print("arg tim starts")
-#startTime = time.time()
 
 train_data, train_loader = data_provider(args, 'train')
 vali_data, vali_loader = data_provider(args, 'val')
@@ -182,23 +180,13 @@ elif args.model == 'Autoformer':
     model = Autoformer.Model(args).float()
 elif args.model == 'DLinear':
     model = DLinear.Model(args).float()
+'''
 elif args.model == 'ARIMA':
     #print(train_data.data_x[:, 7])
     season_length = 12 # Monthly data 
     Y_test = (test_data.data_x)
-    #print("ytest size: ",Y_test.shape)
-
-    #stamp = test_data.data_stamp
-    #print("datastamp: ", stamp)
-    #print("dstamp shape: ", stamp.shape)
-    #Y_test = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 6]
-    #Y_train = test_data.data_x[0:args.seq_len, 6]
-    #print("Y_test", Y_test)
-
-    # Extract the last series (7th column)
     print("taking in series of length: ", args.seq_len)
     print("predicting for the next steps of horizon length: ", args.pred_len)
-
     input_seq = Y_test[0:args.seq_len, -1]
     actual = Y_test[args.seq_len+1:args.seq_len+1+args.pred_len, -1]
     
@@ -214,18 +202,6 @@ elif args.model == 'ARIMA':
     Y_hat_df = sf.forecast(df=df, h=horizon, fitted=True)
     print("y_hat head:", Y_hat_df.head())
     forecast = Y_hat_df.to_numpy()[:,2]
-    
-    """ #seq len and pred len are 96
-    #model = pm.auto_arima(test_data.data_x[0:args.seq_len, 6], 
-    model = pm.auto_arima(train_data.data_x[0:2000, 6], 
-                        m=1, seasonal=False,
-                      start_p=0, start_q=0, max_order=4, test='adf',error_action='ignore',  
-                           suppress_warnings=True,
-                      stepwise=True, trace=True)
-    print("initializing complete")
-    #model.fit(test_data.data_x[0:args.seq_len, 6])
-    #model.fit(train_data.data_x[0:args.seq_len, 7])
-    forecast=model.predict(n_periods=args.pred_len, return_conf_int=True)[0] """
     print("forecast:", forecast)
     actual = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 6]
     print("actual:", actual)
@@ -234,22 +210,18 @@ elif args.model == 'ARIMA':
     if args.use_wandb:
         wandb.log({f"mae {args.seed}":metrics[0],f"mse {args.seed}":metrics[1], f"rmse {args.seed}":metrics[2], f"mape {args.seed}":metrics[3], f"mspe {args.seed}":metrics[4]})
     exit()
-
+'''
 
 print_gpu_memory_usage()
-#path = os.path.join(args.checkpoints,setting + '-' + args.model_comment)  # unique checkpoint saving path
 
 path = args.model_comment
 args.content = load_content(args)
-print("os.path.exists: ", path)
-print("accel local main process: ", accelerator.is_local_main_process)
+if args.verbose:
+    print("os.path.exists: ", path)
+    print("accel local main process: ", accelerator.is_local_main_process)
 if not os.path.exists(path) and accelerator.is_local_main_process:
     os.makedirs(path)
 
-start_event = torch.cuda.Event(enable_timing=True)
-end_event = torch.cuda.Event(enable_timing=True)
-start_event.record()
-#train_loader = train_loader[0:120]#try this to shorten
 train_steps = len(train_loader)
 #train_steps = 120
 
@@ -266,7 +238,6 @@ model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
 earlyUnwrap = accelerator.unwrap_model(model)
 num_params=sum(p.numel() for p in earlyUnwrap.parameters())
 print(f'Total number of parameters: {num_params}')
-#summary(earlyUnwrap, ((1,2),(3,4),(5,6),(7,8)))
 if args.use_wandb:
     wandb.config.update({'num_params':num_params})
 
@@ -289,14 +260,12 @@ train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelera
 if args.use_amp:
     scaler = torch.cuda.amp.GradScaler()
 
-
+start_event = torch.cuda.Event(enable_timing=True)
+end_event = torch.cuda.Event(enable_timing=True)
+start_event.record()
 for epoch in range(args.train_epochs):
-    #epochStartTime = time.time()
-    iter_count = 0
-    train_loss = []
-    
+    train_loss = [] 
     model.train()
-    epoch_time = time.time()
     
     for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
         #for testing purposes
@@ -345,133 +314,82 @@ for epoch in range(args.train_epochs):
             batch_y = batch_y[:, -args.pred_len:, f_dim:]
             if args.model == "DLinear":
                 batch_y = batch_y.to(torch.bfloat16)
-            #print("outputs dtype: ", outputs.dtype)
-            #print("batch_Y dtype: ", batch_y.dtype)
-            
             loss = criterion(outputs, batch_y)
             if args.model == "DLinear":
                 loss = loss.to(torch.bfloat16)
-            #print("loss dtype", loss.dtype)
             train_loss.append(loss.item())
-            
-        if (i + 1) % 10000 == 0:
+          
+        if args.verbose and ((i + 1) % 10000 == 0): #this doesn't happen with 10,000
             #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
             accelerator.print(
                 "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
-            #speed = (time.time() - time_now) / iter_count
-            #left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
-            #accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
-            #iter_count = 0
-            
-
+        
+        break 
+        
         if args.use_amp:
             scaler.scale(loss).backward()
             scaler.step(model_optim)
             scaler.update()
         else:
-            accelerator.backward(loss)
-            model_optim.step()
+            accelerator.backward(loss) #here's backprop
+            model_optim.step() #and this is adam taking a step
 
         if args.lradj == 'TST':
             adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=False)
             scheduler.step()
-        
-
-    accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
-    train_loss = np.average(train_loss)
-    print("calculating vali loss")
+    #accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
+    if args.verbose:
+        train_loss = np.average(train_loss)
     vali_loss, vali_mae_loss = vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric)
-    print("calculating test loss")
     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
-    
-    accelerator.print(
-        "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
-            epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
-    if args.use_wandb:
-        wandb.log({f"train loss {args.seed}":train_loss, f"vali loss {args.seed}": vali_loss, f"test loss {args.seed}": test_loss, f"MAE loss {args.seed}": test_mae_loss})
-    #for param_tensor in model.state_dict():
-    #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
+    if args.verbose:
+        accelerator.print(
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
+        if args.use_wandb:
+            wandb.log({f"train loss":train_loss, f"vali loss": vali_loss, f"MSE loss": test_loss, f"MAE loss": test_mae_loss})
+
     if not os.path.exists(path):
-        # Create directory if it does not exist
         os.makedirs(path)
     early_stopping(vali_loss, model, path)
     if early_stopping.early_stop:
-        accelerator.print("Early stopping")
+        #accelerator.print("Early stopping")
         if args.use_wandb:
             wandb.log({f"actual epochs": epoch+1})
+            wandb.log({f"MSE loss": test_loss, f"MAE loss": test_mae_loss})
         break
 
     if args.lradj != 'TST':
         if args.lradj == 'COS':
             scheduler.step()
-            accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
+            if args.verbose:
+                accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
         else:
             if epoch == 0:
                 args.learning_rate = model_optim.param_groups[0]['lr']
-                accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
+                if args.verbose:
+                    accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
             adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=True)
 
     else:
-        accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
+        if args.verbose:
+            accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
 
 accelerator.wait_for_everyone()
+end_event.record()
+torch.cuda.synchronize()
+elapsed_time = start_event.elapsed_time(end_event)
+print("gpu time:", elapsed_time)
 
 best_model_path = path + '/' + 'checkpoint'
 accelerator.wait_for_everyone()
 unwrapped_model = accelerator.unwrap_model(model)
-
-end_event.record()
-torch.cuda.synchronize()
-
-elapsed_time = start_event.elapsed_time(end_event)
-print("gpu time:", elapsed_time)
-torch.cuda.empty_cache()
-
 unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
-
-
 num_params = sum(p.numel() for p in unwrapped_model.parameters())
 print(f'Total number of parameters: {num_params}')
 if args.use_wandb:
     wandb.config.update({'num_params':num_params})
     wandb.config.update({'gpu time':elapsed_time})
-
-
-unwrapped_model.eval()
-with torch.no_grad():
-
-    iter_count = 0
-    train_loss = []
-    #vali_loss, vali_mae_loss = vali(args, accelerator, unwrapped_model, vali_data, vali_loader, criterion, mae_metric)
-    test_loss, test_mae_loss = vali(args, accelerator, unwrapped_model, test_data, test_loader, criterion, mae_metric,path)
-    
-    file = path+'/valiResults/'
-    # Read the CSV file into a pandas DataFrame for predictions
-    predictions_df = pd.read_csv(file+'forecasts.csv')
-
-    # Convert DataFrame to a NumPy array and discard the first row
-    predictions_array = predictions_df.iloc[1:, 1:].to_numpy().astype(float)
-
-    # Read the CSV file into a pandas DataFrame for test set
-    test_df = pd.read_csv(file+'trues.csv')
-
-    # Convert DataFrame to a NumPy array and discard the first row
-    test_array = test_df.iloc[1:, 1:].to_numpy().astype(float)
-
-    metrics = metric(predictions_array, test_array)
-    print("metrics: ", metrics)
-    if args.use_wandb:
-        wandb.log({f"mae {args.seed}":metrics[0],f"mse {args.seed}":metrics[1], f"rmse {args.seed}":metrics[2], f"mape {args.seed}":metrics[3], f"mspe {args.seed}":metrics[4]})
-    #all_metrics.append(metrics)
-#del accelerator
-torch.cuda.empty_cache()
-gc.collect()
-
-'''
-if args.use_wandb:
-    all_metrics = np.mean(all_metrics, axis=0)
-    wandb.log({f"mae":all_metrics[0],f"mse":all_metrics[1], f"rmse":all_metrics[2], f"mape":all_metrics[3], f"mspe":all_metrics[4]})
-'''
 
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:

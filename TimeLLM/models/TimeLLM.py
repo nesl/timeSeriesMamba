@@ -52,7 +52,7 @@ class Model(nn.Module):
         self.num_params = configs.num_params
         self.llm_model_name = configs.llm_model
         
-        print("self.num_params in TimeLLM.py: ", self.num_params)
+        #print("self.num_params in TimeLLM.py: ", self.num_params)
         if configs.llm_model == "Mamba":
             '''
             self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
@@ -139,8 +139,8 @@ class Model(nn.Module):
                     total_params += 1
                     total_el += param_size
 
-            print(f"Total number of named param groups: {total_params}")
-            print(f"Total number of params downloaded off huggingface: {total_el}")
+            #print(f"Total number of named param groups: {total_params}")
+            #print(f"Total number of params downloaded off huggingface: {total_el}")
 
             '''
             print("Testing LLAMA3.2 causal on 'Hey how are you doing?', response: ")
@@ -273,7 +273,7 @@ class Model(nn.Module):
                     config=self.bert_config,
                 )
             except EnvironmentError:  # downloads model from HF is not already done
-                print("Local model files not found. Attempting to download...")
+                #print("Local model files not found. Attempting to download...")
                 self.llm_model = BertModel.from_pretrained(
                     'google-bert/bert-base-uncased',
                     trust_remote_code=True,
@@ -288,7 +288,7 @@ class Model(nn.Module):
                     local_files_only=True
                 )
             except EnvironmentError:  # downloads the tokenizer from HF if not already done
-                print("Local tokenizer files not found. Atempting to download them..")
+                #print("Local tokenizer files not found. Atempting to download them..")
                 self.tokenizer = BertTokenizer.from_pretrained(
                     'google-bert/bert-base-uncased',
                     trust_remote_code=True,
@@ -297,7 +297,7 @@ class Model(nn.Module):
         else:
             raise Exception('LLM model is not defined')
 
-        print("LLM model used is: ", configs.llm_model)
+        #print("LLM model used is: ", configs.llm_model)
         if configs.rand_init:
             # Reinitialize all parameters with random weights
             for name, param in self.llm_model.named_parameters():
@@ -306,7 +306,7 @@ class Model(nn.Module):
                         init.normal_(param.data, mean=0.0, std=0.02)  
                     elif "bias" in name:
                         init.constant_(param.data, 0)
-            print("llm weights randomly initialized!")
+            #print("llm weights randomly initialized!")
 
 
         if self.tokenizer.eos_token:

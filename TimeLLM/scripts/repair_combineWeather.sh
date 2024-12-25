@@ -89,10 +89,9 @@ fi
 seq_len=$((512 / downsampling_factor))
 
 # Define trials for different pred_len values
-for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
-#for pred_len in $((336 / downsampling_factor))  ; do
+for pred_len in $((96 / downsampling_factor)) ; do
 #for pred_len in 336; do
-  for seed in {3..6}; do
+  for seed in 4 6 7; do
     tag="Weather_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
     comment="checkpoints/${tag}"
     log_file="results/Weather/${tag}.txt"

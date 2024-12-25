@@ -1,10 +1,10 @@
 model_name=TimeLLM
-train_epochs=1
+train_epochs=100
 learning_rate=0.01
 llama_layers=32
 
 master_port=01097
-num_process=2
+num_process=3
 batch_size=16
 d_model=32
 d_ff=128
