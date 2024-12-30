@@ -58,7 +58,7 @@ og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}
 # Redirect output to a file named after the comment variable
 
 tag="smalltest_weather_${og_tag}"
-for seed in {1,,1}; do
+for seed in 1; do
   comment="checkpoints/${tag}_seed${seed}"
   log_file="results/${tag}_seed${seed}.txt"
   exec > "$log_file" 2>&1

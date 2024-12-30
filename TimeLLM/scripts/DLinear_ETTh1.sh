@@ -1,4 +1,4 @@
-model_name=TimeLLM
+model_name=DLinear
 train_epochs=100
 learning_rate=0.01
 llama_layers=32
@@ -9,7 +9,7 @@ batch_size=24
 d_model=32
 d_ff=128
 
-comment='TimeLLM-ETTh1'
+comment='DLinear-ETTh1'
 
 accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
   --task_name long_term_forecast \
@@ -84,7 +84,8 @@ accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_proces
   --d_model $d_model \
   --d_ff $d_ff \
   --batch_size $batch_size \
-  --learning_rate $learning_rate \
+  --lradj 'COS'\
+  --learning_rate 0.001 \
   --llm_layers $llama_layers \
   --train_epochs $train_epochs \
   --model_comment $comment

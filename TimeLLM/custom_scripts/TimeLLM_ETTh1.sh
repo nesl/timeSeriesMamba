@@ -3,9 +3,9 @@ train_epochs=100
 learning_rate=0.01
 llama_layers=32
 
-master_port=10097
-num_process=4
-batch_size=24
+master_port=01097
+num_process=3
+batch_size=16
 d_model=32
 d_ff=128
 
@@ -84,7 +84,8 @@ accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_proces
   --d_model $d_model \
   --d_ff $d_ff \
   --batch_size $batch_size \
-  --learning_rate $learning_rate \
+  --lradj 'COS'\
+  --learning_rate 0.001 \
   --llm_layers $llama_layers \
   --train_epochs $train_epochs \
   --model_comment $comment

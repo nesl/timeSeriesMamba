@@ -2,12 +2,22 @@ from math import sqrt
 
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 
-from transformers import LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
+from transformers import AutoModel,MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaForCausalLM, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
     BertModel, BertTokenizer
 from layers.Embed import PatchEmbedding
 import transformers
 from layers.StandardNorm import Normalize
+
+import sys
+#print("sys.path before:", sys.path)
+sys.path.insert(0, '/home/nesl/oliver/timeSeriesMamba/mamba_ssm/models/')
+#print("sys.path after:", sys.path)
+from mixer_seq_simple import MambaLMHeadModel,MambaTimeHeadModel
+sys.path.pop(0)
+
+from huggingface_hub import hf_hub_download
 
 transformers.logging.set_verbosity_error()
 
@@ -39,13 +49,119 @@ class Model(nn.Module):
         self.d_llm = configs.llm_dim
         self.patch_len = configs.patch_len
         self.stride = configs.stride
+        self.num_params = configs.num_params
+        self.llm_model_name = configs.llm_model
+        
+        #print("self.num_params in TimeLLM.py: ", self.num_params)
+        if configs.llm_model == "Mamba":
+            '''
+            self.mamba_config = MambaConfig.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
+            self.mamba_config.num_hidden_layers = configs.llm_layers
+            self.mamba_config.output_attentions = True
+            self.mamba_config.output_hidden_states = True
 
-        if configs.llm_model == 'LLAMA':
+            self.llm_model = MambaModel.from_pretrained(
+            f"state-spaces/mamba-{self.num_params}-hf",
+            config=self.mamba_config
+            )
+            self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba-{self.num_params}-hf")
+            '''
+            self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba-{self.num_params}")#, device=device, dtype=dtype)
+            
+        elif configs.llm_model == "Mamba2":
+            self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")#, device=device, dtype=dtype)
+            #self.llm_model = AutoModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
+            #print("Mamba2 info: ", self.llm_model.vocab_size)
+       
+        elif configs.llm_model == "LLAMA3.1":
+            model_string = "meta-llama/Meta-Llama-3.1-8B"
+            
+            self.llama_config = LlamaConfig.from_pretrained(model_string)
+            self.llama_config.num_hidden_layers = configs.llm_layers
+            self.llama_config.output_attentions = True
+            self.llama_config.output_hidden_states = True
+            
+
+            self.llm_model = LlamaModel.from_pretrained(
+                    #"/home/nesl/oliver/timeSeriesMamba/TimeLLM/Meta-Llama-3.1-8B",
+                    model_string,
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config,
+                    # load_in_4bit=True
+                )
+            tokenizer_config_path = hf_hub_download(repo_id="meta-llama/Meta-Llama-3.1-8B", filename="tokenizer_config.json")
+            tokenizer_path = hf_hub_download(repo_id="meta-llama/Meta-Llama-3.1-8B", filename="tokenizer.json")
+            
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_string,
+                    trust_remote_code=False,
+                    local_files_only=True
+                )
+            
+        elif configs.llm_model == "LLAMA3.2":
+            model_string = "meta-llama/Llama-3.2-1B"
+            self.llama_config = LlamaConfig.from_pretrained(model_string)
+            #self.llama_config.num_hidden_layers = configs.llm_layers
+            self.llama_config.output_attentions = True
+            self.llama_config.output_hidden_states = True
+            
+
+            self.llm_model = LlamaModel.from_pretrained(
+                    #"/home/nesl/oliver/timeSeriesMamba/TimeLLM/Meta-Llama-3.1-8B",
+                    model_string,
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config
+                    # load_in_4bit=True
+                )
+            tokenizer_config_path = hf_hub_download(repo_id="meta-llama/Llama-3.2-1B", filename="tokenizer_config.json")
+            tokenizer_path = hf_hub_download(repo_id="meta-llama/Llama-3.2-1B", filename="tokenizer.json")
+            
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_string,
+                    trust_remote_code=False,
+                    local_files_only=True
+                )
+
+            total_params = 0
+            total_el = 0
+            #print("Model Parameter Sizes:\n")
+            
+            for name, param in self.llm_model.named_parameters():
+                if param.requires_grad:
+                    param_size = param.numel()  # Total number of elements in the parameter
+                    #print(f"Parameter: {name}")
+                    #print(f" - Shape: {param.shape}")
+                    #print(f" - Size: {param_size}\n")
+                    total_params += 1
+                    total_el += param_size
+
+            #print(f"Total number of named param groups: {total_params}")
+            #print(f"Total number of params downloaded off huggingface: {total_el}")
+
+            '''
+            print("Testing LLAMA3.2 causal on 'Hey how are you doing?', response: ")
+            input_ids = self.tokenizer("Hey how are you doing?", return_tensors="pt")["input_ids"]
+            self.llama_config.num_hidden_layers = 2
+            
+            self.languagellm_model =  LlamaForCausalLM.from_pretrained(
+                    model_string,
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config)
+            out = self.languagellm_model.generate(input_ids, max_new_tokens=10)
+            print(self.tokenizer.batch_decode(out))
+            '''
+        elif configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
             self.llama_config.num_hidden_layers = configs.llm_layers
             self.llama_config.output_attentions = True
             self.llama_config.output_hidden_states = True
+            '''
             try:
                 self.llm_model = LlamaModel.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
@@ -75,6 +191,21 @@ class Model(nn.Module):
             except EnvironmentError:  # downloads the tokenizer from HF if not already done
                 print("Local tokenizer files not found. Atempting to download them..")
                 self.tokenizer = LlamaTokenizer.from_pretrained(
+                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
+                    'huggyllama/llama-7b',
+                    trust_remote_code=True,
+                    local_files_only=False
+                )
+                '''
+            self.llm_model = LlamaModel.from_pretrained(
+                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
+                    'huggyllama/llama-7b',
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.llama_config,
+                    # load_in_4bit=True
+                )
+            self.tokenizer = LlamaTokenizer.from_pretrained(
                     # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/tokenizer.model",
                     'huggyllama/llama-7b',
                     trust_remote_code=True,
@@ -83,13 +214,25 @@ class Model(nn.Module):
         elif configs.llm_model == 'GPT2':
             self.gpt2_config = GPT2Config.from_pretrained('openai-community/gpt2')
 
-            self.gpt2_config.num_hidden_layers = configs.llm_layers
+            #self.gpt2_config.num_hidden_layers = configs.llm_layers
             self.gpt2_config.output_attentions = True
             self.gpt2_config.output_hidden_states = True
+            self.llm_model = GPT2Model.from_pretrained(
+                    'openai-community/gpt2',
+                    trust_remote_code=True,
+                    local_files_only=False,
+                    config=self.gpt2_config,
+                )
+            self.tokenizer = GPT2Tokenizer.from_pretrained(
+                    'openai-community/gpt2',
+                    trust_remote_code=True,
+                    local_files_only=False
+                )
+            '''
             try:
                 self.llm_model = GPT2Model.from_pretrained(
                     'openai-community/gpt2',
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                     local_files_only=True,
                     config=self.gpt2_config,
                 )
@@ -115,6 +258,7 @@ class Model(nn.Module):
                     trust_remote_code=True,
                     local_files_only=False
                 )
+            '''
         elif configs.llm_model == 'BERT':
             self.bert_config = BertConfig.from_pretrained('google-bert/bert-base-uncased')
 
@@ -129,7 +273,7 @@ class Model(nn.Module):
                     config=self.bert_config,
                 )
             except EnvironmentError:  # downloads model from HF is not already done
-                print("Local model files not found. Attempting to download...")
+                #print("Local model files not found. Attempting to download...")
                 self.llm_model = BertModel.from_pretrained(
                     'google-bert/bert-base-uncased',
                     trust_remote_code=True,
@@ -144,7 +288,7 @@ class Model(nn.Module):
                     local_files_only=True
                 )
             except EnvironmentError:  # downloads the tokenizer from HF if not already done
-                print("Local tokenizer files not found. Atempting to download them..")
+                #print("Local tokenizer files not found. Atempting to download them..")
                 self.tokenizer = BertTokenizer.from_pretrained(
                     'google-bert/bert-base-uncased',
                     trust_remote_code=True,
@@ -152,6 +296,18 @@ class Model(nn.Module):
                 )
         else:
             raise Exception('LLM model is not defined')
+
+        #print("LLM model used is: ", configs.llm_model)
+        if configs.rand_init:
+            # Reinitialize all parameters with random weights
+            for name, param in self.llm_model.named_parameters():
+                if param.requires_grad:
+                    if "weight" in name:
+                        init.normal_(param.data, mean=0.0, std=0.02)  
+                    elif "bias" in name:
+                        init.constant_(param.data, 0)
+            #print("llm weights randomly initialized!")
+
 
         if self.tokenizer.eos_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -240,12 +396,21 @@ class Model(nn.Module):
         enc_out, n_vars = self.patch_embedding(x_enc.to(torch.bfloat16))
         enc_out = self.reprogramming_layer(enc_out, source_embeddings, source_embeddings)
         llama_enc_out = torch.cat([prompt_embeddings, enc_out], dim=1)
-        dec_out = self.llm_model(inputs_embeds=llama_enc_out).last_hidden_state
+        
+        if "Mamba" not in self.llm_model_name: #i think this is fine, it just feeds embeddings instead of prompts?
+            dec_out = self.llm_model(inputs_embeds=llama_enc_out).last_hidden_state
+        else:
+            dec_out = self.llm_model(llama_enc_out).last_hidden_state
+        
+        #llama enc out is float tensor
+        #dec_out = self.llm_model(input_ids=prompt).last_hidden_state
+        #dec_out = self.llm_model(input_ids=llama_enc_out, inputs_embeds=llama_enc_out).last_hidden_state
         dec_out = dec_out[:, :, :self.d_ff]
 
         dec_out = torch.reshape(
             dec_out, (-1, n_vars, dec_out.shape[-2], dec_out.shape[-1]))
         dec_out = dec_out.permute(0, 1, 3, 2).contiguous()
+        dec_out = dec_out.to(torch.bfloat16)
 
         dec_out = self.output_projection(dec_out[:, :, :, -self.patch_nums:])
         dec_out = dec_out.permute(0, 2, 1).contiguous()

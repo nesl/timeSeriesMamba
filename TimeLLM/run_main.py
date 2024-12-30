@@ -98,10 +98,6 @@ parser.add_argument('--use_amp', action='store_true', help='use automatic mixed 
 parser.add_argument('--llm_layers', type=int, default=6)
 parser.add_argument('--percent', type=int, default=100)
 
-parser.add_argument('--dsampfactor', type=int, default=1, help='for downsampling purposes')
-parser.add_argument('--col_percent', type=int, default=100)
-parser.add_argument('--num_params', type=str, default='7b', help='string of our param size to append to huggingface')
-parser.add_argument('--rand_init', type=int, default=0, help='if nonzero, initialize weights of LLM randomly')
 
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
@@ -218,7 +214,11 @@ for ii in range(args.itr):
                 f_dim = -1 if args.features == 'MS' else 0
                 outputs = outputs[:, -args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -args.pred_len:, f_dim:]
+                if args.model == "DLinear":
+                    batch_y = batch_y.to(torch.bfloat16)
                 loss = criterion(outputs, batch_y)
+                if args.model == "DLinear":
+                    loss = loss.to(torch.bfloat16)
                 train_loss.append(loss.item())
 
             if (i + 1) % 100 == 0:

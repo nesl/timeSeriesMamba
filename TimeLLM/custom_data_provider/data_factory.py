@@ -10,6 +10,8 @@ data_dict = {
     'Traffic': Dataset_Custom,
     'Weather': Dataset_Custom,
     'm4': Dataset_M4,
+    'Illness': Dataset_Custom,
+    'Exchange': Dataset_Custom
 }
 
 
@@ -17,6 +19,8 @@ def data_provider(args, flag):
     Data = data_dict[args.data]
     timeenc = 0 if args.embed != 'timeF' else 1
     percent = args.percent
+    col_percent = args.col_percent
+    dsampfactor = args.dsampfactor
 
     if flag == 'test':
         shuffle_flag = False
@@ -53,7 +57,9 @@ def data_provider(args, flag):
             timeenc=timeenc,
             freq=freq,
             percent=percent,
-            seasonal_patterns=args.seasonal_patterns
+            col_percent=col_percent,
+            seasonal_patterns=args.seasonal_patterns,
+            dsampfactor=dsampfactor,
         )
     data_loader = DataLoader(
         data_set,
