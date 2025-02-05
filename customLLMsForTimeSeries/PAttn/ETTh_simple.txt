@@ -1,0 +1,174 @@
+ETTh1_96_96_simple_PAttn
+mae:0.3874, std:0.0000 ---- mse:0.3827, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4170, std:0.0000 ---- mse:0.4402, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4191, std:0.0000 ---- mse:0.4468, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4578, std:0.0000 ---- mse:0.4761, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3270, std:0.0000 ---- mse:0.2783, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3729, std:0.0000 ---- mse:0.3451, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3749, std:0.0000 ---- mse:0.3372, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3875, std:0.0000 ---- mse:0.3823, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3871, std:0.0000 ---- mse:0.3824, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3878, std:0.0000 ---- mse:0.3837, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3881, std:0.0000 ---- mse:0.3831, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3870, std:0.0000 ---- mse:0.3827, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3871, std:0.0000 ---- mse:0.3823, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3870, std:0.0000 ---- mse:0.3821, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3872, std:0.0000 ---- mse:0.3823, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3883, std:0.0000 ---- mse:0.3829, std:0.0000
+ETTh1_96_96_simple_PAttn
+mae:0.3872, std:0.0000 ---- mse:0.3831, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4161, std:0.0000 ---- mse:0.4393, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4160, std:0.0000 ---- mse:0.4385, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4165, std:0.0000 ---- mse:0.4401, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4162, std:0.0000 ---- mse:0.4393, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4159, std:0.0000 ---- mse:0.4394, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4166, std:0.0000 ---- mse:0.4395, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4160, std:0.0000 ---- mse:0.4401, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4160, std:0.0000 ---- mse:0.4389, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4161, std:0.0000 ---- mse:0.4387, std:0.0000
+ETTh1_96_192_simple_PAttn
+mae:0.4160, std:0.0000 ---- mse:0.4389, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4202, std:0.0000 ---- mse:0.4487, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4196, std:0.0000 ---- mse:0.4468, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4187, std:0.0000 ---- mse:0.4465, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4188, std:0.0000 ---- mse:0.4465, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4182, std:0.0000 ---- mse:0.4449, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4198, std:0.0000 ---- mse:0.4479, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4201, std:0.0000 ---- mse:0.4492, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4198, std:0.0000 ---- mse:0.4455, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4192, std:0.0000 ---- mse:0.4462, std:0.0000
+ETTh1_96_336_simple_PAttn
+mae:0.4191, std:0.0000 ---- mse:0.4464, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4578, std:0.0000 ---- mse:0.4749, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4587, std:0.0000 ---- mse:0.4750, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4552, std:0.0000 ---- mse:0.4718, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4566, std:0.0000 ---- mse:0.4742, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4542, std:0.0000 ---- mse:0.4694, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4560, std:0.0000 ---- mse:0.4715, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4548, std:0.0000 ---- mse:0.4715, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4541, std:0.0000 ---- mse:0.4702, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4510, std:0.0000 ---- mse:0.4652, std:0.0000
+ETTh1_96_720_simple_PAttn
+mae:0.4554, std:0.0000 ---- mse:0.4713, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3260, std:0.0000 ---- mse:0.2764, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3264, std:0.0000 ---- mse:0.2757, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3249, std:0.0000 ---- mse:0.2734, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3286, std:0.0000 ---- mse:0.2795, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3265, std:0.0000 ---- mse:0.2765, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3268, std:0.0000 ---- mse:0.2774, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3264, std:0.0000 ---- mse:0.2767, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3240, std:0.0000 ---- mse:0.2727, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3255, std:0.0000 ---- mse:0.2759, std:0.0000
+ETTh2_96_96_simple_PAttn
+mae:0.3260, std:0.0000 ---- mse:0.2763, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3712, std:0.0000 ---- mse:0.3436, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3731, std:0.0000 ---- mse:0.3473, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3722, std:0.0000 ---- mse:0.3437, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3719, std:0.0000 ---- mse:0.3448, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3724, std:0.0000 ---- mse:0.3456, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3759, std:0.0000 ---- mse:0.3514, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3721, std:0.0000 ---- mse:0.3456, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3725, std:0.0000 ---- mse:0.3454, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3732, std:0.0000 ---- mse:0.3451, std:0.0000
+ETTh2_96_192_simple_PAttn
+mae:0.3723, std:0.0000 ---- mse:0.3455, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3752, std:0.0000 ---- mse:0.3390, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3746, std:0.0000 ---- mse:0.3367, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3746, std:0.0000 ---- mse:0.3383, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3754, std:0.0000 ---- mse:0.3405, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3747, std:0.0000 ---- mse:0.3385, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3736, std:0.0000 ---- mse:0.3371, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3756, std:0.0000 ---- mse:0.3401, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3749, std:0.0000 ---- mse:0.3402, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3769, std:0.0000 ---- mse:0.3421, std:0.0000
+ETTh2_96_336_simple_PAttn
+mae:0.3761, std:0.0000 ---- mse:0.3385, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4260, std:0.0000 ---- mse:0.4055, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4261, std:0.0000 ---- mse:0.4047, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4264, std:0.0000 ---- mse:0.4040, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4254, std:0.0000 ---- mse:0.4045, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4236, std:0.0000 ---- mse:0.4006, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4239, std:0.0000 ---- mse:0.4003, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4244, std:0.0000 ---- mse:0.4015, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4251, std:0.0000 ---- mse:0.4064, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4261, std:0.0000 ---- mse:0.4044, std:0.0000
+ETTh2_96_720_simple_PAttn
+mae:0.4253, std:0.0000 ---- mse:0.4035, std:0.0000
