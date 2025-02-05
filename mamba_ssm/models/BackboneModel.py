@@ -3,7 +3,7 @@ from math import sqrt
 import torch
 import torch.nn as nn
 
-from transformers import AutoModel,MambaModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
+from transformers import AutoModel,AutoTokenizer ,MambaConfig, LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
     BertModel, BertTokenizer
 from TimeLLM.layers.Embed import PatchEmbedding
 import transformers

@@ -324,7 +324,7 @@ for epoch in range(args.train_epochs):
             accelerator.print(
                 "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
         
-        break 
+        #break 
         
         if args.use_amp:
             scaler.scale(loss).backward()

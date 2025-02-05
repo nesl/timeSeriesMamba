@@ -3,6 +3,7 @@ model_name=BackboneModel
 train_epochs=3
 learning_rate=0.01
 llm_layers=6
+pred_len=2048
 
 # Default values for variables
 master_port_base=1071  # Base for master port calculation
@@ -15,7 +16,7 @@ d_model=256
 
 # Function to display usage information
 usage() {
-  echo "Usage: $0 -l <llm_layers> -e <train_epochs> -c <save_checkpoints> -m <llm_model> -g <gpu_id>"
+  echo "Usage: $0 -l <llm_layers> -e <train_epochs> -p <pred len> -m <llm_model> -g <gpu_id>"
   exit 1
 }
 
@@ -24,7 +25,7 @@ while getopts "l:e:c:m:g:" opt; do
   case $opt in
     l) llm_layers=$OPTARG ;;
     e) train_epochs=$OPTARG ;;
-    c) save_checkpoints=$OPTARG ;;
+    c) pred_len=$OPTARG ;;
     m) llm_model=$OPTARG ;;
     g) gpu_id=$OPTARG ;;  # Capture the GPU ID
     *) usage ;;
@@ -32,7 +33,7 @@ while getopts "l:e:c:m:g:" opt; do
 done
 
 # Check if required arguments are provided
-if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$save_checkpoints" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
+if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$pred_len" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
   usage
 fi
 
@@ -49,10 +50,10 @@ echo "Using master_port $master_port"
 echo "Setting llm_layers to $llm_layers"
 echo "Setting d_model to $d_model"
 echo "Setting train_epochs to $train_epochs"
-echo "Setting save_checkpoints to $save_checkpoints"
+echo "Setting pred_len to $pred_len"
 echo "Setting llm_model to $llm_model"
 
-og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}"
+og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${pred_len}"
 
 
 # Redirect output to a file named after the comment variable
@@ -73,7 +74,7 @@ for seed in {6..10}; do
     --features M \
     --seq_len 512 \
     --label_len 48 \
-    --pred_len 96 \
+    --pred_len $pred_len \
     --e_layers 2 \
     --d_layers 1 \
     --factor 3 \
@@ -87,7 +88,7 @@ for seed in {6..10}; do
     --n_layer $llm_layers \
     --train_epochs $train_epochs \
     --model_comment $comment \
-    --save_checkpoints $save_checkpoints \
+    --save_checkpoints 0 \
     --llm_model $llm_model \
     --llm_dim $d_model \
     --num_params $num_params \

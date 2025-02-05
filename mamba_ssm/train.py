@@ -34,10 +34,6 @@ from TimeLLM.utils.tools import del_files, EarlyStopping, adjust_learning_rate, 
 
 parser = argparse.ArgumentParser(description='Time-LLM')
 
-fix_seed = 2021
-random.seed(fix_seed)
-torch.manual_seed(fix_seed)
-np.random.seed(fix_seed)
 
 # basic config
 parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
@@ -70,6 +66,7 @@ parser.add_argument('--seq_len', type=int, default=96, help='input sequence leng
 parser.add_argument('--label_len', type=int, default=48, help='start token length')
 parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
 parser.add_argument('--seasonal_patterns', type=str, default='Monthly', help='subset for M4')
+parser.add_argument('--dsampfactor', type=int, default=1, help='for downsampling purposes')
 
 # model define
 parser.add_argument('--enc_in', type=int, default=7, help='encoder input size')
@@ -110,11 +107,15 @@ parser.add_argument('--lradj', type=str, default='type1', help='adjust learning 
 parser.add_argument('--pct_start', type=float, default=0.2, help='pct_start')
 parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
 parser.add_argument('--percent', type=int, default=100)
+parser.add_argument('--col_percent', type=int, default=100)
+
 
 parser.add_argument('--use_wandb', type=int, default=1)
+parser.add_argument('--verbose', type=int, default=0)
+
 #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
 parser.add_argument('--early_break', type=int, default=0)
-parser.add_argument('--save_checkpoints', type=int, default=1)
+parser.add_argument('--save_checkpoints', type=int, default=0)
 
 
 args = parser.parse_args()
@@ -127,13 +128,29 @@ if args.use_wandb == 1:
     wandb.config.update({
         'layer count': args.n_layer,
         'd_model': args.d_model,
+        'pred_len': args.pred_len,
+        'seq_len': args.seq_len,
         'train epochs': args.train_epochs,
         'model id': args.model_id,
         'model' : args.model,
         'LLM used': args.llm_model,
-        #'num params': args.num_params
+        'seed': args.seed,
+        'dsampfactor': args.dsampfactor,
+        'percent': args.percent,
+        'col_percent': args.col_percent
     })
 all_metrics = []
+
+def print_gpu_memory_usage():
+    allocated = torch.cuda.memory_allocated() / (1024 ** 2)  # Convert bytes to MB
+    cached = torch.cuda.memory_reserved() / (1024 ** 2)  # Convert bytes to MB
+    print(f"Allocated memory: {allocated:.2f} MB")
+    print(f"Cached memory: {cached:.2f} MB")
+
+fix_seed = args.seed
+random.seed(fix_seed)
+torch.manual_seed(fix_seed)
+np.random.seed(fix_seed)
 
 #seeds = [2,3,10,15,42,100,101,2021,2024,9999]
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
@@ -156,19 +173,14 @@ setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}
     args.factor,
     args.embed,
     args.des, args.seed)
-#print("arg tim starts")
-#startTime = time.time()
 
 train_data, train_loader = data_provider(args, 'train')
 vali_data, vali_loader = data_provider(args, 'val')
 test_data, test_loader = data_provider(args, 'test')
-
 args.device = accelerator.device
 
 print("Using Framework: ", args.model)
-#print("args.device: ", args.device)
 model = BackboneModel.Model(args).float()
-
 path = os.path.join(args.checkpoints,
                     setting + '-' + args.model_comment)  # unique checkpoint saving path
 
@@ -180,7 +192,7 @@ if not os.path.exists(path) and accelerator.is_local_main_process:
 
 time_now = time.time()
 train_steps = len(train_loader)
-early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience, verbose=True)
+early_stopping = EarlyStopping(accelerator=accelerator, patience=args.patience, verbose=args.verbose)
 
 trained_parameters = []
 
@@ -213,14 +225,14 @@ train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelera
 if args.use_amp:
     scaler = torch.cuda.amp.GradScaler()
 
-
+start_event = torch.cuda.Event(enable_timing=True)
+end_event = torch.cuda.Event(enable_timing=True)
+start_event.record()
 for epoch in range(args.train_epochs):
-    #epochStartTime = time.time()
     iter_count = 0
     train_loss = []
     
     model.train()
-    epoch_time = time.time()
     
     for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
         #for testing purposes
@@ -256,13 +268,10 @@ for epoch in range(args.train_epochs):
                 loss = criterion(outputs, batch_y)
                 train_loss.append(loss.item())
         else:
-            #print("no amp")
             if args.output_attention:
                 outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                #print("no amp output attention: ", outputs)
             else:
                 outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                #print("no amp no output attention: ", outputs)
 
             f_dim = -1 if args.features == 'MS' else 0
             outputs = outputs[:, -args.pred_len:, f_dim:]
@@ -270,14 +279,11 @@ for epoch in range(args.train_epochs):
             loss = criterion(outputs, batch_y)
             train_loss.append(loss.item())
             
-        if (i + 1) % 10000 == 0:
+        if args.verbose and ((i + 1) % 1000 == 0): #this doesn't happen with 10,000
             #accelerator.print("\ttime taken for ",n," iters: ",iterStartTime)
             accelerator.print(
                 "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
-            speed = (time.time() - time_now) / iter_count
-            left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
-            accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
-            iter_count = 0
+           
             
 
         if args.use_amp:
@@ -292,97 +298,65 @@ for epoch in range(args.train_epochs):
             adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=False)
             scheduler.step()
         
-
-    accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
-    train_loss = np.average(train_loss)
-    print("calculating vali loss")
+    if args.verbose:
+        train_loss = np.average(train_loss)
     vali_loss, vali_mae_loss = vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric)
-    print("calculating test loss")
     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
-    accelerator.print(
-        "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
-            epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
+    if args.verbose:
+        accelerator.print(
+            "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test Loss: {3:.7f} MAE Loss: {4:.7f}".format(
+                epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
     if args.use_wandb:
-        wandb.log({f"train loss {args.seed}":train_loss, f"vali loss {args.seed}": vali_loss, f"test loss {args.seed}": test_loss, f"MAE loss {args.seed}": test_mae_loss})
-    #for param_tensor in model.state_dict():
-    #    print(param_tensor, "\n", model.state_dict()[param_tensor].size())
+        wandb.log({f"train loss":train_loss, f"vali loss": vali_loss, f"MSE loss": test_loss, f"MAE loss": test_mae_loss})
     if not os.path.exists(path):
-        # Create directory if it does not exist
         os.makedirs(path)
     early_stopping(vali_loss, model, path)
     if early_stopping.early_stop:
-        accelerator.print("Early stopping")
+        #accelerator.print("Early stopping")
         if args.use_wandb:
             wandb.log({f"actual epochs": epoch+1})
+            wandb.log({f"MSE loss": test_loss, f"MAE loss": test_mae_loss})
         break
 
     if args.lradj != 'TST':
         if args.lradj == 'COS':
             scheduler.step()
-            accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
+            if args.verbose:
+                accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
         else:
             if epoch == 0:
                 args.learning_rate = model_optim.param_groups[0]['lr']
-                accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
+                if args.verbose:
+                    accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
             adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=True)
 
     else:
-        accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
+        if args.verbose:
+            accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
 
 accelerator.wait_for_everyone()
+end_event.record()
+torch.cuda.synchronize()
+elapsed_time = start_event.elapsed_time(end_event)
+print("gpu time:", elapsed_time)
 
 best_model_path = path + '/' + 'checkpoint'
 accelerator.wait_for_everyone()
 unwrapped_model = accelerator.unwrap_model(model)
-torch.cuda.synchronize()
-torch.cuda.empty_cache()
 unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
-
 num_params = sum(p.numel() for p in unwrapped_model.parameters())
 print(f'Total number of parameters: {num_params}')
 if args.use_wandb:
     wandb.config.update({'num_params':num_params})
+    wandb.config.update({'gpu time':elapsed_time})
 
-unwrapped_model.eval()
-with torch.no_grad():
-
-    iter_count = 0
-    train_loss = []
-    
-    #vali_loss, vali_mae_loss = vali(args, accelerator, unwrapped_model, vali_data, vali_loader, criterion, mae_metric)
-    test_loss, test_mae_loss = vali(args, accelerator, unwrapped_model, test_data, test_loader, criterion, mae_metric,path)
-    
-    file = path+'/valiResults/'
-    # Read the CSV file into a pandas DataFrame for predictions
-    predictions_df = pd.read_csv(file+'forecasts.csv')
-
-    # Convert DataFrame to a NumPy array and discard the first row
-    predictions_array = predictions_df.iloc[1:, 1:].to_numpy().astype(float)
-
-    # Read the CSV file into a pandas DataFrame for test set
-    test_df = pd.read_csv(file+'trues.csv')
-
-    # Convert DataFrame to a NumPy array and discard the first row
-    test_array = test_df.iloc[1:, 1:].to_numpy().astype(float)
-
-    metrics = metric(predictions_array, test_array)
-    print("metrics: ", metrics)
-    if args.use_wandb:
-        wandb.log({f"mae {args.seed}":metrics[0],f"mse {args.seed}":metrics[1], f"rmse {args.seed}":metrics[2], f"mape {args.seed}":metrics[3], f"mspe {args.seed}":metrics[4]})
-    all_metrics.append(metrics)
-
-if args.use_wandb:
-    all_metrics = np.mean(all_metrics, axis=0)
-    wandb.log({f"mae":all_metrics[0],f"mse":all_metrics[1], f"rmse":all_metrics[2], f"mape":all_metrics[3], f"mspe":all_metrics[4]})
 
 accelerator.wait_for_everyone()
 if accelerator.is_local_main_process:
-    path = './checkpoints'  # unique checkpoint saving path
-
     if args.save_checkpoints == 0:
             #del_files(path)  # delete checkpoint files
             os.remove(best_model_path)
-            accelerator.print('success delete checkpoints at path : ', path)
+            accelerator.print('success delete checkpoints at path : ', best_model_path)
             #print('success delete checkpoints at path : ', path)
         
 accelerator.print('done!')

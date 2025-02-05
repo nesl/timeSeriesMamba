@@ -7,7 +7,7 @@ seq_len=1024
 pred_len=2048
 
 # Default values for variables
-master_port_base=1071  # Base for master port calculation
+master_port_base=1081  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -18,21 +18,19 @@ d_model=256
 #dataset stuff
 downsampling_factor=1
 percent=100
-col_percent=10 #320 cols in the ECL set....oh should I have changed the enc_in and dec_in
+col_percent=100 
 
 # Function to display usage information
 usage() {
-  echo "Usage: $0 -l <llm_layers> -e <train_epochs> -p <pred len> -s <seq len> -m <llm_model> -g <gpu_id>"
+  echo "Usage: $0 -l <llm_layers> -e <train_epochs> -m <llm_model> -g <gpu_id>"
   exit 1
 }
 
 # Parse command-line arguments
-while getopts "l:e:p:s:m:g:" opt; do
+while getopts "l:e:m:g:" opt; do
   case $opt in
     l) llm_layers=$OPTARG ;;
     e) train_epochs=$OPTARG ;;
-    p) pred_len=$OPTARG ;;
-    s) seq_len=$OPTARG ;;
     m) llm_model=$OPTARG ;;
     g) gpu_id=$OPTARG ;;  # Capture the GPU ID
     *) usage ;;
@@ -40,7 +38,7 @@ while getopts "l:e:p:s:m:g:" opt; do
 done
 
 # Check if required arguments are provided
-if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$pred_len" ] || [ -z "$seq_len" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
+if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
   usage
 fi
 
@@ -52,8 +50,7 @@ echo "Running on GPU $CUDA_VISIBLE_DEVICES"
 master_port=$((master_port_base + (gpu_id % 10)))
 echo "Using master_port $master_port"
 
-
-# Predefined combinations for  seq_len and pred_len
+# Predefined combinations for pred_len and seq_len
 combinations=(
   "512 96"
   "512 192"
@@ -72,13 +69,11 @@ for combo in "${combinations[@]}"; do
   echo "Setting pred_len to $pred_len"
   echo "Setting seq_len to $seq_len"
   echo "Setting llm_model to $llm_model"
-  # seq and pred lengths capped around 2048
 
   og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${pred_len}_s${seq_len}"
 
-
   # Redirect output to a file named after the comment variable
-  tag="backbone_ECL_${og_tag}"
+  tag="backbone_ETTh1_${og_tag}"
   for seed in {1..10}; do
     comment="checkpoints/${tag}_seed${seed}"
     log_file="results/${tag}_seed${seed}.txt"
@@ -87,21 +82,21 @@ for combo in "${combinations[@]}"; do
     accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port train.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/electricity/ \
-      --data_path electricity.csv \
-      --model_id ECL_${seq_len}_${pred_len} \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh1.csv \
+      --data ETTh1 \
+      --model_id ETTh1_${seq_len}_${pred_len} \
       --model $model_name \
-      --data ECL \
       --features M \
       --seq_len $seq_len \
       --label_len 0 \
       --pred_len $pred_len \
-      --e_layers 2 \
-      --d_layers 1 \
       --factor 3 \
-      --enc_in 321 \
-      --dec_in 321 \
-      --c_out 321 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
+      --des 'Exp' \
+      --itr 1 \
       --dsampfactor $downsampling_factor \
       --percent $percent \
       --col_percent $col_percent \
@@ -120,6 +115,6 @@ for combo in "${combinations[@]}"; do
       --verbose 1 \
       --seed $seed
 
-
-    echo "ECL completed, saved to $comment"
-  done 
+    echo "ETTh1 completed for pred_len=$pred_len, seq_len=$seq_len, saved to $comment"
+  done
+done

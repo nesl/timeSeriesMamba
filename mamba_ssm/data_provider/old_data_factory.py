@@ -1,8 +1,9 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_M4
+from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_ETT_48hour, Dataset_Custom, Dataset_M4
 from torch.utils.data import DataLoader
 
 data_dict = {
     'ETTh1': Dataset_ETT_hour,
+    'ETTh1_downsampled_48': Dataset_ETT_48hour,
     'ETTh2': Dataset_ETT_hour,
     'ETTm1': Dataset_ETT_minute,
     'ETTm2': Dataset_ETT_minute,
@@ -10,8 +11,7 @@ data_dict = {
     'Traffic': Dataset_Custom,
     'Weather': Dataset_Custom,
     'm4': Dataset_M4,
-    'Illness': Dataset_Custom,
-    'Exchange': Dataset_Custom
+    'Illness': Dataset_Custom
 }
 
 
@@ -19,8 +19,6 @@ def data_provider(args, flag):
     Data = data_dict[args.data]
     timeenc = 0 if args.embed != 'timeF' else 1
     percent = args.percent
-    col_percent = args.col_percent
-    dsampfactor = args.dsampfactor
 
     if flag == 'test':
         shuffle_flag = False
@@ -57,9 +55,7 @@ def data_provider(args, flag):
             timeenc=timeenc,
             freq=freq,
             percent=percent,
-            col_percent=col_percent,
-            seasonal_patterns=args.seasonal_patterns,
-            dsampfactor=dsampfactor,
+            seasonal_patterns=args.seasonal_patterns
         )
     data_loader = DataLoader(
         data_set,

@@ -5,7 +5,7 @@ learning_rate=0.01
 llm_layers=6
 
 # Default values for variables
-master_port_base=1051  # Base for master port calculation
+master_port_base=1081  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
