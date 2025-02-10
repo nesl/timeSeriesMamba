@@ -9,6 +9,9 @@ from TimeLLM.layers.Embed import PatchEmbedding
 import transformers
 from TimeLLM.layers.StandardNorm import Normalize
 
+import numpy as np
+from uni2ts.model.moirai import MoiraiForecast, MoiraiModule
+from einops import rearrange
 import sys
 sys.path.insert(0, '/home/oliver/Desktop/mamba')
 
@@ -82,7 +85,7 @@ class Model(nn.Module):
             
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
             self.llm_model = MambaTimeHeadModel.from_init(configs, device=self.device, dtype=self.dtype)
-            
+
         else:
             raise Exception('LLM model is not defined')
 
@@ -141,31 +144,12 @@ class Model(nn.Module):
 
         B, T, N = x_enc.size()
         x_enc = x_enc.permute(0, 2, 1).contiguous().reshape(B * N, T, 1)
-
+        '''
         min_values = torch.min(x_enc, dim=1)[0]
         max_values = torch.max(x_enc, dim=1)[0]
         medians = torch.median(x_enc, dim=1).values
         lags = self.calcute_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
-        '''
-        prompt = []
-        for b in range(x_enc.shape[0]):
-            min_values_str = str(min_values[b].tolist()[0])
-            max_values_str = str(max_values[b].tolist()[0])
-            median_values_str = str(medians[b].tolist()[0])
-            lags_values_str = str(lags[b].tolist())
-            prompt_ = (
-                f"<|start_prompt|>Dataset description: {self.description}"
-                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps information; "
-                "Input statistics: "
-                f"min value {min_values_str}, "
-                f"max value {max_values_str}, "
-                f"median value {median_values_str}, "
-                f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
-                f"top 5 lags are : {lags_values_str}<|<end_prompt>|>"
-            )
-
-            prompt.append(prompt_)
         '''
         x_enc = x_enc.reshape(B, N, T).permute(0, 2, 1).contiguous()
 
@@ -198,7 +182,7 @@ class Model(nn.Module):
         dec_out = dec_out.permute(0, 2, 1).contiguous()
 
         dec_out = self.normalize_layers(dec_out, 'denorm')
-
+        #print("dec out shape: ", dec_out.shape) #torch.Size([16, 24, 1]
         return dec_out
 
     def calcute_lags(self, x_enc):
@@ -211,6 +195,95 @@ class Model(nn.Module):
         return lags
 
 
+
+class Uni2TSWrapper(nn.Module):
+    def __init__(self, configs, cov_channel=7, size="base", patch_size="auto", device="cuda"):
+        super(Uni2TSWrapper, self).__init__()
+        self.device = device
+        self.model = MoiraiForecast(
+            module=MoiraiModule.from_pretrained(f"Salesforce/moirai-1.0-R-{size}"),
+            prediction_length=configs.pred_len,
+            context_length=configs.seq_len,
+            patch_size=32,
+            num_samples=16,#kind of difficult to pick out?
+            target_dim=3,
+            feat_dynamic_real_dim=cov_channel,
+            past_feat_dynamic_real_dim=None,
+        )
+        
+        
+
+    def forward(self, data, batch_x_mark, dec_inp, batch_y_mark, data_w_cov=None, future_cov=None, use_cov=True):
+        #print("moirai forward start: ") #16 is the covariates, and 60 is the seq len. 24 pred len comes from model define
+        #print("og data shape: ", data.shape) # Time series values. old Shape: (batch, time, variate)
+        #but also they say univariate data is temp_data = data[:,0] so implying the second dim is variates, the first is time
+        data = data[0,:].squeeze(-1)
+        data_w_cov = data_w_cov.permute(1, 0, 2).squeeze(-1)  # Shape: (T, num_cov)
+        future_cov = future_cov.permute(1, 0, 2).squeeze(-1)  # Shape: (T_future, num_cov)
+        #print("new data shape: ", data.shape)
+        #print("data_w_cov shape: ", data_w_cov.shape)
+        #print("future_cov shape: ", future_cov.shape)
+
+        # Convert to float tensor and handle NaNs
+        #print("model dtype: " , next(self.model.parameters()).dtype)
+        dtype = next(self.model.parameters()).dtype
+        data = torch.tensor(data, dtype=dtype, device=self.device)
+        zero_tensor = torch.tensor(0.0, dtype=dtype, device=self.device)
+        data = torch.where(torch.isnan(data), zero_tensor, data)
+
+        past_target = rearrange(
+            torch.as_tensor(data, dtype=torch.float32), "t -> 1 t 1"
+        )
+        past_target = past_target.to(dtype)
+        #print("data shape: ", data.shape)
+        #print("data type: ", data.dtype)
+        
+
+        past_observed_target = torch.ones_like(past_target, dtype=torch.bool, device=self.device)
+        past_is_pad = torch.zeros_like(past_target, dtype=torch.bool, device=self.device).squeeze(-1)
+        #print("reshaped past_target shape: ", past_target.shape)
+        #print("reshaped past_target dtype: ", past_target.dtype)
+        b, t ,n = past_target.shape
+        if use_cov:
+            covariate_all = []
+            for i in range(1, len(future_cov[0]) - 1):
+                covariate = torch.cat([data_w_cov[:, i], future_cov[:, i]])
+                #print("covariate shape: ", covariate.shape)
+                #covariate = torch.tensor(covariate, dtype=self.dtype, device=self.device)
+                covariate = rearrange(covariate, "t -> 1 t 1")
+                covariate_all.append(covariate)
+            
+            covariate_all = torch.cat(covariate_all, dim=2)
+            observed_covariate = torch.ones_like(covariate_all, dtype=torch.bool, device=self.device)
+            '''
+            print("past target: ", past_target.shape)
+            print("past observed target: ", past_observed_target.shape)
+            print("past is pad: ", past_is_pad.shape)
+            print("covariate_all: ", covariate_all.shape)
+            print("observed_covariate: ", observed_covariate.shape)
+            '''
+            forecast = self.model(
+                past_target=past_target,
+                past_observed_target=past_observed_target,
+                past_is_pad=past_is_pad,
+                feat_dynamic_real=covariate_all,
+                observed_feat_dynamic_real=observed_covariate,
+            )
+        else:
+            forecast = self.model(
+                past_target=past_target,
+                past_observed_target=past_observed_target,
+                past_is_pad=past_is_pad,
+            )
+
+        # Convert forecast output to PyTorch tensor
+        #forecast = torch.tensor(forecast.mean(axis=[0, 1]), device=self.device)
+        forecast = torch.tensor(forecast)
+        forecast = forecast.permute(1,2,0)
+        #print("forecast out shape: ", forecast.shape) #try to get #torch.Size([16, 24, 1]
+        return forecast
+
+        
 class ReprogrammingLayer(nn.Module):
     def __init__(self, d_model, n_heads, d_keys=None, d_llm=None, attention_dropout=0.1):
         super(ReprogrammingLayer, self).__init__()

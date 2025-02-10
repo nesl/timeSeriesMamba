@@ -1,0 +1,8 @@
+Running on GPU 3
+Using master_port 1074
+Setting llm_layers to 0
+Setting d_model to 256
+Setting train_epochs to 10
+Setting pred_len to 24
+Setting seq_len to 60
+Setting llm_model to Moirai

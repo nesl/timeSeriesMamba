@@ -59,7 +59,7 @@ def data_provider(args, flag):
             percent=percent,
             col_percent=col_percent,
             seasonal_patterns=args.seasonal_patterns,
-            dsampfactor=dsampfactor,
+            dsampfactor=dsampfactor
         )
     data_loader = DataLoader(
         data_set,

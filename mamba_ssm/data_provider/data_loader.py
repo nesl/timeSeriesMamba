@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from utils.timefeatures import time_features
 from data_provider.m4 import M4Dataset, M4Meta
 import warnings
+import torch
 
 warnings.filterwarnings('ignore')
 
@@ -319,9 +320,19 @@ class Dataset_Custom(Dataset):
         self.data_x = self.data_x[::self.downsampling_factor]
         self.data_y = self.data_y[::self.downsampling_factor]
         self.data_stamp = self.data_stamp[::self.downsampling_factor]
-        
+
+
         self.enc_in = self.data_x.shape[-1]
+
+        '''
+        self.data_x = torch.from_numpy(self.data_x)
+        self.data_y = torch.from_numpy(self.data_y)
+        self.data_x = self.data_x.to(torch.bfloat16)
+        self.data_y = self.data_y.to(torch.bfloat16)
+        '''        
+
         print("data x len", len(self.data_x))
+        print("data x type", self.data_y.dtype)
         print("data seq len", self.seq_len)
         print("data pred len", self.pred_len)
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
@@ -400,17 +411,19 @@ class Dataset_Custom(Dataset):
 
 
     def __getitem__(self, index):
+
         feat_id = index // self.tot_len
         s_begin = index % self.tot_len
 
         s_end = s_begin + self.seq_len
         r_begin = s_end - self.label_len
         r_end = r_begin + self.label_len + self.pred_len
+    
         seq_x = self.data_x[s_begin:s_end, feat_id:feat_id + 1]
         seq_y = self.data_y[r_begin:r_end, feat_id:feat_id + 1]
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
-
+        #print("dataset custom np array seq_x dtype:", seq_x.dtype)
         return seq_x, seq_y, seq_x_mark, seq_y_mark
 
     def __len__(self):

@@ -7,7 +7,7 @@ seq_len=1024
 pred_len=2048
 
 # Default values for variables
-master_port_base=1072  # Base for master port calculation
+master_port_base=1075  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -52,7 +52,9 @@ echo "Using master_port $master_port"
 
 # Predefined combinations for pred_len and seq_len
 combinations=(
-  "512 96"
+  "512 192"
+  "512 336"
+  "512 720"
 )
 
 # Loop over the combinations

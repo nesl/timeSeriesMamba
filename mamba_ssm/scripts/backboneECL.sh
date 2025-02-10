@@ -7,7 +7,7 @@ seq_len=1024
 pred_len=2048
 
 # Default values for variables
-master_port_base=1071  # Base for master port calculation
+master_port_base=1062  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -16,7 +16,7 @@ gpu_id=0  # Default GPU
 d_model=256
 
 #dataset stuff
-downsampling_factor=1
+downsampling_factor=12
 percent=100
 col_percent=10 #320 cols in the ECL set....oh should I have changed the enc_in and dec_in
 
@@ -27,12 +27,10 @@ usage() {
 }
 
 # Parse command-line arguments
-while getopts "l:e:p:s:m:g:" opt; do
+while getopts "l:e:m:g:" opt; do
   case $opt in
     l) llm_layers=$OPTARG ;;
     e) train_epochs=$OPTARG ;;
-    p) pred_len=$OPTARG ;;
-    s) seq_len=$OPTARG ;;
     m) llm_model=$OPTARG ;;
     g) gpu_id=$OPTARG ;;  # Capture the GPU ID
     *) usage ;;
@@ -40,7 +38,7 @@ while getopts "l:e:p:s:m:g:" opt; do
 done
 
 # Check if required arguments are provided
-if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$pred_len" ] || [ -z "$seq_len" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
+if [ -z "$llm_layers" ] || [ -z "$train_epochs" ] || [ -z "$llm_model" ] || [ -z "$gpu_id" ]; then
   usage
 fi
 
@@ -55,10 +53,7 @@ echo "Using master_port $master_port"
 
 # Predefined combinations for  seq_len and pred_len
 combinations=(
-  "512 96"
-  "512 192"
-  "512 336"
-  "512 720"
+  "64 96"
 )
 
 # Loop over the combinations
@@ -123,3 +118,4 @@ for combo in "${combinations[@]}"; do
 
     echo "ECL completed, saved to $comment"
   done 
+done

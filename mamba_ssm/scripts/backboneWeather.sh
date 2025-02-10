@@ -3,9 +3,9 @@ model_name=BackboneModel
 train_epochs=3
 learning_rate=0.01
 llm_layers=6
-seq_len=1024
-pred_len=2048
-
+seq_len=512
+pred_len=96
+train_percent=100
 # Default values for variables
 master_port_base=1071  # Base for master port calculation
 batch_size=16
@@ -17,7 +17,7 @@ d_model=256
 
 #dataset stuff
 downsampling_factor=1
-percent=100
+percent=8
 col_percent=100 
 
 # Function to display usage information
@@ -54,15 +54,14 @@ echo "Using master_port $master_port"
 
 # Predefined combinations for  seq_len and pred_len
 combinations=(
-  "512 96"
-  "512 192"
-  "512 336"
-  "512 720"
+  "75"
+  "50"
+  "25"
 )
 
 # Loop over the combinations
 for combo in "${combinations[@]}"; do
-  IFS=' ' read -r seq_len pred_len <<< "$combo"
+  IFS=' ' read -r train_percent <<< "$combo"
 
   # Print the values to verify
   echo "Setting llm_layers to $llm_layers"
@@ -72,10 +71,6 @@ for combo in "${combinations[@]}"; do
   echo "Setting seq_len to $seq_len"
   echo "Setting llm_model to $llm_model"
   # seq and pred lengths capped around ???
-
-
-  og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${pred_len}_s${seq_len}"
-
   # Generate the tag with the current pred_len and seq_len
   og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${pred_len}_s${seq_len}"
 
@@ -105,6 +100,7 @@ for combo in "${combinations[@]}"; do
       --c_out 21 \
       --dsampfactor $downsampling_factor \
       --percent $percent \
+      --col_percent $train_percent \
       --col_percent $col_percent \
       --d_model $d_model \
       --d_ff $d_ff \

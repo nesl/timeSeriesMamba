@@ -1,3 +1,9 @@
 [submodule "3rdparty/lm-evaluation-harness"]
 	path = 3rdparty/lm-evaluation-harness
 	url = https://github.com/EleutherAI/lm-evaluation-harness/
+[submodule "Mamba4Cast"]
+	path = Mamba4Cast
+	url = https://github.com/automl/Mamba4Cast
+[submodule "moment"]
+	path = moment
+	url = https://github.com/moment-timeseries-foundation-model/moment

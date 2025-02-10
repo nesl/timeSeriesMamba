@@ -7,7 +7,7 @@ seq_len=1024
 pred_len=2048
 
 # Default values for variables
-master_port_base=1071  # Base for master port calculation
+master_port_base=1091  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -17,8 +17,8 @@ d_model=256
 
 #dataset stuff
 downsampling_factor=1
-percent=8
-col_percent=10 #320 cols in the Traffic set....oh should I have changed the enc_in and dec_in
+percent=100
+col_percent=100
 
 # Function to display usage information
 usage() {
@@ -52,7 +52,9 @@ echo "Using master_port $master_port"
 
 # Predefined combinations for pred_len and seq_len
 combinations=(
-  "512 96"
+  "60 24"
+  "60 48"
+  "60 64"
 )
 
 # Loop over the combinations
@@ -70,7 +72,7 @@ for combo in "${combinations[@]}"; do
   og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_p${pred_len}_s${seq_len}"
 
   # Redirect output to a file named after the comment variable
-  tag="backbone_Traffic_${og_tag}"
+  tag="backbone_ILI_${og_tag}"
   for seed in {1..10}; do
     comment="checkpoints/${tag}_seed${seed}"
     log_file="results/${tag}_seed${seed}.txt"
@@ -79,10 +81,10 @@ for combo in "${combinations[@]}"; do
     accelerate launch --mixed_precision bf16 --num_processes 1 --gpu_ids $gpu_id --main_process_port $master_port train.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/traffic/ \
-      --data_path traffic.csv \
-      --data Traffic \
-      --model_id Traffic_${seq_len}_${pred_len} \
+      --root_path ./dataset/illness/ \
+      --data_path national_illness.csv \
+      --data Illness \
+      --model_id ILI_${seq_len}_${pred_len} \
       --model $model_name \
       --features M \
       --seq_len $seq_len \
@@ -91,9 +93,9 @@ for combo in "${combinations[@]}"; do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 862 \
-      --dec_in 862 \
-      --c_out 862 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --dsampfactor $downsampling_factor \
       --percent $percent \
       --col_percent $col_percent \
@@ -108,10 +110,10 @@ for combo in "${combinations[@]}"; do
       --llm_model $llm_model \
       --llm_dim $d_model \
       --num_params $num_params \
-      --use_wandb 1 \
+      --use_wandb 0 \
       --verbose 1 \
       --seed $seed
 
-    echo "Traffic completed for pred_len=$pred_len, seq_len=$seq_len, saved to $comment"
+    echo "ILI completed for pred_len=$pred_len, seq_len=$seq_len, saved to $comment"
   done
 done
