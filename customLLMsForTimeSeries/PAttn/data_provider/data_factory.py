@@ -11,7 +11,8 @@ def data_provider(args, flag, drop_last_test=True, train_all=False):
     timeenc = 0 if args.embed != 'timeF' else 1
     percent = args.percent
     max_len = args.max_len
-    
+    col_percent = args.col_percent
+    dsampfactor = args.dsampfactor    
     if flag == 'test':
         shuffle_flag = False
         drop_last = drop_last_test
@@ -40,7 +41,9 @@ def data_provider(args, flag, drop_last_test=True, train_all=False):
         freq=freq,
         percent=percent,
         max_len=max_len,
-        train_all=train_all
+        train_all=train_all,
+        col_percent=col_percent,
+        dsampfactor=dsampfactor
     )
     data_loader = DataLoader(
         data_set,

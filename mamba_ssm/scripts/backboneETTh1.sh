@@ -3,11 +3,11 @@ model_name=BackboneModel
 train_epochs=3
 learning_rate=0.01
 llm_layers=6
-seq_len=1024
-pred_len=2048
+seq_len=512
+pred_len=96
 
 # Default values for variables
-master_port_base=1081  # Base for master port calculation
+master_port_base=1086  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -50,6 +50,7 @@ echo "Running on GPU $CUDA_VISIBLE_DEVICES"
 master_port=$((master_port_base + (gpu_id % 10)))
 echo "Using master_port $master_port"
 
+: '
 # Predefined combinations for pred_len and seq_len
 combinations=(
   "512 96"
@@ -61,7 +62,8 @@ combinations=(
 # Loop over the combinations
 for combo in "${combinations[@]}"; do
   IFS=' ' read -r seq_len pred_len <<< "$combo"
-
+'
+for train_percent in 75 50 25; do
   # Print the values to verify
   echo "Setting llm_layers to $llm_layers"
   echo "Setting d_model to $d_model"
@@ -99,6 +101,7 @@ for combo in "${combinations[@]}"; do
       --itr 1 \
       --dsampfactor $downsampling_factor \
       --percent $percent \
+      --train_percent $train_percent \
       --col_percent $col_percent \
       --d_model $d_model \
       --d_ff $d_ff \

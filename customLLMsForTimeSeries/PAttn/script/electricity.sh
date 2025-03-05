@@ -1,12 +1,15 @@
-export CUDA_VISIBLE_DEVICES="0,1,2"
+export CUDA_VISIBLE_DEVICES="2"
 
-seq_len=512
+seq_len=64
 
 model=PAttn
 methods_h='PAttn'
+tag_file=main.py
 
 gpu_loc=0
 percent=100
+dsampfactor=12
+col_percent=10
 
 pre_lens_h='96 192 336 720'
 filename=Electricity
@@ -17,11 +20,13 @@ for method in $methods_h;
 do
 lr=0.00005
 bs=16
-fi
+
+for seed in $(seq 1 10); do
+
 python $tag_file \
     --root_path ./datasets/electricity/ \
     --data_path electricity.csv \
-    --model_id 'Electricity_'$seq_len'_'$pred_len'_'$method \
+    --model_id 'Electricity_'$seq_len'_'$pred_len\
     --data custom \
     --method $method \
     --seq_len $seq_len \
@@ -41,6 +46,9 @@ python $tag_file \
     --patch_size 16 \
     --stride 8 \
     --percent $percent \
+    --col_percent $col_percent \
+    --dsampfactor $dsampfactor \
+    --seed $seed \
     --gpt_layer 6 \
     --itr 1 \
     --model $model \
@@ -49,5 +57,6 @@ python $tag_file \
     --is_gpt 1 \
     --gpu_loc $gpu_loc \
     --save_file_name $filename
+    done
 done
 done

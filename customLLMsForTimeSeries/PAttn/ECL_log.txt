@@ -1,0 +1,1712 @@
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154454-qah73q5v
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run helpful-sun-5481
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/qah73q5v
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.70it/s]34it [00:00, 134.19it/s]66it [00:00, 201.52it/s]86it [00:00, 165.99it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.6185667514801025
+0it [00:00, ?it/s]4it [00:00, 35.84it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4379080 Vali Loss: 0.3591207
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.359121).  Saving model ...
+0it [00:00, ?it/s]22it [00:00, 214.17it/s]55it [00:00, 279.17it/s]84it [00:00, 280.83it/s]86it [00:00, 229.19it/s]
+Epoch: 2 cost time: 0.45784997940063477
+0it [00:00, ?it/s]4it [00:00, 37.98it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4050134 Vali Loss: 0.3502111
+lr = 0.0000452264
+Validation loss decreased (0.359121 --> 0.350211).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 178.97it/s]51it [00:00, 267.55it/s]85it [00:00, 297.22it/s]86it [00:00, 236.63it/s]
+Epoch: 3 cost time: 0.44568777084350586
+0it [00:00, ?it/s]4it [00:00, 33.31it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4023920 Vali Loss: 0.3402892
+lr = 0.0000396967
+Validation loss decreased (0.350211 --> 0.340289).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 196.43it/s]48it [00:00, 240.48it/s]74it [00:00, 248.22it/s]86it [00:00, 210.03it/s]
+Epoch: 4 cost time: 0.49243831634521484
+0it [00:00, ?it/s]4it [00:00, 36.51it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4007248 Vali Loss: 0.3448665
+lr = 0.0000327289
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]21it [00:00, 209.58it/s]54it [00:00, 277.13it/s]86it [00:00, 237.68it/s]
+Epoch: 5 cost time: 0.44858431816101074
+0it [00:00, ?it/s]4it [00:00, 40.34it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.3997998 Vali Loss: 0.3443359
+lr = 0.0000250050
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]17it [00:00, 168.84it/s]43it [00:00, 219.20it/s]68it [00:00, 233.12it/s]86it [00:00, 199.78it/s]
+Epoch: 6 cost time: 0.51434326171875
+0it [00:00, ?it/s]4it [00:00, 31.99it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3989835 Vali Loss: 0.3458657
+lr = 0.0000172811
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 140.72it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3775, mse:0.3650, rmse:0.6041, smape:65.6152
+mse_mean = 0.3650, mse_std = 0.0000
+mae_mean = 0.3775, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mhelpful-sun-5481[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/qah73q5v[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154454-qah73q5v/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154505-g5hvxrm8
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run swift-thunder-5482
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/g5hvxrm8
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.89it/s]33it [00:00, 133.66it/s]65it [00:00, 200.08it/s]86it [00:00, 164.51it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.6347758769989014
+0it [00:00, ?it/s]4it [00:00, 39.49it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4391929 Vali Loss: 0.3544679
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.354468).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 195.50it/s]53it [00:00, 271.55it/s]86it [00:00, 296.84it/s]86it [00:00, 231.61it/s]
+Epoch: 2 cost time: 0.45362067222595215
+0it [00:00, ?it/s]4it [00:00, 33.17it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4050623 Vali Loss: 0.3489352
+lr = 0.0000452264
+Validation loss decreased (0.354468 --> 0.348935).  Saving model ...
+0it [00:00, ?it/s]21it [00:00, 209.39it/s]52it [00:00, 267.01it/s]84it [00:00, 288.91it/s]86it [00:00, 219.14it/s]
+Epoch: 3 cost time: 0.4899559020996094
+0it [00:00, ?it/s]4it [00:00, 39.10it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4019110 Vali Loss: 0.3492965
+lr = 0.0000396967
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]18it [00:00, 175.86it/s]45it [00:00, 225.27it/s]71it [00:00, 236.97it/s]86it [00:00, 205.11it/s]
+Epoch: 4 cost time: 0.5178303718566895
+0it [00:00, ?it/s]4it [00:00, 33.36it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4014630 Vali Loss: 0.3481359
+lr = 0.0000327289
+Validation loss decreased (0.348935 --> 0.348136).  Saving model ...
+0it [00:00, ?it/s]17it [00:00, 168.32it/s]49it [00:00, 255.22it/s]81it [00:00, 283.76it/s]86it [00:00, 218.07it/s]
+Epoch: 5 cost time: 0.49480533599853516
+0it [00:00, ?it/s]4it [00:00, 36.03it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.4001509 Vali Loss: 0.3397237
+lr = 0.0000250050
+Validation loss decreased (0.348136 --> 0.339724).  Saving model ...
+0it [00:00, ?it/s]15it [00:00, 146.97it/s]41it [00:00, 210.51it/s]67it [00:00, 229.76it/s]86it [00:00, 190.53it/s]
+Epoch: 6 cost time: 0.5460023880004883
+0it [00:00, ?it/s]4it [00:00, 32.71it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3986964 Vali Loss: 0.3427848
+lr = 0.0000172811
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]17it [00:00, 164.83it/s]43it [00:00, 217.10it/s]69it [00:00, 233.50it/s]86it [00:00, 199.08it/s]
+Epoch: 7 cost time: 0.5359656810760498
+0it [00:00, ?it/s]4it [00:00, 36.32it/s]
+Epoch: 7, Steps: 86 | Train Loss: 0.3978803 Vali Loss: 0.3441103
+lr = 0.0000103133
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]19it [00:00, 186.12it/s]45it [00:00, 227.67it/s]71it [00:00, 241.12it/s]86it [00:00, 210.94it/s]
+Epoch: 8 cost time: 0.5242223739624023
+0it [00:00, ?it/s]4it [00:00, 39.32it/s]
+Epoch: 8, Steps: 86 | Train Loss: 0.3972053 Vali Loss: 0.3434154
+lr = 0.0000047836
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 139.07it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3746, mse:0.3608, rmse:0.6006, smape:65.4972
+mse_mean = 0.3608, mse_std = 0.0000
+mae_mean = 0.3746, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mswift-thunder-5482[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/g5hvxrm8[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154505-g5hvxrm8/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154518-v1err99g
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run drawn-snowball-5483
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/v1err99g
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.85it/s]34it [00:00, 137.30it/s]66it [00:00, 203.88it/s]86it [00:00, 163.95it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.622178316116333
+0it [00:00, ?it/s]4it [00:00, 37.06it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4394550 Vali Loss: 0.3539136
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.353914).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 175.61it/s]45it [00:00, 227.38it/s]70it [00:00, 237.57it/s]86it [00:00, 201.12it/s]
+Epoch: 2 cost time: 0.5248944759368896
+0it [00:00, ?it/s]4it [00:00, 35.42it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4044907 Vali Loss: 0.3465131
+lr = 0.0000452264
+Validation loss decreased (0.353914 --> 0.346513).  Saving model ...
+0it [00:00, ?it/s]19it [00:00, 188.16it/s]45it [00:00, 228.84it/s]71it [00:00, 241.40it/s]86it [00:00, 195.74it/s]
+Epoch: 3 cost time: 0.53757643699646
+0it [00:00, ?it/s]4it [00:00, 34.24it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4021591 Vali Loss: 0.3414515
+lr = 0.0000396967
+Validation loss decreased (0.346513 --> 0.341451).  Saving model ...
+0it [00:00, ?it/s]16it [00:00, 158.67it/s]48it [00:00, 250.78it/s]80it [00:00, 280.53it/s]86it [00:00, 223.75it/s]
+Epoch: 4 cost time: 0.4826986789703369
+0it [00:00, ?it/s]4it [00:00, 36.90it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4011419 Vali Loss: 0.3438302
+lr = 0.0000327289
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]16it [00:00, 159.92it/s]45it [00:00, 232.41it/s]74it [00:00, 255.13it/s]86it [00:00, 213.12it/s]
+Epoch: 5 cost time: 0.4983663558959961
+0it [00:00, ?it/s]4it [00:00, 35.12it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.4000283 Vali Loss: 0.3426654
+lr = 0.0000250050
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]20it [00:00, 196.97it/s]50it [00:00, 256.60it/s]76it [00:00, 257.74it/s]86it [00:00, 209.31it/s]
+Epoch: 6 cost time: 0.5102436542510986
+0it [00:00, ?it/s]4it [00:00, 28.99it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3988232 Vali Loss: 0.3437698
+lr = 0.0000172811
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 137.40it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3777, mse:0.3634, rmse:0.6028, smape:65.8345
+mse_mean = 0.3634, mse_std = 0.0000
+mae_mean = 0.3777, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mdrawn-snowball-5483[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/v1err99g[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154518-v1err99g/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154530-pfjg3o3o
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run rosy-serenity-5484
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/pfjg3o3o
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.99it/s]33it [00:00, 136.08it/s]66it [00:00, 207.27it/s]86it [00:00, 168.97it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.606501579284668
+0it [00:00, ?it/s]4it [00:00, 36.27it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4382767 Vali Loss: 0.3530997
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.353100).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 195.23it/s]51it [00:00, 257.46it/s]82it [00:00, 280.62it/s]86it [00:00, 237.19it/s]
+Epoch: 2 cost time: 0.44660496711730957
+0it [00:00, ?it/s]4it [00:00, 32.60it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4046110 Vali Loss: 0.3511104
+lr = 0.0000452264
+Validation loss decreased (0.353100 --> 0.351110).  Saving model ...
+0it [00:00, ?it/s]16it [00:00, 157.42it/s]42it [00:00, 216.60it/s]68it [00:00, 232.55it/s]86it [00:00, 191.88it/s]
+Epoch: 3 cost time: 0.5470473766326904
+0it [00:00, ?it/s]4it [00:00, 32.80it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4022318 Vali Loss: 0.3434149
+lr = 0.0000396967
+Validation loss decreased (0.351110 --> 0.343415).  Saving model ...
+0it [00:00, ?it/s]17it [00:00, 167.00it/s]49it [00:00, 253.78it/s]81it [00:00, 283.00it/s]86it [00:00, 227.53it/s]
+Epoch: 4 cost time: 0.48929834365844727
+0it [00:00, ?it/s]4it [00:00, 42.57it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4009931 Vali Loss: 0.3433788
+lr = 0.0000327289
+Validation loss decreased (0.343415 --> 0.343379).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 177.22it/s]49it [00:00, 251.56it/s]81it [00:00, 279.30it/s]86it [00:00, 223.79it/s]
+Epoch: 5 cost time: 0.4843881130218506
+0it [00:00, ?it/s]4it [00:00, 36.17it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.3998631 Vali Loss: 0.3457174
+lr = 0.0000250050
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]19it [00:00, 187.38it/s]51it [00:00, 260.50it/s]83it [00:00, 284.29it/s]86it [00:00, 228.32it/s]
+Epoch: 6 cost time: 0.4805786609649658
+0it [00:00, ?it/s]4it [00:00, 34.31it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3989051 Vali Loss: 0.3403106
+lr = 0.0000172811
+Validation loss decreased (0.343379 --> 0.340311).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 177.26it/s]46it [00:00, 235.88it/s]72it [00:00, 245.70it/s]86it [00:00, 208.09it/s]
+Epoch: 7 cost time: 0.49237513542175293
+0it [00:00, ?it/s]4it [00:00, 41.65it/s]
+Epoch: 7, Steps: 86 | Train Loss: 0.3981322 Vali Loss: 0.3429002
+lr = 0.0000103133
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]17it [00:00, 168.81it/s]43it [00:00, 219.06it/s]68it [00:00, 232.47it/s]86it [00:00, 192.74it/s]
+Epoch: 8 cost time: 0.5546350479125977
+0it [00:00, ?it/s]4it [00:00, 35.52it/s]
+Epoch: 8, Steps: 86 | Train Loss: 0.3974494 Vali Loss: 0.3422391
+lr = 0.0000047836
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]16it [00:00, 158.30it/s]42it [00:00, 217.80it/s]68it [00:00, 234.90it/s]86it [00:00, 197.68it/s]
+Epoch: 9 cost time: 0.5349557399749756
+0it [00:00, ?it/s]4it [00:00, 38.09it/s]
+Epoch: 9, Steps: 86 | Train Loss: 0.3967610 Vali Loss: 0.3419394
+lr = 0.0000012333
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 117.93it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3744, mse:0.3605, rmse:0.6004, smape:65.2936
+mse_mean = 0.3605, mse_std = 0.0000
+mae_mean = 0.3744, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mrosy-serenity-5484[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/pfjg3o3o[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154530-pfjg3o3o/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154544-ur8t81qu
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glamorous-energy-5485
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/ur8t81qu
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.48it/s]30it [00:00, 114.33it/s]56it [00:00, 165.53it/s]83it [00:00, 198.70it/s]86it [00:00, 145.16it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.6965498924255371
+0it [00:00, ?it/s]4it [00:00, 38.81it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4369713 Vali Loss: 0.3522714
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.352271).  Saving model ...
+0it [00:00, ?it/s]13it [00:00, 126.88it/s]39it [00:00, 202.23it/s]65it [00:00, 226.61it/s]86it [00:00, 192.68it/s]
+Epoch: 2 cost time: 0.5346450805664062
+0it [00:00, ?it/s]4it [00:00, 35.18it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4050574 Vali Loss: 0.3459705
+lr = 0.0000452264
+Validation loss decreased (0.352271 --> 0.345971).  Saving model ...
+0it [00:00, ?it/s]17it [00:00, 165.20it/s]49it [00:00, 254.41it/s]82it [00:00, 285.56it/s]86it [00:00, 229.46it/s]
+Epoch: 3 cost time: 0.4567084312438965
+0it [00:00, ?it/s]4it [00:00, 36.69it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4018486 Vali Loss: 0.3451760
+lr = 0.0000396967
+Validation loss decreased (0.345971 --> 0.345176).  Saving model ...
+0it [00:00, ?it/s]22it [00:00, 214.29it/s]54it [00:00, 274.71it/s]86it [00:00, 237.51it/s]
+Epoch: 4 cost time: 0.44416236877441406
+0it [00:00, ?it/s]4it [00:00, 32.31it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4009824 Vali Loss: 0.3497099
+lr = 0.0000327289
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]21it [00:00, 204.87it/s]52it [00:00, 262.11it/s]79it [00:00, 260.65it/s]86it [00:00, 216.79it/s]
+Epoch: 5 cost time: 0.5036797523498535
+0it [00:00, ?it/s]4it [00:00, 31.68it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.4004476 Vali Loss: 0.3404795
+lr = 0.0000250050
+Validation loss decreased (0.345176 --> 0.340479).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 175.08it/s]43it [00:00, 218.41it/s]69it [00:00, 233.49it/s]86it [00:00, 201.57it/s]
+Epoch: 6 cost time: 0.5231437683105469
+0it [00:00, ?it/s]4it [00:00, 36.58it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3989892 Vali Loss: 0.3396162
+lr = 0.0000172811
+Validation loss decreased (0.340479 --> 0.339616).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 198.15it/s]47it [00:00, 235.06it/s]76it [00:00, 257.36it/s]86it [00:00, 217.62it/s]
+Epoch: 7 cost time: 0.512505054473877
+0it [00:00, ?it/s]4it [00:00, 38.26it/s]
+Epoch: 7, Steps: 86 | Train Loss: 0.3981953 Vali Loss: 0.3378564
+lr = 0.0000103133
+Validation loss decreased (0.339616 --> 0.337856).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 193.78it/s]47it [00:00, 235.55it/s]74it [00:00, 249.10it/s]86it [00:00, 211.60it/s]
+Epoch: 8 cost time: 0.49081873893737793
+0it [00:00, ?it/s]4it [00:00, 40.57it/s]
+Epoch: 8, Steps: 86 | Train Loss: 0.3972195 Vali Loss: 0.3423437
+lr = 0.0000047836
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]20it [00:00, 198.29it/s]46it [00:00, 232.25it/s]72it [00:00, 242.75it/s]86it [00:00, 204.22it/s]
+Epoch: 9 cost time: 0.5035293102264404
+0it [00:00, ?it/s]4it [00:00, 34.28it/s]
+Epoch: 9, Steps: 86 | Train Loss: 0.3967417 Vali Loss: 0.3413840
+lr = 0.0000012333
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]16it [00:00, 156.56it/s]44it [00:00, 226.74it/s]72it [00:00, 249.64it/s]86it [00:00, 215.29it/s]
+Epoch: 10 cost time: 0.4802854061126709
+0it [00:00, ?it/s]4it [00:00, 40.99it/s]
+Epoch: 10, Steps: 86 | Train Loss: 0.3963019 Vali Loss: 0.3414215
+lr = 0.0000000100
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 140.42it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3741, mse:0.3612, rmse:0.6010, smape:65.2186
+mse_mean = 0.3612, mse_std = 0.0000
+mae_mean = 0.3741, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mglamorous-energy-5485[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/ur8t81qu[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154544-ur8t81qu/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154558-kvdifakl
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vital-aardvark-5486
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/kvdifakl
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.20it/s]33it [00:00, 121.17it/s]64it [00:00, 185.63it/s]86it [00:00, 153.22it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.677274227142334
+0it [00:00, ?it/s]4it [00:00, 35.06it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4372310 Vali Loss: 0.3533330
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.353333).  Saving model ...
+0it [00:00, ?it/s]15it [00:00, 149.52it/s]42it [00:00, 217.37it/s]68it [00:00, 233.04it/s]86it [00:00, 198.88it/s]
+Epoch: 2 cost time: 0.5445096492767334
+0it [00:00, ?it/s]4it [00:00, 36.53it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4046752 Vali Loss: 0.3443259
+lr = 0.0000452264
+Validation loss decreased (0.353333 --> 0.344326).  Saving model ...
+0it [00:00, ?it/s]22it [00:00, 215.03it/s]56it [00:00, 286.31it/s]85it [00:00, 286.29it/s]86it [00:00, 229.74it/s]
+Epoch: 3 cost time: 0.4737570285797119
+0it [00:00, ?it/s]4it [00:00, 34.79it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4021776 Vali Loss: 0.3468184
+lr = 0.0000396967
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]18it [00:00, 176.09it/s]50it [00:00, 256.46it/s]82it [00:00, 282.73it/s]86it [00:00, 227.97it/s]
+Epoch: 4 cost time: 0.47096800804138184
+0it [00:00, ?it/s]4it [00:00, 36.73it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4010283 Vali Loss: 0.3479962
+lr = 0.0000327289
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]20it [00:00, 199.83it/s]51it [00:00, 263.05it/s]78it [00:00, 263.93it/s]86it [00:00, 211.91it/s]
+Epoch: 5 cost time: 0.5052971839904785
+0it [00:00, ?it/s]4it [00:00, 30.63it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.3999265 Vali Loss: 0.3476390
+lr = 0.0000250050
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 136.03it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3770, mse:0.3631, rmse:0.6026, smape:65.8339
+mse_mean = 0.3631, mse_std = 0.0000
+mae_mean = 0.3770, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mvital-aardvark-5486[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/kvdifakl[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154558-kvdifakl/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154610-4vl6ybdc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fresh-planet-5487
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/4vl6ybdc
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.88it/s]30it [00:00, 120.75it/s]56it [00:00, 169.73it/s]82it [00:00, 199.26it/s]86it [00:00, 150.74it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.6669507026672363
+0it [00:00, ?it/s]4it [00:00, 40.41it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4384183 Vali Loss: 0.3495494
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.349549).  Saving model ...
+0it [00:00, ?it/s]17it [00:00, 166.19it/s]43it [00:00, 219.32it/s]69it [00:00, 233.99it/s]86it [00:00, 193.46it/s]
+Epoch: 2 cost time: 0.5436191558837891
+0it [00:00, ?it/s]4it [00:00, 33.72it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4053657 Vali Loss: 0.3451837
+lr = 0.0000452264
+Validation loss decreased (0.349549 --> 0.345184).  Saving model ...
+0it [00:00, ?it/s]21it [00:00, 204.64it/s]53it [00:00, 268.82it/s]85it [00:00, 291.65it/s]86it [00:00, 229.40it/s]
+Epoch: 3 cost time: 0.4755673408508301
+0it [00:00, ?it/s]4it [00:00, 32.24it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4023399 Vali Loss: 0.3489288
+lr = 0.0000396967
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]19it [00:00, 188.82it/s]45it [00:00, 228.66it/s]70it [00:00, 237.53it/s]86it [00:00, 196.54it/s]
+Epoch: 4 cost time: 0.5390548706054688
+0it [00:00, ?it/s]4it [00:00, 37.48it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4010749 Vali Loss: 0.3452289
+lr = 0.0000327289
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]19it [00:00, 187.23it/s]51it [00:00, 260.99it/s]83it [00:00, 285.50it/s]86it [00:00, 221.87it/s]
+Epoch: 5 cost time: 0.49160170555114746
+0it [00:00, ?it/s]4it [00:00, 34.50it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.4003037 Vali Loss: 0.3467315
+lr = 0.0000250050
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 129.43it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3776, mse:0.3656, rmse:0.6047, smape:65.6758
+mse_mean = 0.3656, mse_std = 0.0000
+mae_mean = 0.3776, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mfresh-planet-5487[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/4vl6ybdc[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154610-4vl6ybdc/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154620-gzz5ula3
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lunar-snow-5488
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/gzz5ula3
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.78it/s]34it [00:00, 135.79it/s]67it [00:00, 204.60it/s]86it [00:00, 167.20it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.6262829303741455
+0it [00:00, ?it/s]4it [00:00, 40.30it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4369908 Vali Loss: 0.3546892
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.354689).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 194.66it/s]53it [00:00, 271.59it/s]86it [00:00, 224.57it/s]
+Epoch: 2 cost time: 0.4684638977050781
+0it [00:00, ?it/s]4it [00:00, 35.31it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4052615 Vali Loss: 0.3520197
+lr = 0.0000452264
+Validation loss decreased (0.354689 --> 0.352020).  Saving model ...
+0it [00:00, ?it/s]21it [00:00, 202.61it/s]49it [00:00, 247.32it/s]78it [00:00, 263.93it/s]86it [00:00, 221.51it/s]
+Epoch: 3 cost time: 0.47200679779052734
+0it [00:00, ?it/s]4it [00:00, 41.14it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4022280 Vali Loss: 0.3465913
+lr = 0.0000396967
+Validation loss decreased (0.352020 --> 0.346591).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 179.62it/s]47it [00:00, 239.44it/s]73it [00:00, 248.44it/s]86it [00:00, 206.16it/s]
+Epoch: 4 cost time: 0.5029854774475098
+0it [00:00, ?it/s]4it [00:00, 41.19it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4009649 Vali Loss: 0.3411764
+lr = 0.0000327289
+Validation loss decreased (0.346591 --> 0.341176).  Saving model ...
+0it [00:00, ?it/s]19it [00:00, 184.92it/s]52it [00:00, 268.49it/s]85it [00:00, 295.93it/s]86it [00:00, 233.63it/s]
+Epoch: 5 cost time: 0.4599430561065674
+0it [00:00, ?it/s]4it [00:00, 33.90it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.3999805 Vali Loss: 0.3452033
+lr = 0.0000250050
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]15it [00:00, 149.51it/s]47it [00:00, 246.29it/s]79it [00:00, 276.20it/s]86it [00:00, 213.61it/s]
+Epoch: 6 cost time: 0.5033102035522461
+0it [00:00, ?it/s]4it [00:00, 32.11it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3988247 Vali Loss: 0.3421486
+lr = 0.0000172811
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]19it [00:00, 186.85it/s]50it [00:00, 257.83it/s]82it [00:00, 282.91it/s]86it [00:00, 224.74it/s]
+Epoch: 7 cost time: 0.4850504398345947
+0it [00:00, ?it/s]4it [00:00, 38.56it/s]
+Epoch: 7, Steps: 86 | Train Loss: 0.3980499 Vali Loss: 0.3415664
+lr = 0.0000103133
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 126.02it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3748, mse:0.3616, rmse:0.6013, smape:65.4094
+mse_mean = 0.3616, mse_std = 0.0000
+mae_mean = 0.3748, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mlunar-snow-5488[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/gzz5ula3[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154620-gzz5ula3/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154633-m2vgbt5g
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run usual-firebrand-5489
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/m2vgbt5g
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.56it/s]30it [00:00, 115.78it/s]56it [00:00, 166.45it/s]82it [00:00, 197.69it/s]86it [00:00, 144.64it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.7116756439208984
+0it [00:00, ?it/s]4it [00:00, 31.78it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4395000 Vali Loss: 0.3521959
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.352196).  Saving model ...
+0it [00:00, ?it/s]17it [00:00, 167.89it/s]51it [00:00, 263.81it/s]84it [00:00, 293.14it/s]86it [00:00, 235.87it/s]
+Epoch: 2 cost time: 0.4480552673339844
+0it [00:00, ?it/s]4it [00:00, 35.33it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4053130 Vali Loss: 0.3511609
+lr = 0.0000452264
+Validation loss decreased (0.352196 --> 0.351161).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 177.61it/s]51it [00:00, 261.94it/s]84it [00:00, 290.70it/s]86it [00:00, 231.50it/s]
+Epoch: 3 cost time: 0.45369768142700195
+0it [00:00, ?it/s]4it [00:00, 30.25it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4025008 Vali Loss: 0.3444009
+lr = 0.0000396967
+Validation loss decreased (0.351161 --> 0.344401).  Saving model ...
+0it [00:00, ?it/s]17it [00:00, 165.04it/s]44it [00:00, 223.66it/s]71it [00:00, 241.01it/s]86it [00:00, 198.04it/s]
+Epoch: 4 cost time: 0.5174438953399658
+0it [00:00, ?it/s]4it [00:00, 40.69it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4008292 Vali Loss: 0.3430849
+lr = 0.0000327289
+Validation loss decreased (0.344401 --> 0.343085).  Saving model ...
+0it [00:00, ?it/s]18it [00:00, 177.48it/s]51it [00:00, 263.48it/s]84it [00:00, 289.73it/s]86it [00:00, 227.28it/s]
+Epoch: 5 cost time: 0.46151041984558105
+0it [00:00, ?it/s]4it [00:00, 35.28it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.4001801 Vali Loss: 0.3491921
+lr = 0.0000250050
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]21it [00:00, 208.45it/s]54it [00:00, 277.06it/s]86it [00:00, 241.46it/s]
+Epoch: 6 cost time: 0.44269371032714844
+0it [00:00, ?it/s]4it [00:00, 34.02it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3991561 Vali Loss: 0.3452250
+lr = 0.0000172811
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]19it [00:00, 188.11it/s]46it [00:00, 232.77it/s]73it [00:00, 249.33it/s]86it [00:00, 212.76it/s]
+Epoch: 7 cost time: 0.49103307723999023
+0it [00:00, ?it/s]4it [00:00, 41.89it/s]
+Epoch: 7, Steps: 86 | Train Loss: 0.3980877 Vali Loss: 0.3433677
+lr = 0.0000103133
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 147.49it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3755, mse:0.3608, rmse:0.6006, smape:65.7359
+mse_mean = 0.3608, mse_std = 0.0000
+mae_mean = 0.3755, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33musual-firebrand-5489[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/m2vgbt5g[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154633-m2vgbt5g/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154646-8086u91f
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run young-meadow-5490
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/8086u91f
+Electricity_64_96_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+(5324, 33)
+downsampling factor:  12
+cuda:0
+0it [00:00, ?it/s]1it [00:00,  4.30it/s]33it [00:00, 122.65it/s]65it [00:00, 190.08it/s]86it [00:00, 153.45it/s]
+electricity.csv torch.Size([16, 33, 64]) torch.Size([16, 33, 96])
+Epoch: 1 cost time: 0.6858119964599609
+0it [00:00, ?it/s]4it [00:00, 35.05it/s]
+Epoch: 1, Steps: 86 | Train Loss: 0.4360120 Vali Loss: 0.3489457
+lr = 0.0000487767
+Validation loss decreased (inf --> 0.348946).  Saving model ...
+0it [00:00, ?it/s]16it [00:00, 155.78it/s]43it [00:00, 217.95it/s]69it [00:00, 233.41it/s]86it [00:00, 197.32it/s]
+Epoch: 2 cost time: 0.5300729274749756
+0it [00:00, ?it/s]4it [00:00, 35.72it/s]
+Epoch: 2, Steps: 86 | Train Loss: 0.4045918 Vali Loss: 0.3425207
+lr = 0.0000452264
+Validation loss decreased (0.348946 --> 0.342521).  Saving model ...
+0it [00:00, ?it/s]13it [00:00, 128.40it/s]46it [00:00, 246.01it/s]79it [00:00, 282.79it/s]86it [00:00, 215.19it/s]
+Epoch: 3 cost time: 0.4865455627441406
+0it [00:00, ?it/s]4it [00:00, 35.39it/s]
+Epoch: 3, Steps: 86 | Train Loss: 0.4021929 Vali Loss: 0.3412797
+lr = 0.0000396967
+Validation loss decreased (0.342521 --> 0.341280).  Saving model ...
+0it [00:00, ?it/s]20it [00:00, 197.21it/s]53it [00:00, 268.49it/s]80it [00:00, 266.73it/s]86it [00:00, 212.47it/s]
+Epoch: 4 cost time: 0.49892282485961914
+0it [00:00, ?it/s]4it [00:00, 35.57it/s]
+Epoch: 4, Steps: 86 | Train Loss: 0.4010444 Vali Loss: 0.3446583
+lr = 0.0000327289
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]16it [00:00, 155.47it/s]42it [00:00, 214.84it/s]68it [00:00, 233.32it/s]86it [00:00, 195.62it/s]
+Epoch: 5 cost time: 0.5303959846496582
+0it [00:00, ?it/s]4it [00:00, 37.14it/s]
+Epoch: 5, Steps: 86 | Train Loss: 0.4001455 Vali Loss: 0.3459062
+lr = 0.0000250050
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]21it [00:00, 204.11it/s]53it [00:00, 269.38it/s]84it [00:00, 286.13it/s]86it [00:00, 229.69it/s]
+Epoch: 6 cost time: 0.46735596656799316
+0it [00:00, ?it/s]4it [00:00, 37.17it/s]
+Epoch: 6, Steps: 86 | Train Loss: 0.3991289 Vali Loss: 0.3396676
+lr = 0.0000172811
+Validation loss decreased (0.341280 --> 0.339668).  Saving model ...
+0it [00:00, ?it/s]16it [00:00, 157.58it/s]48it [00:00, 250.04it/s]80it [00:00, 280.60it/s]86it [00:00, 220.98it/s]
+Epoch: 7 cost time: 0.47957587242126465
+0it [00:00, ?it/s]4it [00:00, 42.26it/s]
+Epoch: 7, Steps: 86 | Train Loss: 0.3981024 Vali Loss: 0.3424656
+lr = 0.0000103133
+EarlyStopping counter: 1 out of 3
+0it [00:00, ?it/s]16it [00:00, 159.52it/s]43it [00:00, 223.94it/s]69it [00:00, 236.42it/s]86it [00:00, 191.64it/s]
+Epoch: 8 cost time: 0.5413036346435547
+0it [00:00, ?it/s]4it [00:00, 28.03it/s]
+Epoch: 8, Steps: 86 | Train Loss: 0.3972484 Vali Loss: 0.3435037
+lr = 0.0000047836
+EarlyStopping counter: 2 out of 3
+0it [00:00, ?it/s]13it [00:00, 128.16it/s]43it [00:00, 225.96it/s]69it [00:00, 238.44it/s]86it [00:00, 197.42it/s]
+Epoch: 9 cost time: 0.522489070892334
+0it [00:00, ?it/s]4it [00:00, 34.88it/s]
+Epoch: 9, Steps: 86 | Train Loss: 0.3967196 Vali Loss: 0.3412330
+lr = 0.0000012333
+EarlyStopping counter: 3 out of 3
+Early stopping
+------------------------------------
+0it [00:00, ?it/s]17it [00:00, 125.33it/s]
+test shape: (17, 16, 33, 96) (17, 16, 33, 96)
+test shape: (272, 33, 96) (272, 33, 96)
+mae:0.3743, mse:0.3604, rmse:0.6004, smape:65.3091
+mse_mean = 0.3604, mse_std = 0.0000
+mae_mean = 0.3743, mae_std = 0.0000
+Electricity
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33myoung-meadow-5490[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/8086u91f[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154646-8086u91f/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154700-0pl6x5um
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vibrant-smoke-5491
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/0pl6x5um
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mvibrant-smoke-5491[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/0pl6x5um[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154700-0pl6x5um/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154705-c3uec265
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run whole-leaf-5492
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/c3uec265
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mwhole-leaf-5492[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/c3uec265[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154705-c3uec265/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154710-24nht2pp
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run desert-sound-5493
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/24nht2pp
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mdesert-sound-5493[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/24nht2pp[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154710-24nht2pp/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154715-of6ygmr3
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run bright-frost-5494
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/of6ygmr3
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mbright-frost-5494[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/of6ygmr3[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154715-of6ygmr3/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154720-82fx950j
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run eager-bird-5495
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/82fx950j
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33meager-bird-5495[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/82fx950j[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154720-82fx950j/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154724-s0nob31x
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run devout-night-5496
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/s0nob31x
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mdevout-night-5496[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/s0nob31x[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154724-s0nob31x/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154729-abuuph0f
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run iconic-grass-5497
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/abuuph0f
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33miconic-grass-5497[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/abuuph0f[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154729-abuuph0f/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154734-szml17ie
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ethereal-wind-5498
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/szml17ie
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33methereal-wind-5498[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/szml17ie[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154734-szml17ie/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154739-qvkifau7
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run copper-violet-5499
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/qvkifau7
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mcopper-violet-5499[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/qvkifau7[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154739-qvkifau7/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154744-tfb1lw49
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run neat-morning-5500
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/tfb1lw49
+Electricity_64_192_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mneat-morning-5500[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/tfb1lw49[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154744-tfb1lw49/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154749-iqr2hds5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run easy-moon-5501
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/iqr2hds5
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33measy-moon-5501[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/iqr2hds5[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154749-iqr2hds5/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154753-kdd3agww
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vibrant-rain-5502
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/kdd3agww
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mvibrant-rain-5502[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/kdd3agww[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154753-kdd3agww/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154758-yx4u65fo
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run expert-wave-5503
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/yx4u65fo
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mexpert-wave-5503[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/yx4u65fo[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154758-yx4u65fo/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154803-szlgh6md
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glorious-lake-5504
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/szlgh6md
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mglorious-lake-5504[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/szlgh6md[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154803-szlgh6md/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154808-utk9tppl
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run drawn-river-5505
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/utk9tppl
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mdrawn-river-5505[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/utk9tppl[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154808-utk9tppl/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154813-x8zydpe0
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run twilight-valley-5506
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/x8zydpe0
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mtwilight-valley-5506[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/x8zydpe0[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154813-x8zydpe0/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154818-2itffpxj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run silver-terrain-5507
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/2itffpxj
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33msilver-terrain-5507[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/2itffpxj[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154818-2itffpxj/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154823-qdugh7xg
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run tough-river-5508
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/qdugh7xg
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mtough-river-5508[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/qdugh7xg[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154823-qdugh7xg/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154827-4k508qd0
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run legendary-cherry-5509
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/4k508qd0
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mlegendary-cherry-5509[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/4k508qd0[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154827-4k508qd0/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154832-thg1tvbl
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run exalted-sunset-5510
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/thg1tvbl
+Electricity_64_336_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mexalted-sunset-5510[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/thg1tvbl[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154832-thg1tvbl/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154837-tizgdxhu
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run pious-capybara-5511
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/tizgdxhu
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mpious-capybara-5511[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/tizgdxhu[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154837-tizgdxhu/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154842-c5rl7er2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ethereal-thunder-5512
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/c5rl7er2
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33methereal-thunder-5512[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/c5rl7er2[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154842-c5rl7er2/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154847-qlq2zn9x
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lively-forest-5513
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/qlq2zn9x
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mlively-forest-5513[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/qlq2zn9x[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154847-qlq2zn9x/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154852-jnldmfp5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run sandy-moon-5514
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/jnldmfp5
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33msandy-moon-5514[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/jnldmfp5[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154852-jnldmfp5/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154856-zrdq2s7e
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run super-flower-5515
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/zrdq2s7e
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33msuper-flower-5515[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/zrdq2s7e[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154856-zrdq2s7e/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154901-ezfnie1f
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run pious-pond-5516
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/ezfnie1f
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mpious-pond-5516[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/ezfnie1f[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154901-ezfnie1f/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154906-iu2tvbfn
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run sparkling-bee-5517
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/iu2tvbfn
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33msparkling-bee-5517[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/iu2tvbfn[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154906-iu2tvbfn/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154911-730a8zew
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run wandering-plant-5518
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/730a8zew
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mwandering-plant-5518[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/730a8zew[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154911-730a8zew/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154916-nt0ss3if
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run honest-oath-5519
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/nt0ss3if
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mhonest-oath-5519[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/nt0ss3if[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154916-nt0ss3if/logs[0m
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/wandb/run-20250205_154921-j6i4beu6
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run swift-waterfall-5520
+wandb: ⭐️ View project at https://wandb.ai/owucla/TimeMamba
+wandb: 🚀 View run at https://wandb.ai/owucla/TimeMamba/runs/j6i4beu6
+Electricity_64_720_
+(18412, 33)
+downsampling factor:  12
+(2696, 33)
+downsampling factor:  12
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/main.py", line 158, in <module>
+    vali_data, vali_loader = data_provider(args, 'val')
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/customLLMsForTimeSeries/PAttn/data_provider/data_factory.py", line 48, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mswift-waterfall-5520[0m at: [34mhttps://wandb.ai/owucla/TimeMamba/runs/j6i4beu6[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250205_154921-j6i4beu6/logs[0m

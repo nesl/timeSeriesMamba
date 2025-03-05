@@ -55,9 +55,12 @@ class Model(nn.Module):
                 configs.enc_in * configs.seq_len, configs.num_class)
 
     def encoder(self, x):
+        #seasonal_init, trend_init = self.decompsition(x)
+
         seasonal_init, trend_init = self.decompsition(x)
         seasonal_init = seasonal_init.to(torch.bfloat16)
         trend_init = trend_init.to(torch.bfloat16)
+
         seasonal_init, trend_init = seasonal_init.permute(
             0, 2, 1), trend_init.permute(0, 2, 1)
         if self.individual:

@@ -110,7 +110,7 @@ for combo in "${combinations[@]}"; do
       --llm_model $llm_model \
       --llm_dim $d_model \
       --num_params $num_params \
-      --use_wandb 0 \
+      --use_wandb 1 \
       --verbose 1 \
       --seed $seed
 

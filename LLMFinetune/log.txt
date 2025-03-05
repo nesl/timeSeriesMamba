@@ -1,0 +1,80 @@
+WARNING[XFORMERS]: xFormers can't load C++/CUDA extensions. xFormers was built for:
+    PyTorch 2.6.0+cu124 with CUDA 1204 (you have 2.2.2+cu121)
+    Python  3.11.11 (you have 3.11.9)
+  Please reinstall xformers (see https://github.com/facebookresearch/xformers#installing-xformers)
+  Memory-efficient attention, SwiGLU, sparse and more won't be available.
+  Set XFORMERS_MORE_DETAILS=1 for more details
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+[2025-03-02 15:58:40,130] [INFO] [real_accelerator.py:222:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+Unsloth 2025.2.15 patched 16 layers with 16 QKV layers, 16 O layers and 16 MLP layers.
+==((====))==  Unsloth 2025.2.15: Fast Llama patching. Transformers: 4.48.2.
+   \\   /|    GPU: NVIDIA H100 NVL. Max memory: 93.096 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.2.2+cu121. CUDA: 9.0. CUDA Toolkit: 12.1. Triton: 2.2.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free Apache license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+Standardizing format:   0%|          | 0/30 [00:00<?, ? examples/s]Standardizing format: 100%|██████████| 30/30 [00:00<00:00, 13657.78 examples/s]
+Standardizing format:   0%|          | 0/2 [00:00<?, ? examples/s]Standardizing format: 100%|██████████| 2/2 [00:00<00:00, 1487.08 examples/s]
+Map:   0%|          | 0/30 [00:00<?, ? examples/s]Map: 100%|██████████| 30/30 [00:00<00:00, 2273.83 examples/s]
+Map:   0%|          | 0/2 [00:00<?, ? examples/s]Map: 100%|██████████| 2/2 [00:00<00:00, 940.53 examples/s]
+num_proc must be <= 30. Reducing num_proc to 30 for dataset of size 30.
+Converting train dataset to ChatML (num_proc=30):   0%|          | 0/30 [00:00<?, ? examples/s]Converting train dataset to ChatML (num_proc=30):  57%|█████▋    | 17/30 [00:00<00:00, 168.11 examples/s]Converting train dataset to ChatML (num_proc=30): 100%|██████████| 30/30 [00:00<00:00, 147.43 examples/s]
+num_proc must be <= 30. Reducing num_proc to 30 for dataset of size 30.
+Applying chat template to train dataset (num_proc=30):   0%|          | 0/30 [00:00<?, ? examples/s]Applying chat template to train dataset (num_proc=30):   3%|▎         | 1/30 [00:00<00:15,  1.88 examples/s]Applying chat template to train dataset (num_proc=30):  10%|█         | 3/30 [00:00<00:05,  4.69 examples/s]Applying chat template to train dataset (num_proc=30):  13%|█▎        | 4/30 [00:00<00:04,  5.69 examples/s]Applying chat template to train dataset (num_proc=30):  17%|█▋        | 5/30 [00:00<00:03,  6.50 examples/s]Applying chat template to train dataset (num_proc=30):  20%|██        | 6/30 [00:01<00:03,  7.25 examples/s]Applying chat template to train dataset (num_proc=30):  23%|██▎       | 7/30 [00:01<00:02,  7.88 examples/s]Applying chat template to train dataset (num_proc=30):  27%|██▋       | 8/30 [00:01<00:02,  8.38 examples/s]Applying chat template to train dataset (num_proc=30):  30%|███       | 9/30 [00:01<00:02,  8.70 examples/s]Applying chat template to train dataset (num_proc=30):  33%|███▎      | 10/30 [00:01<00:02,  8.85 examples/s]Applying chat template to train dataset (num_proc=30):  37%|███▋      | 11/30 [00:01<00:02,  9.06 examples/s]Applying chat template to train dataset (num_proc=30):  40%|████      | 12/30 [00:01<00:01,  9.21 examples/s]Applying chat template to train dataset (num_proc=30):  43%|████▎     | 13/30 [00:01<00:01,  9.31 examples/s]Applying chat template to train dataset (num_proc=30):  47%|████▋     | 14/30 [00:01<00:01,  9.24 examples/s]Applying chat template to train dataset (num_proc=30):  50%|█████     | 15/30 [00:02<00:01,  9.35 examples/s]Applying chat template to train dataset (num_proc=30):  53%|█████▎    | 16/30 [00:02<00:01,  7.16 examples/s]Applying chat template to train dataset (num_proc=30):  60%|██████    | 18/30 [00:02<00:01,  9.92 examples/s]Applying chat template to train dataset (num_proc=30):  67%|██████▋   | 20/30 [00:02<00:01,  9.66 examples/s]Applying chat template to train dataset (num_proc=30):  73%|███████▎  | 22/30 [00:02<00:00,  9.45 examples/s]Applying chat template to train dataset (num_proc=30):  80%|████████  | 24/30 [00:02<00:00,  9.40 examples/s]Applying chat template to train dataset (num_proc=30):  83%|████████▎ | 25/30 [00:03<00:00,  9.33 examples/s]Applying chat template to train dataset (num_proc=30):  87%|████████▋ | 26/30 [00:03<00:00,  9.27 examples/s]Applying chat template to train dataset (num_proc=30):  93%|█████████▎| 28/30 [00:03<00:00,  9.56 examples/s]Applying chat template to train dataset (num_proc=30):  97%|█████████▋| 29/30 [00:03<00:00,  9.38 examples/s]Applying chat template to train dataset (num_proc=30): 100%|██████████| 30/30 [00:03<00:00,  9.38 examples/s]Applying chat template to train dataset (num_proc=30): 100%|██████████| 30/30 [00:03<00:00,  8.12 examples/s]
+num_proc must be <= 30. Reducing num_proc to 30 for dataset of size 30.
+Tokenizing train dataset (num_proc=30):   0%|          | 0/30 [00:00<?, ? examples/s]Tokenizing train dataset (num_proc=30):   3%|▎         | 1/30 [00:00<00:17,  1.61 examples/s]Tokenizing train dataset (num_proc=30):  10%|█         | 3/30 [00:00<00:05,  5.00 examples/s]Tokenizing train dataset (num_proc=30):  17%|█▋        | 5/30 [00:00<00:03,  6.57 examples/s]Tokenizing train dataset (num_proc=30):  23%|██▎       | 7/30 [00:01<00:03,  7.62 examples/s]Tokenizing train dataset (num_proc=30):  30%|███       | 9/30 [00:01<00:02,  7.97 examples/s]Tokenizing train dataset (num_proc=30):  33%|███▎      | 10/30 [00:01<00:02,  8.26 examples/s]Tokenizing train dataset (num_proc=30):  37%|███▋      | 11/30 [00:01<00:02,  8.42 examples/s]Tokenizing train dataset (num_proc=30):  40%|████      | 12/30 [00:01<00:02,  8.52 examples/s]Tokenizing train dataset (num_proc=30):  43%|████▎     | 13/30 [00:01<00:01,  8.65 examples/s]Tokenizing train dataset (num_proc=30):  47%|████▋     | 14/30 [00:01<00:01,  8.71 examples/s]Tokenizing train dataset (num_proc=30):  50%|█████     | 15/30 [00:02<00:01,  8.88 examples/s]Tokenizing train dataset (num_proc=30):  53%|█████▎    | 16/30 [00:02<00:01,  8.87 examples/s]Tokenizing train dataset (num_proc=30):  57%|█████▋    | 17/30 [00:02<00:01,  8.85 examples/s]Tokenizing train dataset (num_proc=30):  60%|██████    | 18/30 [00:02<00:01,  8.86 examples/s]Tokenizing train dataset (num_proc=30):  63%|██████▎   | 19/30 [00:02<00:01,  8.81 examples/s]Tokenizing train dataset (num_proc=30):  67%|██████▋   | 20/30 [00:02<00:01,  8.82 examples/s]Tokenizing train dataset (num_proc=30):  70%|███████   | 21/30 [00:02<00:01,  8.84 examples/s]Tokenizing train dataset (num_proc=30):  73%|███████▎  | 22/30 [00:02<00:00,  8.85 examples/s]Tokenizing train dataset (num_proc=30):  77%|███████▋  | 23/30 [00:02<00:00,  8.83 examples/s]Tokenizing train dataset (num_proc=30):  80%|████████  | 24/30 [00:03<00:00,  8.87 examples/s]Tokenizing train dataset (num_proc=30):  83%|████████▎ | 25/30 [00:03<00:00,  9.03 examples/s]Tokenizing train dataset (num_proc=30):  87%|████████▋ | 26/30 [00:03<00:00,  8.97 examples/s]Tokenizing train dataset (num_proc=30):  90%|█████████ | 27/30 [00:03<00:00,  9.22 examples/s]Tokenizing train dataset (num_proc=30):  93%|█████████▎| 28/30 [00:03<00:00,  9.35 examples/s]Tokenizing train dataset (num_proc=30): 100%|██████████| 30/30 [00:03<00:00,  9.69 examples/s]Tokenizing train dataset (num_proc=30): 100%|██████████| 30/30 [00:03<00:00,  7.98 examples/s]
+num_proc must be <= 30. Reducing num_proc to 30 for dataset of size 30.
+Tokenizing train dataset (num_proc=30):   0%|          | 0/30 [00:00<?, ? examples/s]Tokenizing train dataset (num_proc=30):  27%|██▋       | 8/30 [00:00<00:00, 78.70 examples/s]Tokenizing train dataset (num_proc=30): 100%|██████████| 30/30 [00:00<00:00, 144.05 examples/s]
+num_proc must be <= 2. Reducing num_proc to 2 for dataset of size 2.
+Converting eval dataset to ChatML (num_proc=2):   0%|          | 0/2 [00:00<?, ? examples/s]Converting eval dataset to ChatML (num_proc=2): 100%|██████████| 2/2 [00:00<00:00, 18.48 examples/s]
+num_proc must be <= 2. Reducing num_proc to 2 for dataset of size 2.
+Applying chat template to eval dataset (num_proc=2):   0%|          | 0/2 [00:00<?, ? examples/s]Applying chat template to eval dataset (num_proc=2):  50%|█████     | 1/2 [00:00<00:00,  1.91 examples/s]Applying chat template to eval dataset (num_proc=2): 100%|██████████| 2/2 [00:00<00:00,  3.62 examples/s]Applying chat template to eval dataset (num_proc=2): 100%|██████████| 2/2 [00:00<00:00,  2.85 examples/s]
+num_proc must be <= 2. Reducing num_proc to 2 for dataset of size 2.
+Tokenizing eval dataset (num_proc=2):   0%|          | 0/2 [00:00<?, ? examples/s]Tokenizing eval dataset (num_proc=2):  50%|█████     | 1/2 [00:00<00:00,  1.84 examples/s]Tokenizing eval dataset (num_proc=2): 100%|██████████| 2/2 [00:00<00:00,  3.44 examples/s]Tokenizing eval dataset (num_proc=2): 100%|██████████| 2/2 [00:00<00:00,  2.71 examples/s]
+num_proc must be <= 2. Reducing num_proc to 2 for dataset of size 2.
+Tokenizing eval dataset (num_proc=2):   0%|          | 0/2 [00:00<?, ? examples/s]Tokenizing eval dataset (num_proc=2): 100%|██████████| 2/2 [00:00<00:00, 16.16 examples/s]
+Map:   0%|          | 0/30 [00:00<?, ? examples/s]Map: 100%|██████████| 30/30 [00:00<00:00, 3114.20 examples/s]
+Map:   0%|          | 0/2 [00:00<?, ? examples/s]Map: 100%|██████████| 2/2 [00:00<00:00, 940.64 examples/s]
+==((====))==  Unsloth - 2x faster free finetuning | Num GPUs = 1
+   \\   /|    Num examples = 30 | Num Epochs = 2
+O^O/ \_/ \    Batch size per device = 2 | Gradient Accumulation steps = 4
+\        /    Total batch size = 8 | Total steps = 6
+ "-____-"     Number of trainable parameters = 11,272,192
+wandb: WARNING The `run_name` is currently set to the same value as `TrainingArguments.output_dir`. If this was not intended, please specify a different run name by setting the `TrainingArguments.run_name` parameter.
+wandb: Currently logged in as: owang22 (owucla). Use `wandb login --relogin` to force relogin
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Tracking run with wandb version 0.19.2
+wandb: Run data is saved locally in /home/nesl/oliver/timeSeriesMamba/LLMFinetune/wandb/run-20250302_155902-vrje1ik8
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run outputs
+wandb: ⭐️ View project at https://wandb.ai/owucla/huggingface
+wandb: 🚀 View run at https://wandb.ai/owucla/huggingface/runs/vrje1ik8
+GPU = NVIDIA H100 NVL. Max memory = 93.096 GB.
+1.088 GB of memory reserved.
+Running round #0..
+  0%|          | 0/6 [00:00<?, ?it/s] 17%|█▋        | 1/6 [00:02<00:14,  2.98s/it]                                              17%|█▋        | 1/6 [00:02<00:14,  2.98s/it] 33%|███▎      | 2/6 [00:03<00:06,  1.50s/it]                                              33%|███▎      | 2/6 [00:03<00:06,  1.50s/it] 50%|█████     | 3/6 [00:04<00:03,  1.10s/it]                                              50%|█████     | 3/6 [00:04<00:03,  1.10s/it]Unsloth: Not an error, but LlamaForCausalLM does not accept `num_items_in_batch`.
+Using gradient accumulation will be very slightly less accurate.
+Read more on gradient accumulation issues here: https://unsloth.ai/blog/gradient
+{'loss': 0.4297, 'grad_norm': 1.9606654644012451, 'learning_rate': 4e-05, 'mean_token_accuracy': 0.8963421732187271, 'epoch': 0.27}
+{'loss': 0.4298, 'grad_norm': 1.6006975173950195, 'learning_rate': 8e-05, 'mean_token_accuracy': 0.895443931221962, 'epoch': 0.53}
+{'loss': 0.5013, 'grad_norm': 1.9652434587478638, 'learning_rate': 0.00012, 'mean_token_accuracy': 0.878288134932518, 'epoch': 0.8}
+
+  0%|          | 0/1 [00:00<?, ?it/s][A                                             
+                                     [A 50%|█████     | 3/6 [00:04<00:03,  1.10s/it]
+100%|██████████| 1/1 [00:00<00:00, 665.66it/s][A
+                                              [A 67%|██████▋   | 4/6 [00:04<00:01,  1.04it/s]                                              67%|██████▋   | 4/6 [00:04<00:01,  1.04it/s] 83%|████████▎ | 5/6 [00:05<00:00,  1.28it/s]                                              83%|████████▎ | 5/6 [00:05<00:00,  1.28it/s]100%|██████████| 6/6 [00:05<00:00,  1.49it/s]                                             100%|██████████| 6/6 [00:05<00:00,  1.49it/s]{'eval_loss': 1.1955900192260742, 'eval_runtime': 0.0614, 'eval_samples_per_second': 32.597, 'eval_steps_per_second': 16.298, 'eval_mean_token_accuracy': 0.8402693867683411, 'epoch': 0.8}
+{'loss': 0.8455, 'grad_norm': 3.5513362884521484, 'learning_rate': 0.00016, 'mean_token_accuracy': 0.8987071514129639, 'epoch': 1.27}
+{'loss': 0.2713, 'grad_norm': 1.649416208267212, 'learning_rate': 0.0002, 'mean_token_accuracy': 0.9297363758087158, 'epoch': 1.53}
+{'loss': 0.1107, 'grad_norm': 0.7609516382217407, 'learning_rate': 0.0, 'mean_token_accuracy': 0.9755854308605194, 'epoch': 1.8}
+
+  0%|          | 0/1 [00:00<?, ?it/s][A                                             
+                                     [A100%|██████████| 6/6 [00:06<00:00,  1.49it/s]
+100%|██████████| 1/1 [00:00<00:00, 717.34it/s][A
+                                              [A                                             100%|██████████| 6/6 [00:06<00:00,  1.49it/s]100%|██████████| 6/6 [00:06<00:00,  1.10s/it]
+{'eval_loss': 1.1968077421188354, 'eval_runtime': 0.0414, 'eval_samples_per_second': 48.255, 'eval_steps_per_second': 24.128, 'eval_mean_token_accuracy': 0.7425897121429443, 'epoch': 1.8}
+{'train_runtime': 7.6719, 'train_samples_per_second': 7.821, 'train_steps_per_second': 0.782, 'train_loss': 0.43138913561900455, 'epoch': 1.8}
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 1440.85it/s]
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33moutputs[0m at: [34mhttps://wandb.ai/owucla/huggingface/runs/vrje1ik8[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250302_155902-vrje1ik8/logs[0m

@@ -2,11 +2,20 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import shutil
-
+import os
+import pandas as pd
 from tqdm import tqdm
 
 plt.switch_backend('agg')
 
+def scale_data(output, scaler):
+    if scaler == 'custom_robust':
+        output = (output['result'] * output['scale'][1].squeeze(-1)) + output['scale'][0].squeeze(-1)
+    elif scaler == 'min_max':
+        output = (output['result'] * (output['scale'][0].squeeze(-1) - output['scale'][1].squeeze(-1))) + output['scale'][1].squeeze(-1)
+    elif scaler == 'identity':
+        output = output['result']
+    return output
 
 def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printout=True):
     if args.lradj == 'type1':
@@ -36,14 +45,15 @@ def adjust_learning_rate(accelerator, optimizer, scheduler, epoch, args, printou
 
 
 class EarlyStopping:
-    def __init__(self, accelerator=None, patience=7, verbose=False, delta=0, save_mode=True):
+    def __init__(self, accelerator=None, patience=7, verbose=True, delta=0, save_mode=True):
         self.accelerator = accelerator
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
         self.best_score = None
         self.early_stop = False
-        self.val_loss_min = np.Inf
+        #self.val_loss_min = np.Inf
+        self.val_loss_min = np.inf
         self.delta = delta
         self.save_mode = save_mode
 
@@ -51,7 +61,8 @@ class EarlyStopping:
         score = -val_loss
         if self.best_score is None:
             self.best_score = score
-            if self.save_mode:
+            #if self.save_mode:
+            if True:
                 self.save_checkpoint(val_loss, model, path)
         elif score < self.best_score + self.delta:
             self.counter += 1
@@ -63,7 +74,8 @@ class EarlyStopping:
                 self.early_stop = True
         else:
             self.best_score = score
-            if self.save_mode:
+            #if self.save_mode:
+            if True:
                 self.save_checkpoint(val_loss, model, path)
             self.counter = 0
 
@@ -78,6 +90,8 @@ class EarlyStopping:
 
         if self.accelerator is not None:
             model = self.accelerator.unwrap_model(model)
+            #for param_tensor in model.state_dict():
+                #print(param_tensor, "\n", model.state_dict()[param_tensor].size())
             torch.save(model.state_dict(), path + '/' + 'checkpoint')
         else:
             torch.save(model.state_dict(), path + '/' + 'checkpoint')
@@ -134,10 +148,13 @@ def del_files(dir_path):
     shutil.rmtree(dir_path)
 
 
-def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
+def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric, csvpath="None"):
     total_loss = []
     total_mae_loss = []
     model.eval()
+    preds = []
+    trues = []
+
     with torch.no_grad():
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
             batch_x = batch_x.float().to(accelerator.device)
@@ -158,7 +175,20 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
                     else:
                         outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
             else:
-                if args.output_attention:
+                if args.model == "Mamba4Cast":
+                    x = {}
+                    x['ts'] = batch_x_mark
+                    x['history'] = batch_x
+                    x['target_dates'] = batch_y_mark
+                    x['task'] = torch.zeros(1,args.pred_len).int().to(accelerator.device) #the zeros should be width of the output
+                    print("ts shape:", x['ts'].shape)
+                    print("history shape:", x['history'].shape)
+                    print("target_dates shape:", x['target_dates'].shape)
+                    print("ts: ", x['ts'])
+                    output = model(x, args.pred_len)
+                    output = scale_data(output, scaler)
+            
+                elif args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                 else:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
@@ -171,6 +201,8 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
 
             pred = outputs.detach()
             true = batch_y.detach()
+            preds.append(pred)
+            trues.append(true)
 
             loss = criterion(pred, true)
 
@@ -181,7 +213,44 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric
 
     total_loss = np.average(total_loss)
     total_mae_loss = np.average(total_mae_loss)
+    
+    if csvpath is not "None":
+        folder_path = csvpath + '/valiResults/' 
+        
+        if not os.path.exists(folder_path) and accelerator.is_local_main_process:
+            os.makedirs(folder_path)
+        #print("pred!: ", preds[0].shape)
+        #print("trues!: ", trues[0].shape)
+        
+        # Stack the list of tensors into a single PyTorch tensor
+        preds_stacked = torch.stack(preds, dim=0)  # Resulting shape: [32, 96, 1]
+        trues_stacked = torch.stack(trues, dim=0)  # Resulting shape: [32, 96, 1]
 
+        # Convert the PyTorch tensor to a NumPy array
+        preds_numpy = preds_stacked.float().cpu().numpy()
+        trues_numpy = trues_stacked.float().cpu().numpy()
+
+
+        # Reshape the array to 2D shape [32, 96]
+        preds_reshaped = preds_numpy.reshape(preds_numpy.shape[0], -1)
+        trues_reshaped = trues_numpy.reshape(trues_numpy.shape[0], -1)
+
+        # Create column names for each of the 96 prediction steps
+        pcolumns = [f'V{i + 1}' for i in range(preds_reshaped.shape[1])]
+        tcolumns = [f'V{i + 1}' for i in range(trues_reshaped.shape[1])]
+
+        # Create the DataFrame
+        forecasts_df = pd.DataFrame(preds_reshaped, columns=pcolumns)
+        trues_df = pd.DataFrame(trues_reshaped, columns=tcolumns)
+
+        # Export the DataFrame to a CSV file
+        forecasts_df.to_csv(folder_path+'forecasts.csv', index=False)
+        trues_df.to_csv(folder_path+'trues.csv', index=False)
+        
+
+        # Print the resulting DataFrame
+        #print(forecasts_df.head())
+        
     model.train()
     return total_loss, total_mae_loss
 

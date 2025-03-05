@@ -24,7 +24,7 @@ for seed in $(seq 1 10); do
 python $tag_file \
     --root_path ./datasets/ETT-small/ \
     --data_path ETTh1.csv \
-    --model_id 'ETTh1_'$inp_len_h'_'$pred_len'_simple_'$method \
+    --model_id 'ETTh1_'$inp_len_h'_'$pred_len \
     --data ett_h \
     --seq_len $inp_len_h \
     --label_len 0 \
@@ -67,7 +67,7 @@ for seed in $(seq 1 10); do
 python $tag_file \
     --root_path ./datasets/ETT-small/ \
     --data_path ETTh2.csv \
-    --model_id 'ETTh2_'$inp_len_h'_'$pred_len'_simple_'$method \
+    --model_id 'ETTh2_'$inp_len_h'_'$pred_len \
     --data ett_h \
     --seq_len $inp_len_h \
     --label_len 0 \

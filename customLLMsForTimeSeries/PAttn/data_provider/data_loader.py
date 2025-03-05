@@ -69,6 +69,8 @@ class Dataset_ETT_hour(Dataset):
         self.scale = scale
         self.timeenc = timeenc
         self.freq = freq
+        self.downsampling_factor=dsampfactor
+
         self.train_ratio = train_ratio 
         self.root_path = root_path
         self.data_path = data_path
@@ -275,7 +277,7 @@ class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h',
-                 percent=10, max_len=-1, train_all=False , train_ratio=1.0 , model_id=''):
+                 percent=100, col_percent=100, dsampfactor=1, max_len=-1, train_all=False , train_ratio=1.0 , model_id=''):
 
         if size == None:
             self.seq_len = 24 * 4 * 4
@@ -296,10 +298,19 @@ class Dataset_Custom(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.percent = percent
+        self.col_percent = col_percent 
+
         self.model_id= model_id
         self.root_path = root_path
         self.data_path = data_path
         self.__read_data__()
+        self.downsampling_factor = dsampfactor
+        print("downsampling factor: ", self.downsampling_factor)
+        self.data_x = self.data_x[::self.downsampling_factor]
+        self.data_y = self.data_y[::self.downsampling_factor]
+        self.data_stamp = self.data_stamp[::self.downsampling_factor]
+        
+
         
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
 
@@ -320,6 +331,8 @@ class Dataset_Custom(Dataset):
             self.period = 12
             self.channel= 7
 
+        self.period = int(self.period/dsampfactor)
+        self.channel = int(self.channel*col_percent)
         self.enc_in = 1 
             
     def __read_data__(self):
@@ -330,8 +343,19 @@ class Dataset_Custom(Dataset):
         cols = list(df_raw.columns)
         cols.remove(self.target)
         cols.remove('date')
+
+        # Set percentage of columns to keep
+        num_cols_to_keep = int(len(cols) * (self.col_percent / 100))
+
+        # Keep only the first num_cols_to_keep columns
+        cols = cols[:num_cols_to_keep]
         df_raw = df_raw[['date'] + cols + [self.target]]
         # print(cols)
+        # Reduce rows based on percent (time dimension)
+        if self.percent < 100:  # Only reduce if less than 100%
+            num_rows_to_keep = int(len(df_raw) * (self.percent / 100))
+            df_raw = df_raw.iloc[:num_rows_to_keep]  # Keep first X% rows
+
         num_train = int(len(df_raw) * 0.7)
         num_test = int(len(df_raw) * 0.2)
         num_vali = len(df_raw) - num_train - num_test
@@ -339,10 +363,6 @@ class Dataset_Custom(Dataset):
         border2s = [num_train, num_train + num_vali, len(df_raw)]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
-        
-        if self.set_type == 0:
-            border2 = (border2 - self.seq_len) * self.percent // 100 + self.seq_len
-
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
             df_data = df_raw[cols_data]

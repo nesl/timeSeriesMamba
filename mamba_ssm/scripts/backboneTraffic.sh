@@ -3,11 +3,11 @@ model_name=BackboneModel
 train_epochs=3
 learning_rate=0.01
 llm_layers=6
-seq_len=1024
-pred_len=2048
+seq_len=512
+pred_len=64
 
 # Default values for variables
-master_port_base=1071  # Base for master port calculation
+master_port_base=1077  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -52,12 +52,14 @@ echo "Using master_port $master_port"
 
 # Predefined combinations for pred_len and seq_len
 combinations=(
-  "512 96"
+  "75"
+  "50"
+  "25"
 )
 
 # Loop over the combinations
 for combo in "${combinations[@]}"; do
-  IFS=' ' read -r seq_len pred_len <<< "$combo"
+  IFS=' ' read -r train_percent <<< "$combo"
 
   # Print the values to verify
   echo "Setting llm_layers to $llm_layers"
@@ -96,6 +98,7 @@ for combo in "${combinations[@]}"; do
       --c_out 862 \
       --dsampfactor $downsampling_factor \
       --percent $percent \
+      --train_percent $train_percent \
       --col_percent $col_percent \
       --d_model $d_model \
       --d_ff $d_ff \

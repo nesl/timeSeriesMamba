@@ -7,7 +7,7 @@ seq_len=512
 pred_len=96
 train_percent=100
 # Default values for variables
-master_port_base=1071  # Base for master port calculation
+master_port_base=1081  # Base for master port calculation
 batch_size=16
 d_ff=128
 num_params='2.7b'
@@ -100,7 +100,7 @@ for combo in "${combinations[@]}"; do
       --c_out 21 \
       --dsampfactor $downsampling_factor \
       --percent $percent \
-      --col_percent $train_percent \
+      --train_percent $train_percent \
       --col_percent $col_percent \
       --d_model $d_model \
       --d_ff $d_ff \

@@ -190,7 +190,7 @@ if __name__ == '__main__':
     test_data, test_loader = data_provider(args, 'test')
     args.percent = int(args.percent*args.train_percent/(100))
     train_data, train_loader = data_provider(args, 'train')
-    args.device = accelerator.device
+    #args.device = accelerator.device #do i need this???
 
     print("Using Framework: ", args.model)
     if args.llm_model == "Moirai":
