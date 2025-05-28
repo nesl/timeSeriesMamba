@@ -1,0 +1,64 @@
+CUDA_VISIBLE_DEVICES: 3
+period of interest 6 months
+[2024-09-07 08:28:27,745] [INFO] [real_accelerator.py:191:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-09-07 08:28:27,859] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-09-07 08:28:27,859] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+accelerator device:  cuda:0
+period of interest in dataset_ett_hour: 6 months
+period days:182
+sample freq0.041666666666666664
+total_samples_in_period 4368.0
+timesteps 96
+downsampling factor:  46
+len data_x 188
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/TimeLLM/seed_process.py", line 165, in <module>
+    train_data, train_loader = data_provider(args, 'train')
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/TimeLLM/data_provider/data_factory.py", line 60, in data_provider
+    data_loader = DataLoader(
+                  ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 350, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 142, in __init__
+    if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+                      ^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/utils/data/sampler.py", line 149, in num_samples
+    return len(self.data_source)
+           ^^^^^^^^^^^^^^^^^^^^^
+ValueError: __len__() should return >= 0
+[2024-09-07 08:28:29,458] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3571042) of binary: /home/nesl/anaconda3/envs/TimeMamba/bin/python
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 268, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+seed_process.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-07_08:28:29
+  host      : sn4622120321
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3571042)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

@@ -1,0 +1,833 @@
+CUDA_VISIBLE_DEVICES: 2
+[2025-02-16 23:17:43,378] [INFO] [real_accelerator.py:191:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2025-02-16 23:17:43,489] [INFO] [comm.py:637:init_distributed] cdb=None
+[2025-02-16 23:17:43,489] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+accelerator device:  cuda:0
+border1: 0, border2: 3500, percent: 100
+Number of rows selected: 3500
+Original data shape: (5000, 2)
+self.data_x shape (rows, covariates): (3500, 1)
+downsampling factor:  1
+data x len 3500
+data seq len 512
+data pred len 96
+border1: 2988, border2: 4000, percent: 100
+Number of rows selected: 1012
+Original data shape: (5000, 2)
+self.data_x shape (rows, covariates): (1012, 1)
+downsampling factor:  1
+data x len 1012
+data seq len 512
+data pred len 96
+border1: 3488, border2: 5000, percent: 100
+Number of rows selected: 1512
+Original data shape: (5000, 2)
+self.data_x shape (rows, covariates): (1512, 1)
+downsampling factor:  1
+data x len 1512
+data seq len 512
+data pred len 96
+Using Framework:  TimeLLM
+Allocated memory: 0.00 MB
+Cached memory: 256.00 MB
+os.path.exists:  checkpoints/smallTest
+accel local main process:  True
+Total number of parameters: 182445448
+[2025-02-16 23:17:45,914] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed info: version=0.14.0, git-hash=unknown, git-branch=unknown
+[2025-02-16 23:17:46,562] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Flops Profiler Enabled: False
+[2025-02-16 23:17:46,563] [INFO] [logging.py:96:log_dist] [Rank 0] Using client Optimizer as basic optimizer
+[2025-02-16 23:17:46,563] [INFO] [logging.py:96:log_dist] [Rank 0] Removing param_group that has no 'params' in the basic Optimizer
+[2025-02-16 23:17:46,563] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Basic Optimizer = Adam
+[2025-02-16 23:17:46,563] [INFO] [utils.py:56:is_zero_supported_optimizer] Checking ZeRO support for optimizer=Adam type=<class 'torch.optim.adam.Adam'>
+[2025-02-16 23:17:46,563] [INFO] [logging.py:96:log_dist] [Rank 0] Creating torch.bfloat16 ZeRO stage 2 optimizer
+[2025-02-16 23:17:46,563] [INFO] [stage_1_and_2.py:149:__init__] Reduce bucket size 200000000
+[2025-02-16 23:17:46,564] [INFO] [stage_1_and_2.py:150:__init__] Allgather bucket size 200000000
+[2025-02-16 23:17:46,564] [INFO] [stage_1_and_2.py:151:__init__] CPU Offload: False
+[2025-02-16 23:17:46,564] [INFO] [stage_1_and_2.py:152:__init__] Round robin gradient partitioning: False
+[2025-02-16 23:17:46,836] [INFO] [utils.py:800:see_memory_usage] Before initializing optimizer states
+[2025-02-16 23:17:46,836] [INFO] [utils.py:801:see_memory_usage] MA 0.54 GB         Max_MA 0.64 GB         CA 0.65 GB         Max_CA 1 GB 
+[2025-02-16 23:17:46,852] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 22.15 GB, percent = 1.5%
+[2025-02-16 23:17:47,035] [INFO] [utils.py:800:see_memory_usage] After initializing optimizer states
+[2025-02-16 23:17:47,035] [INFO] [utils.py:801:see_memory_usage] MA 0.54 GB         Max_MA 0.74 GB         CA 0.85 GB         Max_CA 1 GB 
+[2025-02-16 23:17:47,035] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 22.16 GB, percent = 1.5%
+[2025-02-16 23:17:47,035] [INFO] [stage_1_and_2.py:539:__init__] optimizer state initialized
+[2025-02-16 23:17:47,210] [INFO] [utils.py:800:see_memory_usage] After initializing ZeRO optimizer
+[2025-02-16 23:17:47,210] [INFO] [utils.py:801:see_memory_usage] MA 0.54 GB         Max_MA 0.54 GB         CA 0.85 GB         Max_CA 1 GB 
+[2025-02-16 23:17:47,210] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 22.18 GB, percent = 1.5%
+[2025-02-16 23:17:47,211] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Final Optimizer = Adam
+[2025-02-16 23:17:47,211] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed using client LR scheduler
+[2025-02-16 23:17:47,211] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed LR Scheduler = None
+[2025-02-16 23:17:47,211] [INFO] [logging.py:96:log_dist] [Rank 0] step=0, skipped=0, lr=[0.0003999999999999993], mom=[(0.95, 0.999)]
+[2025-02-16 23:17:47,211] [INFO] [config.py:996:print] DeepSpeedEngine configuration:
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   activation_checkpointing_config  {
+    "partition_activations": false, 
+    "contiguous_memory_optimization": false, 
+    "cpu_checkpointing": false, 
+    "number_checkpoints": null, 
+    "synchronize_checkpoint_boundary": false, 
+    "profile": false
+}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   aio_config ................... {'block_size': 1048576, 'queue_depth': 8, 'thread_count': 1, 'single_submit': False, 'overlap_events': True}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   amp_enabled .................. False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   amp_params ................... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   autotuning_config ............ {
+    "enabled": false, 
+    "start_step": null, 
+    "end_step": null, 
+    "metric_path": null, 
+    "arg_mappings": null, 
+    "metric": "throughput", 
+    "model_info": null, 
+    "results_dir": "autotuning_results", 
+    "exps_dir": "autotuning_exps", 
+    "overwrite": true, 
+    "fast": true, 
+    "start_profile_step": 3, 
+    "end_profile_step": 5, 
+    "tuner_type": "gridsearch", 
+    "tuner_early_stopping": 5, 
+    "tuner_num_trials": 50, 
+    "model_info_path": null, 
+    "mp_size": 1, 
+    "max_train_batch_size": null, 
+    "min_train_batch_size": 1, 
+    "max_train_micro_batch_size_per_gpu": 1.024000e+03, 
+    "min_train_micro_batch_size_per_gpu": 1, 
+    "num_tuning_micro_batch_sizes": 3
+}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   bfloat16_enabled ............. True
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   bfloat16_immediate_grad_update  False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   checkpoint_parallel_write_pipeline  False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   checkpoint_tag_validation_enabled  True
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   checkpoint_tag_validation_fail  False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   comms_config ................. <deepspeed.comm.config.DeepSpeedCommsConfig object at 0x7f251bc2fcd0>
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   communication_data_type ...... None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   compile_config ............... enabled=False backend='inductor' kwargs={}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   compression_config ........... {'weight_quantization': {'shared_parameters': {'enabled': False, 'quantizer_kernel': False, 'schedule_offset': 0, 'quantize_groups': 1, 'quantize_verbose': False, 'quantization_type': 'symmetric', 'quantize_weight_in_forward': False, 'rounding': 'nearest', 'fp16_mixed_quantize': False, 'quantize_change_ratio': 0.001}, 'different_groups': {}}, 'activation_quantization': {'shared_parameters': {'enabled': False, 'quantization_type': 'symmetric', 'range_calibration': 'dynamic', 'schedule_offset': 1000}, 'different_groups': {}}, 'sparse_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'row_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'head_pruning': {'shared_parameters': {'enabled': False, 'method': 'topk', 'schedule_offset': 1000}, 'different_groups': {}}, 'channel_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'layer_reduction': {'enabled': False}}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   curriculum_enabled_legacy .... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   curriculum_params_legacy ..... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   data_efficiency_config ....... {'enabled': False, 'seed': 1234, 'data_sampling': {'enabled': False, 'num_epochs': 1000, 'num_workers': 0, 'curriculum_learning': {'enabled': False}}, 'data_routing': {'enabled': False, 'random_ltd': {'enabled': False, 'layer_token_lr_schedule': {'enabled': False}}}}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   data_efficiency_enabled ...... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   dataloader_drop_last ......... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   disable_allgather ............ False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   dump_state ................... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   dynamic_loss_scale_args ...... None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_enabled ........... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_gas_boundary_resolution  1
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_layer_name ........ bert.encoder.layer
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_layer_num ......... 0
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_max_iter .......... 100
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_stability ......... 1e-06
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_tol ............... 0.01
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   eigenvalue_verbose ........... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   elasticity_enabled ........... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   flops_profiler_config ........ {
+    "enabled": false, 
+    "recompute_fwd_factor": 0.0, 
+    "profile_step": 1, 
+    "module_depth": -1, 
+    "top_modules": 1, 
+    "detailed": true, 
+    "output_file": null
+}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   fp16_auto_cast ............... None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   fp16_enabled ................. False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   fp16_master_weights_and_gradients  False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   global_rank .................. 0
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   grad_accum_dtype ............. None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   gradient_accumulation_steps .. 1
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   gradient_clipping ............ 0.0
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   gradient_predivide_factor .... 1.0
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   graph_harvesting ............. False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   hybrid_engine ................ enabled=False max_out_tokens=512 inference_tp_size=1 release_inference_cache=False pin_parameters=True tp_gather_partition_size=8
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   initial_dynamic_scale ........ 1
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   load_universal_checkpoint .... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   loss_scale ................... 1.0
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   memory_breakdown ............. False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   mics_hierarchial_params_gather  False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   mics_shard_size .............. -1
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   monitor_config ............... tensorboard=TensorBoardConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') wandb=WandbConfig(enabled=False, group=None, team=None, project='deepspeed') csv_monitor=CSVConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') enabled=False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   nebula_config ................ {
+    "enabled": false, 
+    "persistent_storage_path": null, 
+    "persistent_time_interval": 100, 
+    "num_of_version_in_retention": 2, 
+    "enable_nebula_load": true, 
+    "load_path": null
+}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   optimizer_legacy_fusion ...... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   optimizer_name ............... None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   optimizer_params ............. None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   pipeline ..................... {'stages': 'auto', 'partition': 'best', 'seed_layers': False, 'activation_checkpoint_interval': 0, 'pipe_partitioned': True, 'grad_partitioned': True}
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   pld_enabled .................. False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   pld_params ................... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   prescale_gradients ........... False
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   scheduler_name ............... None
+[2025-02-16 23:17:47,212] [INFO] [config.py:1000:print]   scheduler_params ............. None
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   seq_parallel_communication_data_type  torch.float32
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   sparse_attention ............. None
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   sparse_gradients_enabled ..... False
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   steps_per_print .............. inf
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   train_batch_size ............. 24
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   train_micro_batch_size_per_gpu  24
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   use_data_before_expert_parallel_  False
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   use_node_local_storage ....... False
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   wall_clock_breakdown ......... False
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   weight_quantization_config ... None
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   world_size ................... 1
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   zero_allow_untested_optimizer  True
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   zero_config .................. stage=2 contiguous_gradients=True reduce_scatter=True reduce_bucket_size=200000000 use_multi_rank_bucket_allreduce=True allgather_partitions=True allgather_bucket_size=200000000 overlap_comm=True load_from_fp32_weights=True elastic_checkpoint=False offload_param=None offload_optimizer=None sub_group_size=1000000000 cpu_offload_param=None cpu_offload_use_pin_memory=None cpu_offload=None prefetch_bucket_size=50,000,000 param_persistence_threshold=100,000 model_persistence_threshold=sys.maxsize max_live_parameters=1,000,000,000 max_reuse_distance=1,000,000,000 gather_16bit_weights_on_model_save=False stage3_gather_fp16_weights_on_model_save=False ignore_unused_parameters=True legacy_stage1=False round_robin_gradients=False zero_hpz_partition_size=1 zero_quantized_weights=False zero_quantized_nontrainable_weights=False zero_quantized_gradients=False mics_shard_size=-1 mics_hierarchical_params_gather=False memory_efficient_linear=True pipeline_loading_checkpoint=False override_module_apply=True
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   zero_enabled ................. True
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   zero_force_ds_cpu_optimizer .. True
+[2025-02-16 23:17:47,213] [INFO] [config.py:1000:print]   zero_optimization_stage ...... 2
+[2025-02-16 23:17:47,213] [INFO] [config.py:986:print_user_config]   json = {
+    "bf16": {
+        "enabled": true, 
+        "auto_cast": true
+    }, 
+    "zero_optimization": {
+        "stage": 2, 
+        "allgather_partitions": true, 
+        "allgather_bucket_size": 2.000000e+08, 
+        "overlap_comm": true, 
+        "reduce_scatter": true, 
+        "reduce_bucket_size": 2.000000e+08, 
+        "contiguous_gradients": true, 
+        "sub_group_size": 1.000000e+09
+    }, 
+    "gradient_accumulation_steps": 1, 
+    "train_batch_size": 24, 
+    "train_micro_batch_size_per_gpu": 24, 
+    "steps_per_print": inf, 
+    "wall_clock_breakdown": false, 
+    "fp16": {
+        "enabled": false
+    }, 
+    "zero_allow_untested_optimizer": true
+}
+0it [00:00, ?it/s]1it [00:56, 56.87s/it]2it [00:56, 23.49s/it]3it [00:57, 12.82s/it]4it [00:57,  7.82s/it]5it [00:57,  5.05s/it]6it [00:57,  3.41s/it]7it [00:57,  2.34s/it]8it [00:57,  1.64s/it]9it [00:58,  1.17s/it]10it [00:58,  1.18it/s]11it [00:58,  1.59it/s]12it [00:58,  2.09it/s]13it [00:58,  2.68it/s]14it [00:58,  3.38it/s]15it [00:58,  4.13it/s]16it [00:58,  4.80it/s]17it [00:59,  5.39it/s]18it [00:59,  5.89it/s]19it [00:59,  6.34it/s]20it [00:59,  6.66it/s]21it [00:59,  6.90it/s]22it [00:59,  6.98it/s]23it [00:59,  7.01it/s]24it [01:00,  7.14it/s]25it [01:00,  7.26it/s]26it [01:00,  7.56it/s]27it [01:00,  7.56it/s]28it [01:00,  7.39it/s]29it [01:00,  7.38it/s]30it [01:00,  7.41it/s]31it [01:00,  7.32it/s]32it [01:01,  7.34it/s]33it [01:01,  7.38it/s]34it [01:01,  7.27it/s]35it [01:01,  7.57it/s]36it [01:01,  7.55it/s]37it [01:01,  7.30it/s]38it [01:01,  7.35it/s]39it [01:02,  7.58it/s]40it [01:02,  7.57it/s]41it [01:02,  7.42it/s]42it [01:02,  7.38it/s]43it [01:02,  7.40it/s]44it [01:02,  7.41it/s]45it [01:02,  7.42it/s]46it [01:02,  7.65it/s]47it [01:03,  7.56it/s]48it [01:03,  7.78it/s]49it [01:03,  7.70it/s]50it [01:03,  7.45it/s]51it [01:03,  7.47it/s]52it [01:03,  7.48it/s]53it [01:03,  7.47it/s]54it [01:04,  7.45it/s]55it [01:04,  7.45it/s]56it [01:04,  7.35it/s]57it [01:04,  7.39it/s]58it [01:04,  7.25it/s]59it [01:04,  7.29it/s]60it [01:04,  7.29it/s]61it [01:04,  7.35it/s]62it [01:05,  7.43it/s]63it [01:05,  7.47it/s]64it [01:05,  7.50it/s]65it [01:05,  7.51it/s]66it [01:05,  7.41it/s]67it [01:05,  7.46it/s]68it [01:05,  7.52it/s]69it [01:06,  7.39it/s]70it [01:06,  7.42it/s]71it [01:06,  7.47it/s]72it [01:06,  7.53it/s]73it [01:06,  7.53it/s]74it [01:06,  7.48it/s]75it [01:06,  7.49it/s]76it [01:06,  7.51it/s]77it [01:07,  7.53it/s]78it [01:07,  7.52it/s]79it [01:07,  7.67it/s]80it [01:07,  7.59it/s]81it [01:07,  7.43it/s]82it [01:07,  7.27it/s]83it [01:07,  7.25it/s]84it [01:08,  7.18it/s]85it [01:08,  7.24it/s]86it [01:08,  7.29it/s]87it [01:08,  7.33it/s]88it [01:08,  7.39it/s]89it [01:08,  7.31it/s]90it [01:08,  7.39it/s]91it [01:09,  7.42it/s]92it [01:09,  7.66it/s]93it [01:09,  7.65it/s]94it [01:09,  7.48it/s]95it [01:09,  7.61it/s]96it [01:09,  7.54it/s]97it [01:09,  7.52it/s]98it [01:09,  7.54it/s]99it [01:10,  7.51it/s]100it [01:10,  7.75it/s]101it [01:10,  7.72it/s]102it [01:10,  7.94it/s]103it [01:10,  7.84it/s]104it [01:10,  7.70it/s]105it [01:10,  7.55it/s]106it [01:10,  7.56it/s]107it [01:11,  7.55it/s]108it [01:11,  7.47it/s]109it [01:11,  7.46it/s]110it [01:11,  7.49it/s]111it [01:11,  7.54it/s]112it [01:11,  7.53it/s]113it [01:11,  7.55it/s]114it [01:12,  7.54it/s]115it [01:12,  7.76it/s]116it [01:12,  7.68it/s]117it [01:12,  7.65it/s]118it [01:12,  7.62it/s]119it [01:12,  7.61it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [01:13,  2.11it/s]120it [01:13,  1.62it/s]
+0it [00:00, ?it/s]1it [00:05,  5.55s/it]3it [00:05,  1.48s/it]6it [00:05,  1.68it/s]9it [00:05,  2.98it/s]12it [00:06,  4.62it/s]15it [00:06,  6.59it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:07,  2.21it/s]
+0it [00:00, ?it/s]1it [00:38, 38.93s/it]4it [00:39,  7.40s/it]7it [00:39,  3.45s/it]10it [00:39,  1.97s/it]13it [00:39,  1.23s/it]16it [00:39,  1.24it/s]19it [00:39,  1.82it/s]22it [00:39,  2.60it/s]25it [00:39,  3.64it/s]28it [00:39,  4.97it/s]31it [00:40,  6.62it/s]34it [00:40,  8.55it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.78it/s]37it [00:41,  1.12s/it]
+Epoch: 1 | Train Loss: 0.4929224 Vali Loss: 0.0240330 Test Loss: 0.0239507 MAE Loss: 0.1244182
+Validation loss decreased (inf --> 0.024033).  Saving model ...
+lr = 0.0004000000
+Updating learning rate to 0.0003999999999999993
+0it [00:00, ?it/s]1it [00:38, 38.82s/it]2it [00:38, 16.06s/it]3it [00:39,  8.80s/it]4it [00:39,  5.38s/it]5it [00:39,  3.49s/it]6it [00:39,  2.35s/it]7it [00:39,  1.62s/it]8it [00:39,  1.15s/it]9it [00:39,  1.20it/s]10it [00:40,  1.62it/s]11it [00:40,  2.15it/s]12it [00:40,  2.76it/s]13it [00:40,  3.47it/s]14it [00:40,  4.22it/s]15it [00:40,  4.87it/s]16it [00:40,  5.47it/s]17it [00:40,  5.96it/s]18it [00:41,  6.55it/s]19it [00:41,  6.88it/s]20it [00:41,  7.09it/s]21it [00:41,  7.46it/s]22it [00:41,  7.48it/s]23it [00:41,  7.35it/s]24it [00:41,  7.37it/s]25it [00:41,  7.64it/s]26it [00:42,  7.42it/s]27it [00:42,  7.38it/s]28it [00:42,  7.67it/s]29it [00:42,  7.67it/s]30it [00:42,  7.60it/s]31it [00:42,  7.40it/s]32it [00:42,  7.45it/s]33it [00:43,  7.51it/s]34it [00:43,  7.54it/s]35it [00:43,  7.75it/s]36it [00:43,  7.70it/s]37it [00:43,  7.68it/s]38it [00:43,  7.71it/s]39it [00:43,  7.57it/s]40it [00:43,  7.58it/s]41it [00:44,  7.57it/s]42it [00:44,  7.50it/s]43it [00:44,  7.48it/s]44it [00:44,  7.51it/s]45it [00:44,  7.39it/s]46it [00:44,  7.44it/s]47it [00:44,  7.45it/s]48it [00:45,  7.47it/s]49it [00:45,  7.49it/s]50it [00:45,  7.51it/s]51it [00:45,  7.53it/s]52it [00:45,  7.48it/s]53it [00:45,  7.51it/s]54it [00:45,  7.53it/s]55it [00:45,  7.55it/s]56it [00:46,  7.81it/s]57it [00:46,  7.77it/s]58it [00:46,  7.71it/s]59it [00:46,  7.93it/s]60it [00:46,  7.84it/s]61it [00:46,  7.74it/s]62it [00:46,  7.69it/s]63it [00:46,  7.65it/s]64it [00:47,  7.65it/s]65it [00:47,  7.85it/s]66it [00:47,  7.80it/s]67it [00:47,  7.98it/s]68it [00:47,  7.87it/s]69it [00:47,  7.69it/s]70it [00:47,  7.63it/s]71it [00:48,  7.56it/s]72it [00:48,  7.58it/s]73it [00:48,  7.83it/s]74it [00:48,  7.78it/s]75it [00:48,  7.73it/s]76it [00:48,  7.70it/s]77it [00:48,  7.65it/s]78it [00:48,  7.88it/s]79it [00:49,  7.80it/s]80it [00:49,  7.75it/s]81it [00:49,  7.69it/s]82it [00:49,  7.62it/s]83it [00:49,  7.45it/s]84it [00:49,  7.35it/s]85it [00:49,  7.64it/s]86it [00:49,  7.65it/s]87it [00:50,  7.63it/s]88it [00:50,  7.63it/s]89it [00:50,  7.59it/s]90it [00:50,  7.62it/s]91it [00:50,  7.56it/s]92it [00:50,  7.55it/s]93it [00:50,  7.56it/s]94it [00:51,  7.56it/s]95it [00:51,  7.56it/s]96it [00:51,  7.57it/s]97it [00:51,  7.57it/s]98it [00:51,  7.81it/s]99it [00:51,  6.56it/s]100it [00:51,  6.88it/s]101it [00:51,  7.02it/s]102it [00:52,  7.13it/s]103it [00:52,  7.47it/s]104it [00:52,  7.51it/s]105it [00:52,  7.52it/s]106it [00:52,  7.54it/s]107it [00:52,  6.43it/s]108it [00:52,  6.92it/s]109it [00:53,  7.11it/s]110it [00:53,  7.17it/s]111it [00:53,  7.26it/s]112it [00:53,  7.30it/s]113it [00:53,  7.27it/s]114it [00:53,  7.58it/s]115it [00:53,  7.81it/s]116it [00:54,  7.80it/s]117it [00:54,  7.73it/s]118it [00:54,  7.68it/s]119it [00:54,  7.66it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.12it/s]120it [00:55,  2.16it/s]
+0it [00:00, ?it/s]1it [00:04,  4.88s/it]4it [00:04,  1.05it/s]7it [00:05,  2.16it/s]10it [00:05,  3.59it/s]13it [00:05,  5.37it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.55it/s]16it [00:06,  2.39it/s]
+0it [00:00, ?it/s]1it [00:38, 38.72s/it]4it [00:38,  7.36s/it]7it [00:38,  3.43s/it]10it [00:39,  1.96s/it]13it [00:39,  1.22s/it]16it [00:39,  1.24it/s]19it [00:39,  1.83it/s]22it [00:39,  2.62it/s]25it [00:39,  3.66it/s]28it [00:39,  4.99it/s]31it [00:39,  6.64it/s]34it [00:39,  8.56it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.81it/s]37it [00:41,  1.11s/it]
+Epoch: 2 | Train Loss: 0.1204952 Vali Loss: 0.0121600 Test Loss: 0.0129208 MAE Loss: 0.0941960
+Validation loss decreased (0.024033 --> 0.012160).  Saving model ...
+Updating learning rate to 0.00019999999999999966
+0it [00:00, ?it/s]1it [00:38, 38.93s/it]2it [00:39, 16.11s/it]3it [00:39,  8.82s/it]4it [00:39,  5.39s/it]5it [00:39,  3.49s/it]6it [00:39,  2.34s/it]7it [00:39,  1.62s/it]8it [00:39,  1.15s/it]9it [00:39,  1.21it/s]10it [00:40,  1.63it/s]11it [00:40,  2.15it/s]12it [00:40,  2.79it/s]13it [00:40,  3.51it/s]14it [00:40,  4.19it/s]15it [00:40,  4.95it/s]16it [00:40,  5.65it/s]17it [00:40,  6.13it/s]18it [00:41,  6.53it/s]19it [00:41,  6.82it/s]20it [00:41,  7.26it/s]21it [00:41,  7.39it/s]22it [00:41,  7.34it/s]23it [00:41,  7.40it/s]24it [00:41,  7.45it/s]25it [00:42,  7.41it/s]26it [00:42,  7.45it/s]27it [00:42,  7.34it/s]28it [00:42,  7.36it/s]29it [00:42,  7.40it/s]30it [00:42,  7.43it/s]31it [00:42,  7.36it/s]32it [00:42,  7.42it/s]33it [00:43,  7.42it/s]34it [00:43,  7.69it/s]35it [00:43,  7.71it/s]36it [00:43,  7.65it/s]37it [00:43,  7.59it/s]38it [00:43,  7.52it/s]39it [00:43,  7.54it/s]40it [00:43,  7.55it/s]41it [00:44,  7.57it/s]42it [00:44,  7.57it/s]43it [00:44,  7.61it/s]44it [00:44,  7.58it/s]45it [00:44,  7.57it/s]46it [00:44,  7.49it/s]47it [00:44,  7.51it/s]48it [00:45,  7.56it/s]49it [00:45,  7.52it/s]50it [00:45,  7.56it/s]51it [00:45,  7.59it/s]52it [00:45,  7.60it/s]53it [00:45,  7.58it/s]54it [00:45,  7.58it/s]55it [00:45,  7.62it/s]56it [00:46,  7.61it/s]57it [00:46,  7.42it/s]58it [00:46,  7.07it/s]59it [00:46,  7.38it/s]60it [00:46,  7.51it/s]61it [00:46,  7.59it/s]62it [00:46,  7.61it/s]63it [00:47,  7.58it/s]64it [00:47,  7.53it/s]65it [00:47,  7.55it/s]66it [00:47,  6.04it/s]67it [00:47,  6.45it/s]68it [00:47,  6.76it/s]69it [00:47,  7.09it/s]70it [00:48,  7.22it/s]71it [00:48,  7.35it/s]72it [00:48,  7.42it/s]73it [00:48,  7.45it/s]74it [00:48,  7.47it/s]75it [00:48,  7.75it/s]76it [00:48,  7.70it/s]77it [00:48,  7.67it/s]78it [00:49,  7.54it/s]79it [00:49,  7.57it/s]80it [00:49,  7.57it/s]81it [00:49,  7.56it/s]82it [00:49,  7.58it/s]83it [00:49,  7.58it/s]84it [00:49,  7.55it/s]85it [00:50,  7.54it/s]86it [00:50,  7.53it/s]87it [00:50,  7.54it/s]88it [00:50,  7.47it/s]89it [00:50,  7.48it/s]90it [00:50,  7.74it/s]91it [00:50,  7.84it/s]92it [00:50,  8.02it/s]93it [00:51,  7.90it/s]94it [00:51,  8.07it/s]95it [00:51,  7.86it/s]96it [00:51,  8.02it/s]97it [00:51,  8.17it/s]98it [00:51,  8.02it/s]99it [00:51,  7.73it/s]100it [00:51,  7.91it/s]101it [00:52,  7.79it/s]102it [00:52,  7.68it/s]103it [00:52,  7.88it/s]104it [00:52,  7.80it/s]105it [00:52,  7.79it/s]106it [00:52,  7.71it/s]107it [00:52,  7.70it/s]108it [00:53,  7.64it/s]109it [00:53,  7.50it/s]110it [00:53,  7.36it/s]111it [00:53,  7.40it/s]112it [00:53,  7.42it/s]113it [00:53,  7.34it/s]114it [00:53,  7.38it/s]115it [00:53,  7.45it/s]116it [00:54,  7.46it/s]117it [00:54,  7.50it/s]118it [00:54,  7.51it/s]119it [00:54,  7.56it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.12it/s]120it [00:55,  2.15it/s]
+0it [00:00, ?it/s]1it [00:04,  4.87s/it]4it [00:04,  1.05it/s]7it [00:05,  2.16it/s]10it [00:05,  3.58it/s]13it [00:05,  5.35it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.64it/s]16it [00:06,  2.41it/s]
+0it [00:00, ?it/s]1it [00:38, 38.40s/it]4it [00:38,  7.29s/it]7it [00:38,  3.40s/it]10it [00:38,  1.94s/it]13it [00:38,  1.21s/it]16it [00:38,  1.25it/s]19it [00:39,  1.84it/s]22it [00:39,  2.63it/s]25it [00:39,  3.67it/s]28it [00:39,  5.01it/s]31it [00:39,  6.67it/s]34it [00:39,  8.59it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:40,  4.76it/s]37it [00:40,  1.11s/it]
+Epoch: 3 | Train Loss: 0.1095780 Vali Loss: 0.0120560 Test Loss: 0.0121707 MAE Loss: 0.0936730
+Validation loss decreased (0.012160 --> 0.012056).  Saving model ...
+Updating learning rate to 9.999999999999983e-05
+0it [00:00, ?it/s]1it [00:38, 38.62s/it]2it [00:38, 15.98s/it]3it [00:38,  8.74s/it]4it [00:39,  5.34s/it]5it [00:39,  3.47s/it]6it [00:39,  2.33s/it]7it [00:39,  1.61s/it]8it [00:39,  1.14s/it]9it [00:39,  1.21it/s]10it [00:39,  1.64it/s]11it [00:39,  2.15it/s]12it [00:40,  2.75it/s]13it [00:40,  3.47it/s]14it [00:40,  4.24it/s]15it [00:40,  4.92it/s]16it [00:40,  5.65it/s]17it [00:40,  6.32it/s]18it [00:40,  6.87it/s]19it [00:40,  7.08it/s]20it [00:41,  7.47it/s]21it [00:41,  7.79it/s]22it [00:41,  7.70it/s]23it [00:41,  7.53it/s]24it [00:41,  7.01it/s]25it [00:41,  7.09it/s]26it [00:41,  7.44it/s]27it [00:41,  7.51it/s]28it [00:42,  7.77it/s]29it [00:42,  7.95it/s]30it [00:42,  7.86it/s]31it [00:42,  7.74it/s]32it [00:42,  7.64it/s]33it [00:42,  6.50it/s]34it [00:42,  6.98it/s]35it [00:43,  7.25it/s]36it [00:43,  7.33it/s]37it [00:43,  7.61it/s]38it [00:43,  7.59it/s]39it [00:43,  7.58it/s]40it [00:43,  7.49it/s]41it [00:43,  7.70it/s]42it [00:43,  7.86it/s]43it [00:44,  8.01it/s]44it [00:44,  7.85it/s]45it [00:44,  7.67it/s]46it [00:44,  7.56it/s]47it [00:44,  7.52it/s]48it [00:44,  7.71it/s]49it [00:44,  7.87it/s]50it [00:44,  7.69it/s]51it [00:45,  7.60it/s]52it [00:45,  7.50it/s]53it [00:45,  7.37it/s]54it [00:45,  7.37it/s]55it [00:45,  7.39it/s]56it [00:45,  7.40it/s]57it [00:45,  7.39it/s]58it [00:46,  7.59it/s]59it [00:46,  7.70it/s]60it [00:46,  7.58it/s]61it [00:46,  7.37it/s]62it [00:46,  7.31it/s]63it [00:46,  7.57it/s]64it [00:46,  7.58it/s]65it [00:46,  7.54it/s]66it [00:47,  7.49it/s]67it [00:47,  7.69it/s]68it [00:47,  7.59it/s]69it [00:47,  7.73it/s]70it [00:47,  7.80it/s]71it [00:47,  7.72it/s]72it [00:47,  7.52it/s]73it [00:48,  7.48it/s]74it [00:48,  7.48it/s]75it [00:48,  7.46it/s]76it [00:48,  7.67it/s]77it [00:48,  7.60it/s]78it [00:48,  7.78it/s]79it [00:48,  7.65it/s]80it [00:48,  7.82it/s]81it [00:49,  7.74it/s]82it [00:49,  7.65it/s]83it [00:49,  7.83it/s]84it [00:49,  7.92it/s]85it [00:49,  7.70it/s]86it [00:49,  7.85it/s]87it [00:49,  7.72it/s]88it [00:49,  7.61it/s]89it [00:50,  7.57it/s]90it [00:50,  7.51it/s]91it [00:50,  7.45it/s]92it [00:50,  7.42it/s]93it [00:50,  7.42it/s]94it [00:50,  7.45it/s]95it [00:50,  7.62it/s]96it [00:51,  7.73it/s]97it [00:51,  7.84it/s]98it [00:51,  7.98it/s]99it [00:51,  8.07it/s]100it [00:51,  8.13it/s]101it [00:51,  8.19it/s]102it [00:51,  8.23it/s]103it [00:51,  8.23it/s]104it [00:52,  8.10it/s]105it [00:52,  8.14it/s]106it [00:52,  7.92it/s]107it [00:52,  8.02it/s]108it [00:52,  7.81it/s]109it [00:52,  7.71it/s]110it [00:52,  7.62it/s]111it [00:52,  7.81it/s]112it [00:53,  7.92it/s]113it [00:53,  8.02it/s]114it [00:53,  8.09it/s]115it [00:53,  7.85it/s]116it [00:53,  7.68it/s]117it [00:53,  7.58it/s]118it [00:53,  7.52it/s]119it [00:53,  7.75it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.12it/s]120it [00:55,  2.17it/s]
+0it [00:00, ?it/s]1it [00:05,  5.07s/it]4it [00:05,  1.01it/s]7it [00:05,  2.08it/s]10it [00:05,  3.47it/s]13it [00:05,  5.19it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.70it/s]16it [00:06,  2.36it/s]
+0it [00:00, ?it/s]1it [00:38, 38.50s/it]4it [00:38,  7.31s/it]7it [00:38,  3.41s/it]10it [00:38,  1.95s/it]13it [00:38,  1.22s/it]16it [00:39,  1.25it/s]19it [00:39,  1.84it/s]22it [00:39,  2.63it/s]25it [00:39,  3.66it/s]28it [00:39,  5.00it/s]31it [00:39,  6.66it/s]34it [00:39,  8.59it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.79it/s]37it [00:41,  1.11s/it]
+Epoch: 4 | Train Loss: 0.1095520 Vali Loss: 0.0116398 Test Loss: 0.0125465 MAE Loss: 0.0955840
+Validation loss decreased (0.012056 --> 0.011640).  Saving model ...
+Updating learning rate to 4.9999999999999914e-05
+0it [00:00, ?it/s]1it [00:38, 38.58s/it]2it [00:38, 15.96s/it]3it [00:38,  8.72s/it]4it [00:38,  5.33s/it]5it [00:39,  3.45s/it]6it [00:39,  2.34s/it]7it [00:39,  1.63s/it]8it [00:39,  1.15s/it]9it [00:39,  1.20it/s]10it [00:39,  1.62it/s]11it [00:39,  2.16it/s]12it [00:40,  2.79it/s]13it [00:40,  3.50it/s]14it [00:40,  4.19it/s]15it [00:40,  4.85it/s]16it [00:40,  5.44it/s]17it [00:40,  5.93it/s]18it [00:40,  6.37it/s]19it [00:40,  6.68it/s]20it [00:41,  6.94it/s]21it [00:41,  7.09it/s]22it [00:41,  7.12it/s]23it [00:41,  7.29it/s]24it [00:41,  7.60it/s]25it [00:41,  7.58it/s]26it [00:41,  7.58it/s]27it [00:41,  7.57it/s]28it [00:42,  7.58it/s]29it [00:42,  7.60it/s]30it [00:42,  7.48it/s]31it [00:42,  7.41it/s]32it [00:42,  7.69it/s]33it [00:42,  7.69it/s]34it [00:42,  7.87it/s]35it [00:43,  7.71it/s]36it [00:43,  7.65it/s]37it [00:43,  7.64it/s]38it [00:43,  7.62it/s]39it [00:43,  7.58it/s]40it [00:43,  7.60it/s]41it [00:43,  7.59it/s]42it [00:43,  7.83it/s]43it [00:44,  7.98it/s]44it [00:44,  8.11it/s]45it [00:44,  7.99it/s]46it [00:44,  7.85it/s]47it [00:44,  7.72it/s]48it [00:44,  7.53it/s]49it [00:44,  7.51it/s]50it [00:44,  7.49it/s]51it [00:45,  7.42it/s]52it [00:45,  7.46it/s]53it [00:45,  7.71it/s]54it [00:45,  7.67it/s]55it [00:45,  7.63it/s]56it [00:45,  7.48it/s]57it [00:45,  7.50it/s]58it [00:46,  7.49it/s]59it [00:46,  7.39it/s]60it [00:46,  7.26it/s]61it [00:46,  7.27it/s]62it [00:46,  7.34it/s]63it [00:46,  7.41it/s]64it [00:46,  7.37it/s]65it [00:47,  7.29it/s]66it [00:47,  7.60it/s]67it [00:47,  7.59it/s]68it [00:47,  7.59it/s]69it [00:47,  7.58it/s]70it [00:47,  7.82it/s]71it [00:47,  7.74it/s]72it [00:47,  7.69it/s]73it [00:48,  7.61it/s]74it [00:48,  7.59it/s]75it [00:48,  7.58it/s]76it [00:48,  7.55it/s]77it [00:48,  7.56it/s]78it [00:48,  7.55it/s]79it [00:48,  7.55it/s]80it [00:48,  7.53it/s]81it [00:49,  7.52it/s]82it [00:49,  7.53it/s]83it [00:49,  7.55it/s]84it [00:49,  7.51it/s]85it [00:49,  7.50it/s]86it [00:49,  7.47it/s]87it [00:49,  7.50it/s]88it [00:50,  7.52it/s]89it [00:50,  7.54it/s]90it [00:50,  7.55it/s]91it [00:50,  7.55it/s]92it [00:50,  7.54it/s]93it [00:50,  7.53it/s]94it [00:50,  7.55it/s]95it [00:50,  7.53it/s]96it [00:51,  7.53it/s]97it [00:51,  7.54it/s]98it [00:51,  7.56it/s]99it [00:51,  7.57it/s]100it [00:51,  7.57it/s]101it [00:51,  7.57it/s]102it [00:51,  7.82it/s]103it [00:52,  7.75it/s]104it [00:52,  7.73it/s]105it [00:52,  7.68it/s]106it [00:52,  7.65it/s]107it [00:52,  7.60it/s]108it [00:52,  7.83it/s]109it [00:52,  8.00it/s]110it [00:52,  8.13it/s]111it [00:53,  7.91it/s]112it [00:53,  7.82it/s]113it [00:53,  7.75it/s]114it [00:53,  7.68it/s]115it [00:53,  7.64it/s]116it [00:53,  7.62it/s]117it [00:53,  7.62it/s]118it [00:53,  7.84it/s]119it [00:54,  7.75it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.11it/s]120it [00:55,  2.17it/s]
+0it [00:00, ?it/s]1it [00:04,  4.84s/it]4it [00:04,  1.05it/s]7it [00:05,  2.16it/s]10it [00:05,  3.59it/s]13it [00:05,  5.36it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.58it/s]16it [00:06,  2.40it/s]
+0it [00:00, ?it/s]1it [00:38, 38.55s/it]4it [00:38,  7.33s/it]7it [00:38,  3.42s/it]10it [00:38,  1.95s/it]13it [00:39,  1.22s/it]16it [00:39,  1.25it/s]19it [00:39,  1.83it/s]22it [00:39,  2.62it/s]25it [00:39,  3.66it/s]28it [00:39,  5.00it/s]31it [00:39,  6.64it/s]34it [00:39,  8.61it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.78it/s]37it [00:41,  1.11s/it]
+Epoch: 5 | Train Loss: 0.1072076 Vali Loss: 0.0106338 Test Loss: 0.0114929 MAE Loss: 0.0926365
+Validation loss decreased (0.011640 --> 0.010634).  Saving model ...
+Updating learning rate to 2.4999999999999957e-05
+0it [00:00, ?it/s]1it [00:38, 38.62s/it]2it [00:38, 15.98s/it]3it [00:38,  8.75s/it]4it [00:39,  5.35s/it]5it [00:39,  3.47s/it]6it [00:39,  2.33s/it]7it [00:39,  1.62s/it]8it [00:39,  1.14s/it]9it [00:39,  1.21it/s]10it [00:39,  1.63it/s]11it [00:39,  2.16it/s]12it [00:40,  2.76it/s]13it [00:40,  3.43it/s]14it [00:40,  4.19it/s]15it [00:40,  4.95it/s]16it [00:40,  5.67it/s]17it [00:40,  6.31it/s]18it [00:40,  6.85it/s]19it [00:40,  7.07it/s]20it [00:41,  7.46it/s]21it [00:41,  7.51it/s]22it [00:41,  7.55it/s]23it [00:41,  7.57it/s]24it [00:41,  7.81it/s]25it [00:41,  7.75it/s]26it [00:41,  7.71it/s]27it [00:41,  7.54it/s]28it [00:42,  7.80it/s]29it [00:42,  7.75it/s]30it [00:42,  7.71it/s]31it [00:42,  7.54it/s]32it [00:42,  7.54it/s]33it [00:42,  7.56it/s]34it [00:42,  7.56it/s]35it [00:43,  7.60it/s]36it [00:43,  7.59it/s]37it [00:43,  7.61it/s]38it [00:43,  7.61it/s]39it [00:43,  7.86it/s]40it [00:43,  7.79it/s]41it [00:43,  7.72it/s]42it [00:43,  7.71it/s]43it [00:44,  7.94it/s]44it [00:44,  7.85it/s]45it [00:44,  7.76it/s]46it [00:44,  7.67it/s]47it [00:44,  7.60it/s]48it [00:44,  7.52it/s]49it [00:44,  7.54it/s]50it [00:44,  7.53it/s]51it [00:45,  7.51it/s]52it [00:45,  7.54it/s]53it [00:45,  7.49it/s]54it [00:45,  7.49it/s]55it [00:45,  7.46it/s]56it [00:45,  7.47it/s]57it [00:45,  7.74it/s]58it [00:46,  7.70it/s]59it [00:46,  7.67it/s]60it [00:46,  7.65it/s]61it [00:46,  7.63it/s]62it [00:46,  7.60it/s]63it [00:46,  7.60it/s]64it [00:46,  7.61it/s]65it [00:46,  7.50it/s]66it [00:47,  7.54it/s]67it [00:47,  7.55it/s]68it [00:47,  7.52it/s]69it [00:47,  7.52it/s]70it [00:47,  7.36it/s]71it [00:47,  7.41it/s]72it [00:47,  7.41it/s]73it [00:48,  7.37it/s]74it [00:48,  7.42it/s]75it [00:48,  7.68it/s]76it [00:48,  7.68it/s]77it [00:48,  7.68it/s]78it [00:48,  7.70it/s]79it [00:48,  7.60it/s]80it [00:48,  7.42it/s]81it [00:49,  7.69it/s]82it [00:49,  7.87it/s]83it [00:49,  7.81it/s]84it [00:49,  7.73it/s]85it [00:49,  7.69it/s]86it [00:49,  7.55it/s]87it [00:49,  7.59it/s]88it [00:49,  7.59it/s]89it [00:50,  7.87it/s]90it [00:50,  7.87it/s]91it [00:50,  7.79it/s]92it [00:50,  7.72it/s]93it [00:50,  7.67it/s]94it [00:50,  7.65it/s]95it [00:50,  7.64it/s]96it [00:51,  7.61it/s]97it [00:51,  7.57it/s]98it [00:51,  7.55it/s]99it [00:51,  7.46it/s]100it [00:51,  7.46it/s]101it [00:51,  7.47it/s]102it [00:51,  7.46it/s]103it [00:51,  7.37it/s]104it [00:52,  7.41it/s]105it [00:52,  7.69it/s]106it [00:52,  7.93it/s]107it [00:52,  7.87it/s]108it [00:52,  7.77it/s]109it [00:52,  7.99it/s]110it [00:52,  7.86it/s]111it [00:52,  8.06it/s]112it [00:53,  7.97it/s]113it [00:53,  7.83it/s]114it [00:53,  8.00it/s]115it [00:53,  7.90it/s]116it [00:53,  7.82it/s]117it [00:53,  7.95it/s]118it [00:53,  8.06it/s]119it [00:53,  7.93it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.08it/s]120it [00:55,  2.17it/s]
+0it [00:00, ?it/s]1it [00:04,  4.79s/it]4it [00:04,  1.06it/s]7it [00:05,  2.18it/s]10it [00:05,  3.63it/s]13it [00:05,  5.43it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.76it/s]16it [00:06,  2.46it/s]
+0it [00:00, ?it/s]1it [00:38, 38.94s/it]4it [00:39,  7.40s/it]7it [00:39,  3.45s/it]10it [00:39,  1.97s/it]13it [00:39,  1.23s/it]16it [00:39,  1.24it/s]19it [00:39,  1.82it/s]22it [00:39,  2.60it/s]25it [00:39,  3.64it/s]28it [00:39,  4.96it/s]31it [00:40,  6.60it/s]34it [00:40,  8.54it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.73it/s]37it [00:41,  1.12s/it]
+Epoch: 6 | Train Loss: 0.1066737 Vali Loss: 0.0101207 Test Loss: 0.0109717 MAE Loss: 0.0902877
+Validation loss decreased (0.010634 --> 0.010121).  Saving model ...
+Updating learning rate to 1.2499999999999979e-05
+0it [00:00, ?it/s]1it [00:38, 38.77s/it]2it [00:38, 16.04s/it]3it [00:39,  8.78s/it]4it [00:39,  5.36s/it]5it [00:39,  3.48s/it]6it [00:39,  2.33s/it]7it [00:39,  1.61s/it]8it [00:39,  1.14s/it]9it [00:39,  1.21it/s]10it [00:39,  1.65it/s]11it [00:40,  2.18it/s]12it [00:40,  2.82it/s]13it [00:40,  3.55it/s]14it [00:40,  4.32it/s]15it [00:40,  5.10it/s]16it [00:40,  5.82it/s]17it [00:40,  6.46it/s]18it [00:40,  7.00it/s]19it [00:40,  7.17it/s]20it [00:41,  7.52it/s]21it [00:41,  7.81it/s]22it [00:41,  7.74it/s]23it [00:41,  7.94it/s]24it [00:41,  7.85it/s]25it [00:41,  8.03it/s]26it [00:41,  7.93it/s]27it [00:41,  8.12it/s]28it [00:42,  8.26it/s]29it [00:42,  8.37it/s]30it [00:42,  8.44it/s]31it [00:42,  8.48it/s]32it [00:42,  8.53it/s]33it [00:42,  8.55it/s]34it [00:42,  8.58it/s]35it [00:42,  8.59it/s]36it [00:42,  8.61it/s]37it [00:43,  8.60it/s]38it [00:43,  8.59it/s]39it [00:43,  8.61it/s]40it [00:43,  8.62it/s]41it [00:43,  8.63it/s]42it [00:43,  8.61it/s]43it [00:43,  8.62it/s]44it [00:43,  8.61it/s]45it [00:44,  8.62it/s]46it [00:44,  8.63it/s]47it [00:44,  8.62it/s]48it [00:44,  8.62it/s]49it [00:44,  8.62it/s]50it [00:44,  8.62it/s]51it [00:44,  8.61it/s]52it [00:44,  8.61it/s]53it [00:44,  8.62it/s]54it [00:45,  8.62it/s]55it [00:45,  8.59it/s]56it [00:45,  8.56it/s]57it [00:45,  8.53it/s]58it [00:45,  8.53it/s]59it [00:45,  8.54it/s]60it [00:45,  8.56it/s]61it [00:45,  8.57it/s]62it [00:46,  8.58it/s]63it [00:46,  8.58it/s]64it [00:46,  8.58it/s]65it [00:46,  8.58it/s]66it [00:46,  8.58it/s]67it [00:46,  8.58it/s]68it [00:46,  8.59it/s]69it [00:46,  8.59it/s]70it [00:46,  8.59it/s]71it [00:47,  8.59it/s]72it [00:47,  8.59it/s]73it [00:47,  8.19it/s]74it [00:47,  8.26it/s]75it [00:47,  8.33it/s]76it [00:47,  8.09it/s]77it [00:47,  7.92it/s]78it [00:47,  8.05it/s]79it [00:48,  7.90it/s]80it [00:48,  7.81it/s]81it [00:48,  7.73it/s]82it [00:48,  7.66it/s]83it [00:48,  7.63it/s]84it [00:48,  7.63it/s]85it [00:48,  7.62it/s]86it [00:48,  7.60it/s]87it [00:49,  7.60it/s]88it [00:49,  7.60it/s]89it [00:49,  7.60it/s]90it [00:49,  7.59it/s]91it [00:49,  7.59it/s]92it [00:49,  7.58it/s]93it [00:49,  7.58it/s]94it [00:50,  7.58it/s]95it [00:50,  7.56it/s]96it [00:50,  7.57it/s]97it [00:50,  7.58it/s]98it [00:50,  7.59it/s]99it [00:50,  7.83it/s]100it [00:50,  7.99it/s]101it [00:50,  7.89it/s]102it [00:51,  7.78it/s]103it [00:51,  7.96it/s]104it [00:51,  7.84it/s]105it [00:51,  7.75it/s]106it [00:51,  7.71it/s]107it [00:51,  7.66it/s]108it [00:51,  7.63it/s]109it [00:51,  7.62it/s]110it [00:52,  7.60it/s]111it [00:52,  7.59it/s]112it [00:52,  7.58it/s]113it [00:52,  7.47it/s]114it [00:52,  7.50it/s]115it [00:52,  7.49it/s]116it [00:52,  7.51it/s]117it [00:53,  7.53it/s]118it [00:53,  7.79it/s]119it [00:53,  7.76it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:54,  2.18it/s]120it [00:54,  2.20it/s]
+0it [00:00, ?it/s]1it [00:05,  5.13s/it]4it [00:05,  1.00s/it]7it [00:05,  2.07it/s]10it [00:05,  3.45it/s]13it [00:05,  5.18it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.72it/s]16it [00:06,  2.35it/s]
+0it [00:00, ?it/s]1it [00:38, 38.71s/it]4it [00:38,  7.35s/it]7it [00:38,  3.43s/it]10it [00:39,  1.96s/it]13it [00:39,  1.22s/it]16it [00:39,  1.25it/s]19it [00:39,  1.83it/s]22it [00:39,  2.62it/s]25it [00:39,  3.67it/s]28it [00:39,  5.01it/s]31it [00:39,  6.68it/s]34it [00:39,  8.64it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.77it/s]37it [00:41,  1.11s/it]
+Epoch: 7 | Train Loss: 0.1075325 Vali Loss: 0.0103322 Test Loss: 0.0111226 MAE Loss: 0.0912962
+EarlyStopping counter: 1 out of 10
+Updating learning rate to 6.249999999999989e-06
+0it [00:00, ?it/s]1it [00:38, 38.84s/it]2it [00:38, 16.07s/it]3it [00:39,  8.79s/it]4it [00:39,  5.37s/it]5it [00:39,  3.48s/it]6it [00:39,  2.34s/it]7it [00:39,  1.62s/it]8it [00:39,  1.14s/it]9it [00:39,  1.21it/s]10it [00:39,  1.65it/s]11it [00:40,  2.18it/s]12it [00:40,  2.82it/s]13it [00:40,  3.54it/s]14it [00:40,  4.22it/s]15it [00:40,  4.87it/s]16it [00:40,  5.59it/s]17it [00:40,  6.23it/s]18it [00:40,  6.62it/s]19it [00:41,  6.87it/s]20it [00:41,  7.07it/s]21it [00:41,  7.45it/s]22it [00:41,  7.72it/s]23it [00:41,  7.70it/s]24it [00:41,  7.66it/s]25it [00:41,  7.88it/s]26it [00:41,  8.03it/s]27it [00:42,  7.86it/s]28it [00:42,  7.76it/s]29it [00:42,  7.70it/s]30it [00:42,  7.65it/s]31it [00:42,  7.64it/s]32it [00:42,  7.87it/s]33it [00:42,  8.03it/s]34it [00:43,  7.91it/s]35it [00:43,  8.05it/s]36it [00:43,  7.89it/s]37it [00:43,  7.78it/s]38it [00:43,  7.97it/s]39it [00:43,  7.83it/s]40it [00:43,  7.74it/s]41it [00:43,  7.70it/s]42it [00:44,  7.66it/s]43it [00:44,  7.65it/s]44it [00:44,  7.62it/s]45it [00:44,  7.56it/s]46it [00:44,  7.55it/s]47it [00:44,  7.55it/s]48it [00:44,  7.52it/s]49it [00:44,  7.54it/s]50it [00:45,  7.56it/s]51it [00:45,  7.57it/s]52it [00:45,  7.58it/s]53it [00:45,  7.58it/s]54it [00:45,  7.57it/s]55it [00:45,  7.54it/s]56it [00:45,  7.53it/s]57it [00:46,  7.54it/s]58it [00:46,  7.53it/s]59it [00:46,  7.46it/s]60it [00:46,  7.51it/s]61it [00:46,  7.50it/s]62it [00:46,  7.50it/s]63it [00:46,  7.77it/s]64it [00:46,  7.70it/s]65it [00:47,  7.70it/s]66it [00:47,  7.68it/s]67it [00:47,  7.66it/s]68it [00:47,  7.90it/s]69it [00:47,  8.07it/s]70it [00:47,  7.91it/s]71it [00:47,  7.80it/s]72it [00:47,  7.73it/s]73it [00:48,  7.95it/s]74it [00:48,  8.11it/s]75it [00:48,  7.96it/s]76it [00:48,  7.85it/s]77it [00:48,  7.79it/s]78it [00:48,  7.72it/s]79it [00:48,  7.95it/s]80it [00:48,  7.84it/s]81it [00:49,  7.76it/s]82it [00:49,  7.68it/s]83it [00:49,  7.65it/s]84it [00:49,  7.64it/s]85it [00:49,  7.62it/s]86it [00:49,  7.61it/s]87it [00:49,  7.62it/s]88it [00:50,  7.61it/s]89it [00:50,  7.59it/s]90it [00:50,  7.58it/s]91it [00:50,  7.59it/s]92it [00:50,  7.84it/s]93it [00:50,  8.03it/s]94it [00:50,  7.92it/s]95it [00:50,  7.82it/s]96it [00:51,  8.01it/s]97it [00:51,  7.90it/s]98it [00:51,  7.82it/s]99it [00:51,  7.74it/s]100it [00:51,  7.69it/s]101it [00:51,  7.68it/s]102it [00:51,  7.68it/s]103it [00:51,  7.67it/s]104it [00:52,  7.90it/s]105it [00:52,  8.06it/s]106it [00:52,  7.94it/s]107it [00:52,  8.11it/s]108it [00:52,  7.99it/s]109it [00:52,  8.15it/s]110it [00:52,  8.26it/s]111it [00:52,  8.08it/s]112it [00:53,  7.95it/s]113it [00:53,  7.84it/s]114it [00:53,  7.80it/s]115it [00:53,  7.76it/s]116it [00:53,  7.97it/s]117it [00:53,  7.91it/s]118it [00:53,  7.84it/s]119it [00:53,  7.79it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.15it/s]120it [00:55,  2.17it/s]
+0it [00:00, ?it/s]1it [00:05,  5.07s/it]3it [00:05,  1.36s/it]6it [00:05,  1.82it/s]9it [00:05,  3.23it/s]12it [00:05,  4.98it/s]15it [00:05,  7.07it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  2.36it/s]
+0it [00:00, ?it/s]1it [00:38, 38.70s/it]4it [00:38,  7.35s/it]7it [00:38,  3.43s/it]10it [00:39,  1.96s/it]13it [00:39,  1.22s/it]16it [00:39,  1.25it/s]19it [00:39,  1.83it/s]22it [00:39,  2.63it/s]25it [00:39,  3.68it/s]28it [00:39,  5.03it/s]31it [00:39,  6.70it/s]34it [00:39,  8.69it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.80it/s]37it [00:41,  1.11s/it]
+Epoch: 8 | Train Loss: 0.1070646 Vali Loss: 0.0104939 Test Loss: 0.0113400 MAE Loss: 0.0924042
+EarlyStopping counter: 2 out of 10
+Updating learning rate to 3.1249999999999946e-06
+0it [00:00, ?it/s]1it [00:38, 38.80s/it]2it [00:38, 16.05s/it]3it [00:39,  8.77s/it]4it [00:39,  5.36s/it]5it [00:39,  3.47s/it]6it [00:39,  2.34s/it]7it [00:39,  1.61s/it]8it [00:39,  1.14s/it]9it [00:39,  1.21it/s]10it [00:39,  1.64it/s]11it [00:40,  2.18it/s]12it [00:40,  2.82it/s]13it [00:40,  3.48it/s]14it [00:40,  4.16it/s]15it [00:40,  4.83it/s]16it [00:40,  5.57it/s]17it [00:40,  6.22it/s]18it [00:40,  6.77it/s]19it [00:41,  7.04it/s]20it [00:41,  7.23it/s]21it [00:41,  7.36it/s]22it [00:41,  7.42it/s]23it [00:41,  7.46it/s]24it [00:41,  7.31it/s]25it [00:41,  7.40it/s]26it [00:41,  7.46it/s]27it [00:42,  7.50it/s]28it [00:42,  7.52it/s]29it [00:42,  7.52it/s]30it [00:42,  7.79it/s]31it [00:42,  7.76it/s]32it [00:42,  7.71it/s]33it [00:42,  7.64it/s]34it [00:43,  7.59it/s]35it [00:43,  7.84it/s]36it [00:43,  7.78it/s]37it [00:43,  7.97it/s]38it [00:43,  7.83it/s]39it [00:43,  7.76it/s]40it [00:43,  7.96it/s]41it [00:43,  7.84it/s]42it [00:44,  7.78it/s]43it [00:44,  7.68it/s]44it [00:44,  7.64it/s]45it [00:44,  7.61it/s]46it [00:44,  7.86it/s]47it [00:44,  8.04it/s]48it [00:44,  7.88it/s]49it [00:44,  8.05it/s]50it [00:45,  8.18it/s]51it [00:45,  7.99it/s]52it [00:45,  7.82it/s]53it [00:45,  7.76it/s]54it [00:45,  7.72it/s]55it [00:45,  7.67it/s]56it [00:45,  7.65it/s]57it [00:45,  7.63it/s]58it [00:46,  7.60it/s]59it [00:46,  7.57it/s]60it [00:46,  7.83it/s]61it [00:46,  7.74it/s]62it [00:46,  7.96it/s]63it [00:46,  8.11it/s]64it [00:46,  7.93it/s]65it [00:46,  7.81it/s]66it [00:47,  7.74it/s]67it [00:47,  7.70it/s]68it [00:47,  7.65it/s]69it [00:47,  7.62it/s]70it [00:47,  7.62it/s]71it [00:47,  7.61it/s]72it [00:47,  7.86it/s]73it [00:48,  7.77it/s]74it [00:48,  7.72it/s]75it [00:48,  7.67it/s]76it [00:48,  7.63it/s]77it [00:48,  7.63it/s]78it [00:48,  7.62it/s]79it [00:48,  7.60it/s]80it [00:48,  7.61it/s]81it [00:49,  7.64it/s]82it [00:49,  7.86it/s]83it [00:49,  7.80it/s]84it [00:49,  7.76it/s]85it [00:49,  7.71it/s]86it [00:49,  7.68it/s]87it [00:49,  7.65it/s]88it [00:49,  7.62it/s]89it [00:50,  7.60it/s]90it [00:50,  7.61it/s]91it [00:50,  7.64it/s]92it [00:50,  7.63it/s]93it [00:50,  7.61it/s]94it [00:50,  7.61it/s]95it [00:50,  7.61it/s]96it [00:51,  7.55it/s]97it [00:51,  7.56it/s]98it [00:51,  7.59it/s]99it [00:51,  7.59it/s]100it [00:51,  7.59it/s]101it [00:51,  7.61it/s]102it [00:51,  7.63it/s]103it [00:51,  7.64it/s]104it [00:52,  7.62it/s]105it [00:52,  7.60it/s]106it [00:52,  7.62it/s]107it [00:52,  7.88it/s]108it [00:52,  7.79it/s]109it [00:52,  7.71it/s]110it [00:52,  7.68it/s]111it [00:52,  7.60it/s]112it [00:53,  7.60it/s]113it [00:53,  7.86it/s]114it [00:53,  7.81it/s]115it [00:53,  7.74it/s]116it [00:53,  7.66it/s]117it [00:53,  7.66it/s]118it [00:53,  7.62it/s]119it [00:54,  7.62it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.10it/s]120it [00:55,  2.17it/s]
+0it [00:00, ?it/s]1it [00:05,  5.04s/it]4it [00:05,  1.02it/s]7it [00:05,  2.10it/s]10it [00:05,  3.50it/s]13it [00:05,  5.24it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.76it/s]16it [00:06,  2.39it/s]
+0it [00:00, ?it/s]1it [00:38, 38.77s/it]4it [00:38,  7.37s/it]7it [00:39,  3.43s/it]10it [00:39,  1.96s/it]13it [00:39,  1.22s/it]16it [00:39,  1.24it/s]19it [00:39,  1.83it/s]22it [00:39,  2.62it/s]25it [00:39,  3.66it/s]28it [00:39,  5.00it/s]31it [00:39,  6.66it/s]34it [00:40,  8.62it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.80it/s]37it [00:41,  1.12s/it]
+Epoch: 9 | Train Loss: 0.1073765 Vali Loss: 0.0103808 Test Loss: 0.0112719 MAE Loss: 0.0919737
+EarlyStopping counter: 3 out of 10
+Updating learning rate to 1.5624999999999973e-06
+0it [00:00, ?it/s]1it [00:38, 38.75s/it]2it [00:38, 16.03s/it]3it [00:39,  8.77s/it]4it [00:39,  5.36s/it]5it [00:39,  3.47s/it]6it [00:39,  2.33s/it]7it [00:39,  1.60s/it]8it [00:39,  1.13s/it]9it [00:39,  1.22it/s]10it [00:39,  1.64it/s]11it [00:39,  2.18it/s]12it [00:40,  2.79it/s]13it [00:40,  3.46it/s]14it [00:40,  4.22it/s]15it [00:40,  4.98it/s]16it [00:40,  5.70it/s]17it [00:40,  6.19it/s]18it [00:40,  6.75it/s]19it [00:40,  7.03it/s]20it [00:41,  7.24it/s]21it [00:41,  7.45it/s]22it [00:41,  7.46it/s]23it [00:41,  7.50it/s]24it [00:41,  7.53it/s]25it [00:41,  7.57it/s]26it [00:41,  7.62it/s]27it [00:42,  7.66it/s]28it [00:42,  7.88it/s]29it [00:42,  7.94it/s]30it [00:42,  8.00it/s]31it [00:42,  7.88it/s]32it [00:42,  7.79it/s]33it [00:42,  7.60it/s]34it [00:42,  7.61it/s]35it [00:43,  7.89it/s]36it [00:43,  8.09it/s]37it [00:43,  8.25it/s]38it [00:43,  8.04it/s]39it [00:43,  7.92it/s]40it [00:43,  7.62it/s]41it [00:43,  7.61it/s]42it [00:43,  7.66it/s]43it [00:44,  7.62it/s]44it [00:44,  7.62it/s]45it [00:44,  7.62it/s]46it [00:44,  7.57it/s]47it [00:44,  7.58it/s]48it [00:44,  7.58it/s]49it [00:44,  7.66it/s]50it [00:44,  7.86it/s]51it [00:45,  8.04it/s]52it [00:45,  7.87it/s]53it [00:45,  7.79it/s]54it [00:45,  7.72it/s]55it [00:45,  7.67it/s]56it [00:45,  7.65it/s]57it [00:45,  7.66it/s]58it [00:45,  7.90it/s]59it [00:46,  8.06it/s]60it [00:46,  8.14it/s]61it [00:46,  8.23it/s]62it [00:46,  8.09it/s]63it [00:46,  7.95it/s]64it [00:46,  7.85it/s]65it [00:46,  7.78it/s]66it [00:47,  7.72it/s]67it [00:47,  7.95it/s]68it [00:47,  7.84it/s]69it [00:47,  8.03it/s]70it [00:47,  7.92it/s]71it [00:47,  7.82it/s]72it [00:47,  7.73it/s]73it [00:47,  7.53it/s]74it [00:48,  7.56it/s]75it [00:48,  7.58it/s]76it [00:48,  7.84it/s]77it [00:48,  7.78it/s]78it [00:48,  7.76it/s]79it [00:48,  7.64it/s]80it [00:48,  7.76it/s]81it [00:48,  7.92it/s]82it [00:49,  7.86it/s]83it [00:49,  7.88it/s]84it [00:49,  7.99it/s]85it [00:49,  8.01it/s]86it [00:49,  8.12it/s]87it [00:49,  7.96it/s]88it [00:49,  7.82it/s]89it [00:49,  8.05it/s]90it [00:50,  7.93it/s]91it [00:50,  8.07it/s]92it [00:50,  7.94it/s]93it [00:50,  7.88it/s]94it [00:50,  7.80it/s]95it [00:50,  7.74it/s]96it [00:50,  7.70it/s]97it [00:50,  7.66it/s]98it [00:51,  7.71it/s]99it [00:51,  7.68it/s]100it [00:51,  7.65it/s]101it [00:51,  7.63it/s]102it [00:51,  7.63it/s]103it [00:51,  7.63it/s]104it [00:51,  7.43it/s]105it [00:52,  7.50it/s]106it [00:52,  7.49it/s]107it [00:52,  7.81it/s]108it [00:52,  8.05it/s]109it [00:52,  7.94it/s]110it [00:52,  7.89it/s]111it [00:52,  7.79it/s]112it [00:52,  7.66it/s]113it [00:53,  7.91it/s]114it [00:53,  8.12it/s]115it [00:53,  8.26it/s]116it [00:53,  8.37it/s]117it [00:53,  8.18it/s]118it [00:53,  8.02it/s]119it [00:53,  7.87it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.12it/s]120it [00:55,  2.18it/s]
+0it [00:00, ?it/s]1it [00:05,  5.06s/it]4it [00:05,  1.00it/s]7it [00:05,  2.07it/s]10it [00:05,  3.43it/s]13it [00:05,  5.15it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.52it/s]16it [00:06,  2.32it/s]
+0it [00:00, ?it/s]1it [00:38, 38.77s/it]2it [00:38, 16.03s/it]4it [00:38,  6.01s/it]7it [00:39,  2.59s/it]10it [00:39,  1.44s/it]13it [00:39,  1.12it/s]16it [00:39,  1.71it/s]19it [00:39,  2.50it/s]22it [00:39,  3.55it/s]25it [00:39,  4.90it/s]28it [00:39,  6.57it/s]31it [00:40,  8.53it/s]34it [00:40, 10.73it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.87it/s]37it [00:41,  1.12s/it]
+Epoch: 10 | Train Loss: 0.1065777 Vali Loss: 0.0104166 Test Loss: 0.0113237 MAE Loss: 0.0922877
+EarlyStopping counter: 4 out of 10
+Updating learning rate to 7.812499999999987e-07
+0it [00:00, ?it/s]1it [00:38, 38.98s/it]2it [00:39, 16.16s/it]3it [00:39,  8.84s/it]4it [00:39,  5.40s/it]5it [00:39,  3.52s/it]6it [00:39,  2.38s/it]7it [00:39,  1.65s/it]8it [00:40,  1.18s/it]9it [00:40,  1.18it/s]10it [00:40,  1.55it/s]11it [00:40,  2.07it/s]12it [00:40,  2.55it/s]13it [00:40,  3.03it/s]14it [00:41,  3.49it/s]15it [00:41,  3.91it/s]16it [00:41,  4.65it/s]17it [00:41,  5.28it/s]18it [00:41,  5.92it/s]19it [00:41,  6.36it/s]20it [00:41,  6.71it/s]21it [00:42,  6.98it/s]22it [00:42,  7.15it/s]23it [00:42,  7.16it/s]24it [00:42,  7.11it/s]25it [00:42,  7.27it/s]26it [00:42,  7.39it/s]27it [00:42,  7.39it/s]28it [00:42,  7.36it/s]29it [00:43,  7.36it/s]30it [00:43,  7.44it/s]31it [00:43,  7.41it/s]32it [00:43,  7.41it/s]33it [00:43,  7.49it/s]34it [00:43,  7.57it/s]35it [00:43,  7.62it/s]36it [00:44,  7.51it/s]37it [00:44,  7.44it/s]38it [00:44,  7.34it/s]39it [00:44,  7.29it/s]40it [00:44,  7.27it/s]41it [00:44,  7.23it/s]42it [00:44,  7.21it/s]43it [00:44,  7.19it/s]44it [00:45,  7.18it/s]45it [00:45,  7.17it/s]46it [00:45,  7.20it/s]47it [00:45,  7.18it/s]48it [00:45,  7.18it/s]49it [00:45,  7.20it/s]50it [00:45,  7.17it/s]51it [00:46,  7.26it/s]52it [00:46,  7.28it/s]53it [00:46,  7.23it/s]54it [00:46,  7.22it/s]55it [00:46,  7.26it/s]56it [00:46,  7.38it/s]57it [00:46,  7.39it/s]58it [00:47,  7.32it/s]59it [00:47,  7.27it/s]60it [00:47,  7.23it/s]61it [00:47,  7.39it/s]62it [00:47,  7.33it/s]63it [00:47,  7.27it/s]64it [00:47,  7.23it/s]65it [00:48,  7.20it/s]66it [00:48,  7.24it/s]67it [00:48,  7.26it/s]68it [00:48,  7.37it/s]69it [00:48,  7.55it/s]70it [00:48,  7.44it/s]71it [00:48,  7.45it/s]72it [00:48,  7.42it/s]73it [00:49,  7.35it/s]74it [00:49,  7.32it/s]75it [00:49,  7.28it/s]76it [00:49,  7.27it/s]77it [00:49,  7.34it/s]78it [00:49,  7.58it/s]79it [00:49,  7.46it/s]80it [00:50,  7.37it/s]81it [00:50,  7.32it/s]82it [00:50,  7.41it/s]83it [00:50,  7.65it/s]84it [00:50,  7.64it/s]85it [00:50,  7.60it/s]86it [00:50,  7.58it/s]87it [00:50,  7.64it/s]88it [00:51,  7.66it/s]89it [00:51,  7.63it/s]90it [00:51,  7.81it/s]91it [00:51,  7.76it/s]92it [00:51,  7.92it/s]93it [00:51,  7.70it/s]94it [00:51,  7.60it/s]95it [00:52,  7.53it/s]96it [00:52,  7.48it/s]97it [00:52,  7.45it/s]98it [00:52,  7.36it/s]99it [00:52,  7.39it/s]100it [00:52,  7.47it/s]101it [00:52,  7.43it/s]102it [00:52,  7.36it/s]103it [00:53,  7.35it/s]104it [00:53,  7.30it/s]105it [00:53,  7.23it/s]106it [00:53,  7.19it/s]107it [00:53,  7.22it/s]108it [00:53,  7.19it/s]109it [00:53,  7.19it/s]110it [00:54,  7.22it/s]111it [00:54,  7.28it/s]112it [00:54,  7.31it/s]113it [00:54,  7.34it/s]114it [00:54,  7.28it/s]115it [00:54,  7.20it/s]116it [00:54,  7.22it/s]117it [00:55,  7.24it/s]118it [00:55,  7.43it/s]119it [00:55,  7.38it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:56,  2.06it/s]120it [00:56,  2.12it/s]
+0it [00:00, ?it/s]1it [00:05,  5.12s/it]4it [00:05,  1.00s/it]7it [00:05,  2.06it/s]10it [00:05,  3.44it/s]13it [00:05,  5.17it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.53it/s]16it [00:06,  2.31it/s]
+0it [00:00, ?it/s]1it [00:38, 38.67s/it]4it [00:38,  7.35s/it]7it [00:38,  3.43s/it]10it [00:39,  1.96s/it]13it [00:39,  1.23s/it]16it [00:39,  1.24it/s]19it [00:39,  1.81it/s]22it [00:39,  2.57it/s]25it [00:39,  3.57it/s]28it [00:39,  4.83it/s]31it [00:39,  6.35it/s]34it [00:40,  8.07it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.60it/s]37it [00:41,  1.12s/it]
+Epoch: 11 | Train Loss: 0.1052179 Vali Loss: 0.0104462 Test Loss: 0.0113293 MAE Loss: 0.0922897
+EarlyStopping counter: 5 out of 10
+Updating learning rate to 3.9062499999999933e-07
+0it [00:00, ?it/s]1it [00:39, 39.10s/it]2it [00:39, 16.17s/it]3it [00:39,  8.84s/it]4it [00:39,  5.40s/it]5it [00:39,  3.50s/it]6it [00:39,  2.35s/it]7it [00:39,  1.62s/it]8it [00:39,  1.15s/it]9it [00:40,  1.20it/s]10it [00:40,  1.64it/s]11it [00:40,  2.17it/s]12it [00:40,  2.81it/s]13it [00:40,  3.48it/s]14it [00:40,  4.17it/s]15it [00:40,  4.81it/s]16it [00:40,  5.25it/s]17it [00:41,  5.86it/s]18it [00:41,  6.46it/s]19it [00:41,  6.70it/s]20it [00:41,  6.96it/s]21it [00:41,  7.09it/s]22it [00:41,  7.18it/s]23it [00:41,  7.18it/s]24it [00:42,  7.31it/s]25it [00:42,  7.39it/s]26it [00:42,  7.46it/s]27it [00:42,  7.45it/s]28it [00:42,  7.48it/s]29it [00:42,  7.50it/s]30it [00:42,  7.47it/s]31it [00:42,  7.47it/s]32it [00:43,  7.41it/s]33it [00:43,  7.46it/s]34it [00:43,  7.74it/s]35it [00:43,  7.71it/s]36it [00:43,  7.96it/s]37it [00:43,  7.85it/s]38it [00:43,  7.47it/s]39it [00:44,  7.77it/s]40it [00:44,  7.81it/s]41it [00:44,  7.77it/s]42it [00:44,  7.74it/s]43it [00:44,  7.95it/s]44it [00:44,  7.89it/s]45it [00:44,  7.81it/s]46it [00:44,  7.42it/s]47it [00:45,  7.76it/s]48it [00:45,  7.76it/s]49it [00:45,  7.70it/s]50it [00:45,  7.66it/s]51it [00:45,  7.90it/s]52it [00:45,  7.76it/s]53it [00:45,  7.71it/s]54it [00:45,  7.92it/s]55it [00:46,  7.82it/s]56it [00:46,  8.01it/s]57it [00:46,  7.86it/s]58it [00:46,  8.04it/s]59it [00:46,  7.91it/s]60it [00:46,  7.81it/s]61it [00:46,  7.74it/s]62it [00:46,  7.70it/s]63it [00:47,  7.91it/s]64it [00:47,  8.07it/s]65it [00:47,  7.93it/s]66it [00:47,  8.14it/s]67it [00:47,  8.30it/s]68it [00:47,  7.81it/s]69it [00:47,  7.89it/s]70it [00:47,  7.76it/s]71it [00:48,  7.58it/s]72it [00:48,  7.36it/s]73it [00:48,  7.40it/s]74it [00:48,  7.45it/s]75it [00:48,  7.49it/s]76it [00:48,  7.30it/s]77it [00:48,  7.61it/s]78it [00:49,  7.63it/s]79it [00:49,  7.85it/s]80it [00:49,  7.76it/s]81it [00:49,  7.71it/s]82it [00:49,  7.69it/s]83it [00:49,  7.66it/s]84it [00:49,  7.64it/s]85it [00:49,  7.64it/s]86it [00:50,  7.60it/s]87it [00:50,  7.61it/s]88it [00:50,  7.60it/s]89it [00:50,  7.48it/s]90it [00:50,  7.75it/s]91it [00:50,  7.69it/s]92it [00:50,  7.89it/s]93it [00:50,  8.06it/s]94it [00:51,  8.18it/s]95it [00:51,  8.20it/s]96it [00:51,  8.31it/s]97it [00:51,  8.37it/s]98it [00:51,  7.96it/s]99it [00:51,  8.12it/s]100it [00:51,  8.23it/s]101it [00:51,  8.30it/s]102it [00:52,  8.12it/s]103it [00:52,  7.95it/s]104it [00:52,  7.85it/s]105it [00:52,  7.78it/s]106it [00:52,  7.42it/s]107it [00:52,  7.68it/s]108it [00:52,  7.86it/s]109it [00:52,  7.97it/s]110it [00:53,  7.83it/s]111it [00:53,  7.62it/s]112it [00:53,  7.58it/s]113it [00:53,  7.59it/s]114it [00:53,  7.55it/s]115it [00:53,  7.59it/s]116it [00:53,  7.54it/s]117it [00:54,  7.55it/s]118it [00:54,  7.55it/s]119it [00:54,  7.56it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.05it/s]120it [00:55,  2.16it/s]
+0it [00:00, ?it/s]1it [00:04,  4.89s/it]2it [00:04,  2.08s/it]5it [00:05,  1.62it/s]8it [00:05,  3.07it/s]11it [00:05,  4.89it/s]14it [00:05,  7.02it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  2.39it/s]
+0it [00:00, ?it/s]1it [00:39, 39.01s/it]4it [00:39,  7.41s/it]7it [00:39,  3.46s/it]10it [00:39,  1.97s/it]13it [00:39,  1.23s/it]16it [00:39,  1.23it/s]19it [00:39,  1.81it/s]22it [00:39,  2.60it/s]25it [00:39,  3.64it/s]28it [00:40,  4.97it/s]31it [00:40,  6.63it/s]34it [00:40,  8.57it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.52it/s]37it [00:41,  1.13s/it]
+Epoch: 12 | Train Loss: 0.1067507 Vali Loss: 0.0103682 Test Loss: 0.0112205 MAE Loss: 0.0918514
+EarlyStopping counter: 6 out of 10
+Updating learning rate to 1.9531249999999967e-07
+0it [00:00, ?it/s]1it [00:39, 39.21s/it]2it [00:39, 16.21s/it]3it [00:39,  8.87s/it]4it [00:39,  5.41s/it]5it [00:39,  3.51s/it]6it [00:39,  2.36s/it]7it [00:39,  1.63s/it]8it [00:40,  1.15s/it]9it [00:40,  1.20it/s]10it [00:40,  1.63it/s]11it [00:40,  2.15it/s]12it [00:40,  2.79it/s]13it [00:40,  3.44it/s]14it [00:40,  4.20it/s]15it [00:40,  4.85it/s]16it [00:41,  5.56it/s]17it [00:41,  6.18it/s]18it [00:41,  6.56it/s]19it [00:41,  6.83it/s]20it [00:41,  7.03it/s]21it [00:41,  7.15it/s]22it [00:41,  7.25it/s]23it [00:42,  7.26it/s]24it [00:42,  7.36it/s]25it [00:42,  7.34it/s]26it [00:42,  7.31it/s]27it [00:42,  7.61it/s]28it [00:42,  7.60it/s]29it [00:42,  7.59it/s]30it [00:42,  7.64it/s]31it [00:43,  7.85it/s]32it [00:43,  7.87it/s]33it [00:43,  7.76it/s]34it [00:43,  7.77it/s]35it [00:43,  7.72it/s]36it [00:43,  7.96it/s]37it [00:43,  7.90it/s]38it [00:43,  7.83it/s]39it [00:44,  7.79it/s]40it [00:44,  7.34it/s]41it [00:44,  7.71it/s]42it [00:44,  7.76it/s]43it [00:44,  8.00it/s]44it [00:44,  7.89it/s]45it [00:44,  7.81it/s]46it [00:44,  7.75it/s]47it [00:45,  7.70it/s]48it [00:45,  7.53it/s]49it [00:45,  7.87it/s]50it [00:45,  7.81it/s]51it [00:45,  7.76it/s]52it [00:45,  7.75it/s]53it [00:45,  7.74it/s]54it [00:46,  7.75it/s]55it [00:46,  7.74it/s]56it [00:46,  7.68it/s]57it [00:46,  7.93it/s]58it [00:46,  7.87it/s]59it [00:46,  7.78it/s]60it [00:46,  7.71it/s]61it [00:46,  7.67it/s]62it [00:47,  7.63it/s]63it [00:47,  7.59it/s]64it [00:47,  7.60it/s]65it [00:47,  7.60it/s]66it [00:47,  7.62it/s]67it [00:47,  7.87it/s]68it [00:47,  8.09it/s]69it [00:47,  8.00it/s]70it [00:48,  7.62it/s]71it [00:48,  7.50it/s]72it [00:48,  7.79it/s]73it [00:48,  7.72it/s]74it [00:48,  7.86it/s]75it [00:48,  7.64it/s]76it [00:48,  7.60it/s]77it [00:48,  7.51it/s]78it [00:49,  7.08it/s]79it [00:49,  7.48it/s]80it [00:49,  7.77it/s]81it [00:49,  7.98it/s]82it [00:49,  8.15it/s]83it [00:49,  8.01it/s]84it [00:49,  8.15it/s]85it [00:49,  8.00it/s]86it [00:50,  7.87it/s]87it [00:50,  7.79it/s]88it [00:50,  7.67it/s]89it [00:50,  7.64it/s]90it [00:50,  7.63it/s]91it [00:50,  7.64it/s]92it [00:50,  7.62it/s]93it [00:51,  7.85it/s]94it [00:51,  8.02it/s]95it [00:51,  7.90it/s]96it [00:51,  7.79it/s]97it [00:51,  7.97it/s]98it [00:51,  7.83it/s]99it [00:51,  7.81it/s]100it [00:51,  7.79it/s]101it [00:52,  7.42it/s]102it [00:52,  7.70it/s]103it [00:52,  7.75it/s]104it [00:52,  7.73it/s]105it [00:52,  7.71it/s]106it [00:52,  7.68it/s]107it [00:52,  7.68it/s]108it [00:52,  7.60it/s]109it [00:53,  7.50it/s]110it [00:53,  7.49it/s]111it [00:53,  7.48it/s]112it [00:53,  7.46it/s]113it [00:53,  7.53it/s]114it [00:53,  7.57it/s]115it [00:53,  7.56it/s]116it [00:54,  7.56it/s]117it [00:54,  7.74it/s]118it [00:54,  7.67it/s]119it [00:54,  7.90it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.09it/s]120it [00:55,  2.15it/s]
+0it [00:00, ?it/s]1it [00:05,  5.03s/it]4it [00:05,  1.02it/s]7it [00:05,  2.09it/s]10it [00:05,  3.47it/s]13it [00:05,  5.20it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.56it/s]16it [00:06,  2.34it/s]
+0it [00:00, ?it/s]1it [00:39, 39.31s/it]4it [00:39,  7.47s/it]7it [00:39,  3.48s/it]10it [00:39,  2.00s/it]13it [00:39,  1.25s/it]16it [00:39,  1.22it/s]19it [00:40,  1.79it/s]22it [00:40,  2.56it/s]25it [00:40,  3.57it/s]28it [00:40,  4.88it/s]31it [00:40,  6.48it/s]34it [00:40,  8.41it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.70it/s]37it [00:41,  1.13s/it]
+Epoch: 13 | Train Loss: 0.1063997 Vali Loss: 0.0103999 Test Loss: 0.0112802 MAE Loss: 0.0920916
+EarlyStopping counter: 7 out of 10
+Updating learning rate to 9.765624999999983e-08
+0it [00:00, ?it/s]1it [00:39, 39.09s/it]2it [00:39, 16.17s/it]3it [00:39,  8.86s/it]4it [00:39,  5.41s/it]5it [00:39,  3.50s/it]6it [00:39,  2.36s/it]7it [00:39,  1.63s/it]8it [00:40,  1.15s/it]9it [00:40,  1.20it/s]10it [00:40,  1.62it/s]11it [00:40,  2.15it/s]12it [00:40,  2.79it/s]13it [00:40,  3.51it/s]14it [00:40,  4.27it/s]15it [00:40,  5.04it/s]16it [00:40,  5.65it/s]17it [00:41,  6.15it/s]18it [00:41,  6.70it/s]19it [00:41,  6.94it/s]20it [00:41,  7.37it/s]21it [00:41,  7.68it/s]22it [00:41,  7.54it/s]23it [00:41,  7.52it/s]24it [00:41,  7.79it/s]25it [00:42,  7.67it/s]26it [00:42,  7.62it/s]27it [00:42,  7.59it/s]28it [00:42,  7.59it/s]29it [00:42,  7.44it/s]30it [00:42,  7.40it/s]31it [00:42,  7.30it/s]32it [00:43,  7.27it/s]33it [00:43,  7.32it/s]34it [00:43,  7.40it/s]35it [00:43,  7.68it/s]36it [00:43,  7.85it/s]37it [00:43,  7.76it/s]38it [00:43,  7.68it/s]39it [00:43,  7.66it/s]40it [00:44,  7.66it/s]41it [00:44,  7.61it/s]42it [00:44,  7.79it/s]43it [00:44,  8.00it/s]44it [00:44,  8.15it/s]45it [00:44,  8.03it/s]46it [00:44,  7.95it/s]47it [00:45,  7.79it/s]48it [00:45,  7.75it/s]49it [00:45,  7.62it/s]50it [00:45,  7.64it/s]51it [00:45,  7.48it/s]52it [00:45,  7.83it/s]53it [00:45,  8.07it/s]54it [00:45,  8.25it/s]55it [00:45,  8.38it/s]56it [00:46,  8.46it/s]57it [00:46,  8.52it/s]58it [00:46,  8.58it/s]59it [00:46,  8.62it/s]60it [00:46,  8.08it/s]61it [00:46,  8.20it/s]62it [00:46,  8.04it/s]63it [00:46,  7.89it/s]64it [00:47,  7.75it/s]65it [00:47,  7.95it/s]66it [00:47,  7.91it/s]67it [00:47,  7.85it/s]68it [00:47,  7.73it/s]69it [00:47,  7.69it/s]70it [00:47,  7.66it/s]71it [00:48,  7.62it/s]72it [00:48,  7.57it/s]73it [00:48,  7.50it/s]74it [00:48,  7.52it/s]75it [00:48,  7.45it/s]76it [00:48,  7.52it/s]77it [00:48,  7.44it/s]78it [00:48,  7.48it/s]79it [00:49,  7.66it/s]80it [00:49,  7.93it/s]81it [00:49,  8.09it/s]82it [00:49,  7.66it/s]83it [00:49,  7.90it/s]84it [00:49,  8.07it/s]85it [00:49,  8.21it/s]86it [00:49,  8.03it/s]87it [00:50,  7.86it/s]88it [00:50,  8.05it/s]89it [00:50,  7.91it/s]90it [00:50,  7.59it/s]91it [00:50,  7.86it/s]92it [00:50,  7.83it/s]93it [00:50,  7.75it/s]94it [00:50,  7.96it/s]95it [00:51,  7.83it/s]96it [00:51,  8.03it/s]97it [00:51,  7.96it/s]98it [00:51,  8.13it/s]99it [00:51,  7.99it/s]100it [00:51,  7.88it/s]101it [00:51,  7.65it/s]102it [00:51,  7.56it/s]103it [00:52,  7.56it/s]104it [00:52,  7.61it/s]105it [00:52,  7.62it/s]106it [00:52,  7.87it/s]107it [00:52,  7.83it/s]108it [00:52,  8.04it/s]109it [00:52,  7.92it/s]110it [00:53,  8.12it/s]111it [00:53,  7.97it/s]112it [00:53,  7.54it/s]113it [00:53,  7.84it/s]114it [00:53,  7.84it/s]115it [00:53,  7.78it/s]116it [00:53,  7.76it/s]117it [00:53,  7.75it/s]118it [00:54,  7.72it/s]119it [00:54,  7.95it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.07it/s]120it [00:55,  2.16it/s]
+0it [00:00, ?it/s]1it [00:04,  4.73s/it]3it [00:04,  1.27s/it]6it [00:04,  1.95it/s]9it [00:05,  3.43it/s]12it [00:05,  5.28it/s]15it [00:05,  7.45it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  2.46it/s]
+0it [00:00, ?it/s]1it [00:39, 39.08s/it]4it [00:39,  7.44s/it]7it [00:39,  3.47s/it]10it [00:39,  1.98s/it]13it [00:39,  1.24s/it]16it [00:39,  1.23it/s]19it [00:39,  1.80it/s]22it [00:39,  2.58it/s]25it [00:40,  3.60it/s]28it [00:40,  4.92it/s]31it [00:40,  6.38it/s]34it [00:40,  8.23it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:42,  3.98it/s]37it [00:42,  1.14s/it]
+Epoch: 14 | Train Loss: 0.1063511 Vali Loss: 0.0103847 Test Loss: 0.0112986 MAE Loss: 0.0921745
+EarlyStopping counter: 8 out of 10
+Updating learning rate to 4.8828124999999916e-08
+0it [00:00, ?it/s]1it [00:38, 38.94s/it]2it [00:39, 16.11s/it]3it [00:39,  8.81s/it]4it [00:39,  5.39s/it]5it [00:39,  3.49s/it]6it [00:39,  2.36s/it]7it [00:39,  1.63s/it]8it [00:39,  1.15s/it]9it [00:40,  1.20it/s]10it [00:40,  1.61it/s]11it [00:40,  2.12it/s]12it [00:40,  2.72it/s]13it [00:40,  3.38it/s]14it [00:40,  4.07it/s]15it [00:40,  4.74it/s]16it [00:40,  5.48it/s]17it [00:41,  6.00it/s]18it [00:41,  6.42it/s]19it [00:41,  6.94it/s]20it [00:41,  7.19it/s]21it [00:41,  7.34it/s]22it [00:41,  7.42it/s]23it [00:41,  7.73it/s]24it [00:41,  7.69it/s]25it [00:42,  7.92it/s]26it [00:42,  8.05it/s]27it [00:42,  7.84it/s]28it [00:42,  7.72it/s]29it [00:42,  7.67it/s]30it [00:42,  7.63it/s]31it [00:42,  7.58it/s]32it [00:42,  7.55it/s]33it [00:43,  7.54it/s]34it [00:43,  7.40it/s]35it [00:43,  7.41it/s]36it [00:43,  7.33it/s]37it [00:43,  7.38it/s]38it [00:43,  7.40it/s]39it [00:43,  7.45it/s]40it [00:44,  7.51it/s]41it [00:44,  7.52it/s]42it [00:44,  7.55it/s]43it [00:44,  7.72it/s]44it [00:44,  7.95it/s]45it [00:44,  8.16it/s]46it [00:44,  8.09it/s]47it [00:44,  7.98it/s]48it [00:45,  7.89it/s]49it [00:45,  8.13it/s]50it [00:45,  8.29it/s]51it [00:45,  8.13it/s]52it [00:45,  7.99it/s]53it [00:45,  7.71it/s]54it [00:45,  7.94it/s]55it [00:45,  7.97it/s]56it [00:46,  7.87it/s]57it [00:46,  7.78it/s]58it [00:46,  7.71it/s]59it [00:46,  7.71it/s]60it [00:46,  7.70it/s]61it [00:46,  7.42it/s]62it [00:46,  7.64it/s]63it [00:47,  7.67it/s]64it [00:47,  7.65it/s]65it [00:47,  7.62it/s]66it [00:47,  7.62it/s]67it [00:47,  7.62it/s]68it [00:47,  7.63it/s]69it [00:47,  7.58it/s]70it [00:47,  7.57it/s]71it [00:48,  7.58it/s]72it [00:48,  7.54it/s]73it [00:48,  7.58it/s]74it [00:48,  7.58it/s]75it [00:48,  7.49it/s]76it [00:48,  7.54it/s]77it [00:48,  7.59it/s]78it [00:48,  7.60it/s]79it [00:49,  7.88it/s]80it [00:49,  8.10it/s]81it [00:49,  8.28it/s]82it [00:49,  8.13it/s]83it [00:49,  7.66it/s]84it [00:49,  7.57it/s]85it [00:49,  7.83it/s]86it [00:49,  7.74it/s]87it [00:50,  7.96it/s]88it [00:50,  7.88it/s]89it [00:50,  7.80it/s]90it [00:50,  7.77it/s]91it [00:50,  7.32it/s]92it [00:50,  7.37it/s]93it [00:50,  7.48it/s]94it [00:51,  7.54it/s]95it [00:51,  7.53it/s]96it [00:51,  7.53it/s]97it [00:51,  7.53it/s]98it [00:51,  7.42it/s]99it [00:51,  7.72it/s]100it [00:51,  7.94it/s]101it [00:51,  7.90it/s]102it [00:52,  7.82it/s]103it [00:52,  7.72it/s]104it [00:52,  7.96it/s]105it [00:52,  7.88it/s]106it [00:52,  7.81it/s]107it [00:52,  7.64it/s]108it [00:52,  7.59it/s]109it [00:52,  7.85it/s]110it [00:53,  7.74it/s]111it [00:53,  7.76it/s]112it [00:53,  7.94it/s]113it [00:53,  7.61it/s]114it [00:53,  7.74it/s]115it [00:53,  7.74it/s]116it [00:53,  7.73it/s]117it [00:54,  7.64it/s]118it [00:54,  7.62it/s]119it [00:54,  7.63it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.11it/s]120it [00:55,  2.16it/s]
+0it [00:00, ?it/s]1it [00:04,  4.91s/it]3it [00:05,  1.32s/it]6it [00:05,  1.87it/s]9it [00:05,  3.32it/s]12it [00:05,  5.10it/s]15it [00:05,  7.24it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  2.34it/s]
+0it [00:00, ?it/s]1it [00:39, 39.07s/it]4it [00:39,  7.42s/it]7it [00:39,  3.47s/it]10it [00:39,  1.98s/it]13it [00:39,  1.24s/it]16it [00:39,  1.23it/s]19it [00:39,  1.81it/s]22it [00:39,  2.59it/s]25it [00:40,  3.62it/s]28it [00:40,  4.93it/s]31it [00:40,  6.49it/s]34it [00:40,  8.08it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.35it/s]37it [00:41,  1.13s/it]
+Epoch: 15 | Train Loss: 0.1071926 Vali Loss: 0.0104088 Test Loss: 0.0112783 MAE Loss: 0.0920643
+EarlyStopping counter: 9 out of 10
+Updating learning rate to 2.4414062499999958e-08
+0it [00:00, ?it/s]1it [00:39, 39.34s/it]2it [00:39, 16.28s/it]3it [00:39,  8.91s/it]4it [00:39,  5.44s/it]5it [00:39,  3.53s/it]6it [00:40,  2.37s/it]7it [00:40,  1.64s/it]8it [00:40,  1.16s/it]9it [00:40,  1.20it/s]10it [00:40,  1.62it/s]11it [00:40,  2.13it/s]12it [00:40,  2.76it/s]13it [00:40,  3.47it/s]14it [00:41,  4.16it/s]15it [00:41,  4.82it/s]16it [00:41,  5.54it/s]17it [00:41,  6.06it/s]18it [00:41,  6.49it/s]19it [00:41,  6.97it/s]20it [00:41,  7.38it/s]21it [00:41,  7.47it/s]22it [00:42,  7.49it/s]23it [00:42,  7.76it/s]24it [00:42,  7.72it/s]25it [00:42,  7.70it/s]26it [00:42,  7.93it/s]27it [00:42,  7.82it/s]28it [00:42,  7.77it/s]29it [00:42,  7.76it/s]30it [00:43,  7.72it/s]31it [00:43,  7.93it/s]32it [00:43,  8.07it/s]33it [00:43,  7.60it/s]34it [00:43,  7.46it/s]35it [00:43,  7.43it/s]36it [00:43,  7.47it/s]37it [00:43,  7.49it/s]38it [00:44,  7.46it/s]39it [00:44,  7.70it/s]40it [00:44,  7.65it/s]41it [00:44,  7.59it/s]42it [00:44,  7.52it/s]43it [00:44,  7.55it/s]44it [00:44,  7.68it/s]45it [00:45,  7.65it/s]46it [00:45,  7.60it/s]47it [00:45,  7.60it/s]48it [00:45,  7.50it/s]49it [00:45,  7.58it/s]50it [00:45,  7.80it/s]51it [00:45,  8.00it/s]52it [00:45,  7.89it/s]53it [00:46,  7.81it/s]54it [00:46,  7.62it/s]55it [00:46,  7.80it/s]56it [00:46,  7.83it/s]57it [00:46,  7.79it/s]58it [00:46,  8.00it/s]59it [00:46,  7.87it/s]60it [00:46,  8.04it/s]61it [00:47,  7.97it/s]62it [00:47,  7.47it/s]63it [00:47,  7.80it/s]64it [00:47,  7.83it/s]65it [00:47,  7.74it/s]66it [00:47,  7.71it/s]67it [00:47,  7.70it/s]68it [00:47,  7.63it/s]69it [00:48,  7.62it/s]70it [00:48,  7.64it/s]71it [00:48,  7.61it/s]72it [00:48,  7.59it/s]73it [00:48,  7.63it/s]74it [00:48,  7.88it/s]75it [00:48,  7.79it/s]76it [00:49,  7.63it/s]77it [00:49,  7.62it/s]78it [00:49,  7.62it/s]79it [00:49,  7.65it/s]80it [00:49,  7.90it/s]81it [00:49,  8.08it/s]82it [00:49,  8.23it/s]83it [00:49,  8.33it/s]84it [00:50,  8.08it/s]85it [00:50,  7.77it/s]86it [00:50,  7.96it/s]87it [00:50,  7.89it/s]88it [00:50,  7.75it/s]89it [00:50,  7.73it/s]90it [00:50,  7.67it/s]91it [00:50,  7.64it/s]92it [00:51,  7.28it/s]93it [00:51,  7.25it/s]94it [00:51,  7.59it/s]95it [00:51,  7.63it/s]96it [00:51,  7.62it/s]97it [00:51,  7.52it/s]98it [00:51,  7.52it/s]99it [00:52,  7.46it/s]100it [00:52,  7.44it/s]101it [00:52,  7.36it/s]102it [00:52,  7.45it/s]103it [00:52,  7.52it/s]104it [00:52,  7.79it/s]105it [00:52,  7.76it/s]106it [00:52,  7.71it/s]107it [00:53,  7.68it/s]108it [00:53,  7.66it/s]109it [00:53,  7.67it/s]110it [00:53,  7.67it/s]111it [00:53,  7.68it/s]112it [00:53,  7.93it/s]113it [00:53,  7.88it/s]114it [00:53,  7.96it/s]115it [00:54,  7.77it/s]116it [00:54,  7.99it/s]117it [00:54,  8.15it/s]118it [00:54,  8.01it/s]119it [00:54,  7.88it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+120it [00:55,  2.09it/s]120it [00:55,  2.15it/s]
+0it [00:00, ?it/s]1it [00:04,  4.98s/it]4it [00:05,  1.03it/s]7it [00:05,  2.12it/s]10it [00:05,  3.54it/s]13it [00:05,  5.30it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+16it [00:06,  3.61it/s]16it [00:06,  2.37it/s]
+0it [00:00, ?it/s]1it [00:38, 38.80s/it]4it [00:38,  7.37s/it]7it [00:39,  3.44s/it]10it [00:39,  1.96s/it]13it [00:39,  1.23s/it]16it [00:39,  1.24it/s]19it [00:39,  1.82it/s]22it [00:39,  2.59it/s]25it [00:39,  3.62it/s]28it [00:39,  4.95it/s]31it [00:40,  6.59it/s]34it [00:40,  8.52it/s]CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+CUDA_VISIBLE_DEVICES: 2
+37it [00:41,  4.50it/s]37it [00:41,  1.12s/it]
+Epoch: 16 | Train Loss: 0.1069110 Vali Loss: 0.0104052 Test Loss: 0.0112861 MAE Loss: 0.0921294
+EarlyStopping counter: 10 out of 10
+gpu time: 1680560.125
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/TimeLLM/seed_process.py", line 391, in <module>
+    unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/nn/modules/module.py", line 2153, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for Model:
+	size mismatch for reprogramming_layer.query_projection.weight: copying a param with shape torch.Size([256, 16]) from checkpoint, the shape in current model is torch.Size([1024, 16]).
+	size mismatch for reprogramming_layer.query_projection.bias: copying a param with shape torch.Size([256]) from checkpoint, the shape in current model is torch.Size([1024]).
+	size mismatch for reprogramming_layer.key_projection.weight: copying a param with shape torch.Size([256, 768]) from checkpoint, the shape in current model is torch.Size([1024, 768]).
+	size mismatch for reprogramming_layer.key_projection.bias: copying a param with shape torch.Size([256]) from checkpoint, the shape in current model is torch.Size([1024]).
+	size mismatch for reprogramming_layer.value_projection.weight: copying a param with shape torch.Size([256, 768]) from checkpoint, the shape in current model is torch.Size([1024, 768]).
+	size mismatch for reprogramming_layer.value_projection.bias: copying a param with shape torch.Size([256]) from checkpoint, the shape in current model is torch.Size([1024]).
+	size mismatch for reprogramming_layer.out_projection.weight: copying a param with shape torch.Size([768, 256]) from checkpoint, the shape in current model is torch.Size([768, 1024]).
+	size mismatch for output_projection.linear.weight: copying a param with shape torch.Size([96, 2048]) from checkpoint, the shape in current model is torch.Size([96, 8192]).
+[2025-02-16 23:45:54,210] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 1924681) of binary: /home/nesl/anaconda3/envs/TimeMamba/bin/python
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 268, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+seed_process.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-02-16_23:45:54
+  host      : sn4622120321
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 1924681)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+./scripts/smalltest.sh: 50: verbose: not found

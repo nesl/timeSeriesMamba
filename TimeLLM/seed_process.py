@@ -1,7 +1,7 @@
 import os
 cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
 print(f'CUDA_VISIBLE_DEVICES: {cuda_visible_devices}')
-
+import git
 import gc
 import argparse
 import torch
@@ -55,7 +55,9 @@ if __name__ == '__main__':
     parser.add_argument('--data_pretrain', type=str, default='None', help='dataset type')
     parser.add_argument('--root_path', type=str, default='./dataset', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
-    parser.add_argument('--data_path_pretrain', type=str, default='None', help='data file')
+    parser.add_argument('--data_path_test', type=str, default='None', help='data file, make sure is set when cov split')
+    parser.add_argument('--data_path_val', type=str, default='None', help='data file for covariate split')
+   
     parser.add_argument('--features', type=str, default='M',
                         help='forecasting task, options:[M, S, MS]; '
                             'M:multivariate predict multivariate, S: univariate predict univariate, '
@@ -67,6 +69,7 @@ if __name__ == '__main__':
                             'options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], '
                             'you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+    parser.add_argument('--pretrain', type=int, default=0)
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
@@ -98,6 +101,8 @@ if __name__ == '__main__':
     parser.add_argument('--llm_dim', type=int, default='768', help='LLM model dimension')#Mamba:768 LLama7b:4096; GPT2-small:768; BERT-base:768
     parser.add_argument('--num_params', type=str, default='130m', help='string of our param size to append to huggingface')
     parser.add_argument('--rand_init', type=int, default=0, help='if nonzero, initialize weights of LLM randomly')
+    parser.add_argument('--init_seed', type=int, default=0, help='seed for rand_init only')
+    parser.add_argument('--finetune_llm', type=int, default=0, help='if nonzero, allow LLM weights to be trained')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -117,7 +122,7 @@ if __name__ == '__main__':
     parser.add_argument('--percent', type=int, default=100)
     parser.add_argument('--col_percent', type=int, default=100)
     parser.add_argument('--train_percent', type=int, default=100)
-    parser.add_argument('--pretrain', type=int, default=0)
+    parser.add_argument('--split_type', type=str, default="temporal")
 
 
     parser.add_argument('--use_wandb', type=int, default=1)
@@ -138,9 +143,15 @@ if __name__ == '__main__':
     
     #deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
     if args.use_wandb:
+
         wandb.init(project = 'TimeMamba')
+
+        repo = git.Repo(search_parent_directories=True)
+        commit_hash = repo.head.object.hexsha
+
         #log the hyperparameters
         wandb.config.update({
+            'git_commit': commit_hash,
             'layer count': args.llm_layers,
             'd_model': args.d_model,
             'train epochs': args.train_epochs,
@@ -153,9 +164,12 @@ if __name__ == '__main__':
             'train_percent': args.train_percent,
             'rand_init': args.rand_init,
             'seed': args.seed,
+            'init_seed': args.init_seed,
             'pred_len': args.pred_len,
             'seq_len': args.seq_len, 
-            'pretrain': args.pretrain
+            'pretrain': args.pretrain,
+            'finetune_llm': args.finetune_llm,
+            'split_type': args.split_type
         })
 
     def print_gpu_memory_usage():
@@ -190,18 +204,15 @@ if __name__ == '__main__':
         args.embed,
         args.des, 
         args.seed,
-        args.pretrain)
+        args.pretrain,
+        args.finetune_llm)
 
-    if args.pretrain:
-        vali_data, vali_loader = data_provider(args, 'val', 1)
-        test_data, test_loader = data_provider(args, 'test', 0)
-        args.percent = int(args.percent*args.train_percent/(100))
-        train_data, train_loader = data_provider(args, 'train', 1)
-    else:
-        vali_data, vali_loader = data_provider(args, 'val')
-        test_data, test_loader = data_provider(args, 'test')
-        args.percent = int(args.percent*args.train_percent/(100))
-        train_data, train_loader = data_provider(args, 'train')
+
+    vali_data, vali_loader = data_provider(args, 'val')
+    test_data, test_loader = data_provider(args, 'test')
+    args.percent = int(args.percent*args.train_percent/(100))
+    train_data, train_loader = data_provider(args, 'train')
+
     
     criterion = nn.MSELoss()
     mae_metric = nn.L1Loss()

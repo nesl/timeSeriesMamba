@@ -10,59 +10,59 @@
   "log_history": [
     {
       "epoch": 0.26666666666666666,
-      "grad_norm": 1.9606654644012451,
+      "grad_norm": 1.9512690305709839,
       "learning_rate": 4e-05,
-      "loss": 0.4297,
-      "mean_token_accuracy": 0.8963421732187271,
+      "loss": 0.4446,
+      "mean_token_accuracy": 0.8924620449542999,
       "step": 1
     },
     {
       "epoch": 0.5333333333333333,
-      "grad_norm": 1.6006975173950195,
+      "grad_norm": 1.5511059761047363,
       "learning_rate": 8e-05,
-      "loss": 0.4298,
-      "mean_token_accuracy": 0.895443931221962,
+      "loss": 0.407,
+      "mean_token_accuracy": 0.8999884575605392,
       "step": 2
     },
     {
       "epoch": 0.8,
-      "grad_norm": 1.9652434587478638,
+      "grad_norm": 1.7981128692626953,
       "learning_rate": 0.00012,
-      "loss": 0.5013,
-      "mean_token_accuracy": 0.878288134932518,
+      "loss": 0.459,
+      "mean_token_accuracy": 0.8902354687452316,
       "step": 3
     },
     {
       "epoch": 0.8,
-      "eval_loss": 1.1955900192260742,
-      "eval_mean_token_accuracy": 0.8402693867683411,
-      "eval_runtime": 0.0614,
-      "eval_samples_per_second": 32.597,
-      "eval_steps_per_second": 16.298,
+      "eval_loss": 1.1338069438934326,
+      "eval_mean_token_accuracy": 0.8520691196123759,
+      "eval_runtime": 0.0562,
+      "eval_samples_per_second": 35.602,
+      "eval_steps_per_second": 17.801,
       "step": 3
     },
     {
       "epoch": 1.2666666666666666,
-      "grad_norm": 3.5513362884521484,
+      "grad_norm": 3.5414624214172363,
       "learning_rate": 0.00016,
-      "loss": 0.8455,
-      "mean_token_accuracy": 0.8987071514129639,
+      "loss": 0.7954,
+      "mean_token_accuracy": 0.9042705595493317,
       "step": 4
     },
     {
       "epoch": 1.5333333333333332,
-      "grad_norm": 1.649416208267212,
+      "grad_norm": 1.5217777490615845,
       "learning_rate": 0.0002,
-      "loss": 0.2713,
-      "mean_token_accuracy": 0.9297363758087158,
+      "loss": 0.2551,
+      "mean_token_accuracy": 0.9347618967294693,
       "step": 5
     },
     {
       "epoch": 1.8,
-      "grad_norm": 0.7609516382217407,
+      "grad_norm": 1.027843713760376,
       "learning_rate": 0.0,
-      "loss": 0.1107,
-      "mean_token_accuracy": 0.9755854308605194,
+      "loss": 0.1127,
+      "mean_token_accuracy": 0.9734303653240204,
       "step": 6
     }
   ],

@@ -61,6 +61,7 @@ fi
 # Export GPU ID
 export CUDA_VISIBLE_DEVICES=$((gpu_id % 4))
 
+finetune_llm=0
 # Print the values to verify
 echo "Setting llm_layers to $llm_layers"
 echo "Setting d_model to $d_model"
@@ -72,8 +73,9 @@ echo "Setting percent to $percent"
 echo "Setting col_percent to $col_percent"
 echo "Setting master_port to $master_port"
 echo "Setting rand_init to $rand_init"
+echo "Setting finetune_llm to $finetune_llm"
 
-og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}_fl${finetune_llm}"
 
 llm_dim=10
 if [ "$num_params" = "130m" ]; then
@@ -129,7 +131,8 @@ for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((
       --llm_dim $llm_dim \
       --num_params $num_params \
       --rand_init $rand_init \
-      --seed $seed
+      --seed $seed \
+      --finetune_llm $finetune_llm
 
     echo "ETTh1 with pred_len $pred_len and seed $seed completed, saved to $comment"
   done

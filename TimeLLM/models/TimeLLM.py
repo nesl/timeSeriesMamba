@@ -75,6 +75,7 @@ class Model(nn.Module):
             
         elif configs.llm_model == "Mamba2":
             self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
+            #self.tokenizer = AutoTokenizer.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             self.llm_model = MambaLMHeadModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")#, device=device, dtype=dtype)
             #self.llm_model = AutoModel.from_pretrained(f"state-spaces/mamba2-{self.num_params}")
             #print("Mamba2 info: ", self.llm_model.vocab_size)
@@ -215,6 +216,36 @@ class Model(nn.Module):
                     trust_remote_code=True,
                     local_files_only=False
                 )
+        elif configs.llm_model == 'GPT2Pile':
+            self.gpt2_config = GPT2Config.from_pretrained('./results/pile/gpt2/gpt2/checkpoint-1220000')  # Path to your checkpoint
+            self.gpt2_config.output_attentions = True
+            self.gpt2_config.output_hidden_states = True
+            self.llm_model = GPT2Model.from_pretrained(
+                './results/pile/gpt2/gpt2/checkpoint-10000',  # Path to your checkpoint
+                trust_remote_code=True,
+                local_files_only=True,  # Use local files since checkpoint is local
+                config=self.gpt2_config,
+            )
+            self.tokenizer = GPT2Tokenizer.from_pretrained(
+                'openai-community/gpt2',  # Use pretrained tokenizer
+                trust_remote_code=True,
+                local_files_only=False
+            )
+        elif configs.llm_model == 'GPT2OWT':
+            self.gpt2_config = GPT2Config.from_pretrained('./results/openwebtext/gpt2/gpt2/checkpoint-1220000')  # Path to your checkpoint
+            self.gpt2_config.output_attentions = True
+            self.gpt2_config.output_hidden_states = True
+            self.llm_model = GPT2Model.from_pretrained(
+                './results/openwebtext/gpt2/gpt2/checkpoint-10000',  # Path to your checkpoint
+                trust_remote_code=True,
+                local_files_only=True,  # Use local files since checkpoint is local
+                config=self.gpt2_config,
+            )
+            self.tokenizer = GPT2Tokenizer.from_pretrained(
+                'openai-community/gpt2',  # Use pretrained tokenizer
+                trust_remote_code=True,
+                local_files_only=False
+            )
         elif configs.llm_model == 'GPT2':
             self.gpt2_config = GPT2Config.from_pretrained('openai-community/gpt2')
 
@@ -232,6 +263,7 @@ class Model(nn.Module):
                     trust_remote_code=True,
                     local_files_only=False
                 )
+        
             '''
             try:
                 self.llm_model = GPT2Model.from_pretrained(
@@ -309,6 +341,7 @@ class Model(nn.Module):
         else:
             raise Exception('LLM model is not defined')
 
+        '''
         #print("LLM model used is: ", configs.llm_model)
         if configs.rand_init:
             # Reinitialize all parameters with random weights
@@ -319,6 +352,18 @@ class Model(nn.Module):
                     elif "bias" in name:
                         init.constant_(param.data, 0)
             #print("llm weights randomly initialized!")
+        '''
+        if configs.rand_init:
+            torch.manual_seed(configs.init_seed)
+            # Reinitialize all parameters with Xavier initialization (activation-agnostic)
+            for name, param in self.llm_model.named_parameters():
+                if param.requires_grad:
+                    if "weight" in name:
+                        init.xavier_normal_(param.data, gain=1.0)
+                    elif "bias" in name:
+                        init.constant_(param.data, 0)
+            #print("llm weights initialized with Xavier initialization!")
+            torch.manual_seed(configs.seed)
 
 
         if self.tokenizer.eos_token:

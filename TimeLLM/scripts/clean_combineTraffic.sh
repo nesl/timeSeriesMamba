@@ -76,7 +76,7 @@ echo "Setting rand_init to $rand_init"
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 
 llm_dim=10
-if [ "$num_params" = "130m" ]; then
+if [ "$num_params" == "130m" ]; then
   llm_dim=768
 elif [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560

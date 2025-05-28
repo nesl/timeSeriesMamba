@@ -1,0 +1,305 @@
+CUDA_VISIBLE_DEVICES: 3
+[2024-10-28 14:09:22,115] [INFO] [real_accelerator.py:191:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-28 14:09:22,233] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-10-28 14:09:22,233] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+accelerator device:  cuda:0
+border1: 0, border2: 36887, percent: 100
+Number of rows selected: 36887
+Original data shape: (52696, 22)
+self.data_x shape (rows, covariates): (36887, 21)
+downsampling factor:  1
+data x len 36887
+data seq len 512
+data pred len 96
+border1: 36375, border2: 42157, percent: 100
+Number of rows selected: 5782
+Original data shape: (52696, 22)
+self.data_x shape (rows, covariates): (5782, 21)
+downsampling factor:  1
+data x len 5782
+data seq len 512
+data pred len 96
+border1: 41645, border2: 52696, percent: 100
+Number of rows selected: 11051
+Original data shape: (52696, 22)
+self.data_x shape (rows, covariates): (11051, 21)
+downsampling factor:  1
+data x len 11051
+data seq len 512
+data pred len 96
+Using Framework:  TimeLLM
+self.num_params in TimeLLM.py:  1b
+Total number of named param groups: 146
+Total number of params downloaded off huggingface: 1235814400
+LLM model used is:  LLAMA3.2
+Allocated memory: 0.00 MB
+Cached memory: 0.00 MB
+os.path.exists:  checkpoints/smallTest
+accel local main process:  True
+Total number of parameters: 1365853512
+[2024-10-28 14:09:24,321] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed info: version=0.14.0, git-hash=unknown, git-branch=unknown
+[2024-10-28 14:09:27,388] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Flops Profiler Enabled: False
+[2024-10-28 14:09:27,389] [INFO] [logging.py:96:log_dist] [Rank 0] Using client Optimizer as basic optimizer
+[2024-10-28 14:09:27,389] [INFO] [logging.py:96:log_dist] [Rank 0] Removing param_group that has no 'params' in the basic Optimizer
+[2024-10-28 14:09:27,390] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Basic Optimizer = Adam
+[2024-10-28 14:09:27,390] [INFO] [utils.py:56:is_zero_supported_optimizer] Checking ZeRO support for optimizer=Adam type=<class 'torch.optim.adam.Adam'>
+[2024-10-28 14:09:27,390] [INFO] [logging.py:96:log_dist] [Rank 0] Creating torch.bfloat16 ZeRO stage 2 optimizer
+[2024-10-28 14:09:27,391] [INFO] [stage_1_and_2.py:149:__init__] Reduce bucket size 200000000
+[2024-10-28 14:09:27,391] [INFO] [stage_1_and_2.py:150:__init__] Allgather bucket size 200000000
+[2024-10-28 14:09:27,391] [INFO] [stage_1_and_2.py:151:__init__] CPU Offload: False
+[2024-10-28 14:09:27,391] [INFO] [stage_1_and_2.py:152:__init__] Round robin gradient partitioning: False
+[2024-10-28 14:09:27,745] [INFO] [utils.py:800:see_memory_usage] Before initializing optimizer states
+[2024-10-28 14:09:27,746] [INFO] [utils.py:801:see_memory_usage] MA 3.03 GB         Max_MA 3.28 GB         CA 3.28 GB         Max_CA 3 GB 
+[2024-10-28 14:09:27,746] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 63.89 GB, percent = 4.2%
+[2024-10-28 14:09:27,853] [INFO] [utils.py:800:see_memory_usage] After initializing optimizer states
+[2024-10-28 14:09:27,853] [INFO] [utils.py:801:see_memory_usage] MA 3.03 GB         Max_MA 3.52 GB         CA 3.77 GB         Max_CA 4 GB 
+[2024-10-28 14:09:27,853] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 63.9 GB, percent = 4.2%
+[2024-10-28 14:09:27,854] [INFO] [stage_1_and_2.py:539:__init__] optimizer state initialized
+[2024-10-28 14:09:27,952] [INFO] [utils.py:800:see_memory_usage] After initializing ZeRO optimizer
+[2024-10-28 14:09:27,952] [INFO] [utils.py:801:see_memory_usage] MA 3.03 GB         Max_MA 3.03 GB         CA 3.77 GB         Max_CA 4 GB 
+[2024-10-28 14:09:27,952] [INFO] [utils.py:808:see_memory_usage] CPU Virtual Memory:  used = 63.9 GB, percent = 4.2%
+[2024-10-28 14:09:27,953] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Final Optimizer = Adam
+[2024-10-28 14:09:27,953] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed using client LR scheduler
+[2024-10-28 14:09:27,953] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed LR Scheduler = None
+[2024-10-28 14:09:27,953] [INFO] [logging.py:96:log_dist] [Rank 0] step=0, skipped=0, lr=[0.0003999999999999993], mom=[(0.95, 0.999)]
+[2024-10-28 14:09:27,953] [INFO] [config.py:996:print] DeepSpeedEngine configuration:
+[2024-10-28 14:09:27,953] [INFO] [config.py:1000:print]   activation_checkpointing_config  {
+    "partition_activations": false, 
+    "contiguous_memory_optimization": false, 
+    "cpu_checkpointing": false, 
+    "number_checkpoints": null, 
+    "synchronize_checkpoint_boundary": false, 
+    "profile": false
+}
+[2024-10-28 14:09:27,953] [INFO] [config.py:1000:print]   aio_config ................... {'block_size': 1048576, 'queue_depth': 8, 'thread_count': 1, 'single_submit': False, 'overlap_events': True}
+[2024-10-28 14:09:27,953] [INFO] [config.py:1000:print]   amp_enabled .................. False
+[2024-10-28 14:09:27,953] [INFO] [config.py:1000:print]   amp_params ................... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   autotuning_config ............ {
+    "enabled": false, 
+    "start_step": null, 
+    "end_step": null, 
+    "metric_path": null, 
+    "arg_mappings": null, 
+    "metric": "throughput", 
+    "model_info": null, 
+    "results_dir": "autotuning_results", 
+    "exps_dir": "autotuning_exps", 
+    "overwrite": true, 
+    "fast": true, 
+    "start_profile_step": 3, 
+    "end_profile_step": 5, 
+    "tuner_type": "gridsearch", 
+    "tuner_early_stopping": 5, 
+    "tuner_num_trials": 50, 
+    "model_info_path": null, 
+    "mp_size": 1, 
+    "max_train_batch_size": null, 
+    "min_train_batch_size": 1, 
+    "max_train_micro_batch_size_per_gpu": 1.024000e+03, 
+    "min_train_micro_batch_size_per_gpu": 1, 
+    "num_tuning_micro_batch_sizes": 3
+}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   bfloat16_enabled ............. True
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   bfloat16_immediate_grad_update  False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   checkpoint_parallel_write_pipeline  False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   checkpoint_tag_validation_enabled  True
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   checkpoint_tag_validation_fail  False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   comms_config ................. <deepspeed.comm.config.DeepSpeedCommsConfig object at 0x7f8e50bb4950>
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   communication_data_type ...... None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   compile_config ............... enabled=False backend='inductor' kwargs={}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   compression_config ........... {'weight_quantization': {'shared_parameters': {'enabled': False, 'quantizer_kernel': False, 'schedule_offset': 0, 'quantize_groups': 1, 'quantize_verbose': False, 'quantization_type': 'symmetric', 'quantize_weight_in_forward': False, 'rounding': 'nearest', 'fp16_mixed_quantize': False, 'quantize_change_ratio': 0.001}, 'different_groups': {}}, 'activation_quantization': {'shared_parameters': {'enabled': False, 'quantization_type': 'symmetric', 'range_calibration': 'dynamic', 'schedule_offset': 1000}, 'different_groups': {}}, 'sparse_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'row_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'head_pruning': {'shared_parameters': {'enabled': False, 'method': 'topk', 'schedule_offset': 1000}, 'different_groups': {}}, 'channel_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'layer_reduction': {'enabled': False}}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   curriculum_enabled_legacy .... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   curriculum_params_legacy ..... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   data_efficiency_config ....... {'enabled': False, 'seed': 1234, 'data_sampling': {'enabled': False, 'num_epochs': 1000, 'num_workers': 0, 'curriculum_learning': {'enabled': False}}, 'data_routing': {'enabled': False, 'random_ltd': {'enabled': False, 'layer_token_lr_schedule': {'enabled': False}}}}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   data_efficiency_enabled ...... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   dataloader_drop_last ......... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   disable_allgather ............ False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   dump_state ................... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   dynamic_loss_scale_args ...... None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_enabled ........... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_gas_boundary_resolution  1
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_layer_name ........ bert.encoder.layer
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_layer_num ......... 0
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_max_iter .......... 100
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_stability ......... 1e-06
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_tol ............... 0.01
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   eigenvalue_verbose ........... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   elasticity_enabled ........... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   flops_profiler_config ........ {
+    "enabled": false, 
+    "recompute_fwd_factor": 0.0, 
+    "profile_step": 1, 
+    "module_depth": -1, 
+    "top_modules": 1, 
+    "detailed": true, 
+    "output_file": null
+}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   fp16_auto_cast ............... None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   fp16_enabled ................. False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   fp16_master_weights_and_gradients  False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   global_rank .................. 0
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   grad_accum_dtype ............. None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   gradient_accumulation_steps .. 1
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   gradient_clipping ............ 0.0
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   gradient_predivide_factor .... 1.0
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   graph_harvesting ............. False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   hybrid_engine ................ enabled=False max_out_tokens=512 inference_tp_size=1 release_inference_cache=False pin_parameters=True tp_gather_partition_size=8
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   initial_dynamic_scale ........ 1
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   load_universal_checkpoint .... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   loss_scale ................... 1.0
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   memory_breakdown ............. False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   mics_hierarchial_params_gather  False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   mics_shard_size .............. -1
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   monitor_config ............... tensorboard=TensorBoardConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') wandb=WandbConfig(enabled=False, group=None, team=None, project='deepspeed') csv_monitor=CSVConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') enabled=False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   nebula_config ................ {
+    "enabled": false, 
+    "persistent_storage_path": null, 
+    "persistent_time_interval": 100, 
+    "num_of_version_in_retention": 2, 
+    "enable_nebula_load": true, 
+    "load_path": null
+}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   optimizer_legacy_fusion ...... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   optimizer_name ............... None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   optimizer_params ............. None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   pipeline ..................... {'stages': 'auto', 'partition': 'best', 'seed_layers': False, 'activation_checkpoint_interval': 0, 'pipe_partitioned': True, 'grad_partitioned': True}
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   pld_enabled .................. False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   pld_params ................... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   prescale_gradients ........... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   scheduler_name ............... None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   scheduler_params ............. None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   seq_parallel_communication_data_type  torch.float32
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   sparse_attention ............. None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   sparse_gradients_enabled ..... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   steps_per_print .............. inf
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   train_batch_size ............. 16
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   train_micro_batch_size_per_gpu  16
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   use_data_before_expert_parallel_  False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   use_node_local_storage ....... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   wall_clock_breakdown ......... False
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   weight_quantization_config ... None
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   world_size ................... 1
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   zero_allow_untested_optimizer  True
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   zero_config .................. stage=2 contiguous_gradients=True reduce_scatter=True reduce_bucket_size=200000000 use_multi_rank_bucket_allreduce=True allgather_partitions=True allgather_bucket_size=200000000 overlap_comm=True load_from_fp32_weights=True elastic_checkpoint=False offload_param=None offload_optimizer=None sub_group_size=1000000000 cpu_offload_param=None cpu_offload_use_pin_memory=None cpu_offload=None prefetch_bucket_size=50,000,000 param_persistence_threshold=100,000 model_persistence_threshold=sys.maxsize max_live_parameters=1,000,000,000 max_reuse_distance=1,000,000,000 gather_16bit_weights_on_model_save=False stage3_gather_fp16_weights_on_model_save=False ignore_unused_parameters=True legacy_stage1=False round_robin_gradients=False zero_hpz_partition_size=1 zero_quantized_weights=False zero_quantized_nontrainable_weights=False zero_quantized_gradients=False mics_shard_size=-1 mics_hierarchical_params_gather=False memory_efficient_linear=True pipeline_loading_checkpoint=False override_module_apply=True
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   zero_enabled ................. True
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   zero_force_ds_cpu_optimizer .. True
+[2024-10-28 14:09:27,954] [INFO] [config.py:1000:print]   zero_optimization_stage ...... 2
+[2024-10-28 14:09:27,954] [INFO] [config.py:986:print_user_config]   json = {
+    "bf16": {
+        "enabled": true, 
+        "auto_cast": true
+    }, 
+    "zero_optimization": {
+        "stage": 2, 
+        "allgather_partitions": true, 
+        "allgather_bucket_size": 2.000000e+08, 
+        "overlap_comm": true, 
+        "reduce_scatter": true, 
+        "reduce_bucket_size": 2.000000e+08, 
+        "contiguous_gradients": true, 
+        "sub_group_size": 1.000000e+09
+    }, 
+    "gradient_accumulation_steps": 1, 
+    "train_batch_size": 16, 
+    "train_micro_batch_size_per_gpu": 16, 
+    "steps_per_print": inf, 
+    "wall_clock_breakdown": false, 
+    "fp16": {
+        "enabled": false
+    }, 
+    "zero_allow_untested_optimizer": true
+}
+0it [00:00, ?it/s]1it [00:01,  1.18s/it]2it [00:01,  1.59it/s]3it [00:01,  2.20it/s]4it [00:01,  2.65it/s]5it [00:02,  3.03it/s]6it [00:02,  2.97it/s]7it [00:02,  3.10it/s]8it [00:03,  3.44it/s]9it [00:03,  3.53it/s]10it [00:03,  3.46it/s]11it [00:03,  3.68it/s]12it [00:04,  3.77it/s]13it [00:04,  3.84it/s]14it [00:04,  3.87it/s]15it [00:04,  3.96it/s]16it [00:05,  3.81it/s]17it [00:05,  3.84it/s]18it [00:05,  3.78it/s]19it [00:05,  3.94it/s]20it [00:06,  3.79it/s]21it [00:06,  3.89it/s]22it [00:06,  4.03it/s]23it [00:06,  3.83it/s]24it [00:07,  3.89it/s]25it [00:07,  3.86it/s]26it [00:07,  3.99it/s]27it [00:07,  3.77it/s]28it [00:08,  3.93it/s]29it [00:08,  4.03it/s]30it [00:08,  3.80it/s]31it [00:08,  3.99it/s]32it [00:09,  3.89it/s]33it [00:09,  3.91it/s]34it [00:09,  3.95it/s]35it [00:09,  3.92it/s]36it [00:10,  3.87it/s]37it [00:10,  3.96it/s]38it [00:10,  4.02it/s]39it [00:10,  3.92it/s]40it [00:11,  4.02it/s]41it [00:11,  3.92it/s]42it [00:11,  3.99it/s]43it [00:11,  3.99it/s]44it [00:12,  4.04it/s]45it [00:12,  3.88it/s]46it [00:12,  3.97it/s]47it [00:12,  4.06it/s]48it [00:13,  3.88it/s]49it [00:13,  3.96it/s]50it [00:13,  3.92it/s]51it [00:14,  3.99it/s]52it [00:14,  3.73it/s]53it [00:14,  3.96it/s]54it [00:14,  4.03it/s]55it [00:15,  3.83it/s]56it [00:15,  4.00it/s]57it [00:15,  3.91it/s]58it [00:15,  3.91it/s]59it [00:16,  3.92it/s]60it [00:16,  3.83it/s]61it [00:16,  3.91it/s]62it [00:16,  3.98it/s]63it [00:17,  4.08it/s]64it [00:17,  3.87it/s]65it [00:17,  3.96it/s]66it [00:17,  3.89it/s]67it [00:18,  4.01it/s]68it [00:18,  3.80it/s]69it [00:18,  3.90it/s]70it [00:18,  4.00it/s]71it [00:19,  3.81it/s]72it [00:19,  3.99it/s]73it [00:19,  3.91it/s]74it [00:19,  3.92it/s]75it [00:20,  3.95it/s]76it [00:20,  3.91it/s]77it [00:20,  3.91it/s]78it [00:20,  4.00it/s]79it [00:21,  4.07it/s]80it [00:21,  3.90it/s]81it [00:21,  3.88it/s]82it [00:21,  3.84it/s]83it [00:22,  4.02it/s]84it [00:22,  3.76it/s]85it [00:22,  3.89it/s]86it [00:22,  4.03it/s]87it [00:23,  3.83it/s]88it [00:23,  3.97it/s]89it [00:23,  3.89it/s]90it [00:23,  3.94it/s]91it [00:24,  3.79it/s]92it [00:24,  3.82it/s]93it [00:24,  3.94it/s]94it [00:25,  3.81it/s]95it [00:25,  3.92it/s]96it [00:25,  3.85it/s]97it [00:25,  3.92it/s]98it [00:26,  3.75it/s]99it [00:26,  3.90it/s]100it [00:26,  3.96it/s]101it [00:26,  3.77it/s]102it [00:27,  3.96it/s]103it [00:27,  3.87it/s]104it [00:27,  3.89it/s]105it [00:27,  3.85it/s]106it [00:28,  3.79it/s]107it [00:28,  3.93it/s]108it [00:28,  3.77it/s]109it [00:28,  3.94it/s]110it [00:29,  3.86it/s]111it [00:29,  3.93it/s]112it [00:29,  3.91it/s]113it [00:29,  3.89it/s]114it [00:30,  3.90it/s]115it [00:30,  3.97it/s]116it [00:30,  4.04it/s]117it [00:30,  3.91it/s]118it [00:31,  4.02it/s][2024-10-28 14:09:59,125] torch.distributed.elastic.agent.server.api: [WARNING] Received 2 death signal, shutting down workers
+[2024-10-28 14:09:59,125] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 1379185 closing signal SIGINT
+118it [00:31,  3.79it/s]
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/TimeLLM/seed_process.py", line 240, in <module>
+    for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/tqdm/std.py", line 1178, in __iter__
+    for obj in iterable:
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/data_loader.py", line 461, in __iter__
+    current_batch = send_to_device(current_batch, self.device)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/operations.py", line 177, in send_to_device
+    return honor_type(
+           ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/operations.py", line 81, in honor_type
+    return type(obj)(generator)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/operations.py", line 178, in <genexpr>
+    tensor, (send_to_device(t, device, non_blocking=non_blocking, skip_keys=skip_keys) for t in tensor)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/utils/operations.py", line 155, in send_to_device
+    return tensor.to(device, non_blocking=non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+[2024-10-28 14:09:59,396] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 1379185 closing signal SIGTERM
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 727, in run
+    result = self._invoke_run(role)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 868, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 1379088 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 734, in run
+    self._shutdown(e.sigval)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 311, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 318, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 706, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 2047, in _wait
+    time.sleep(delay)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 1379088 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 259, in launch_agent
+    result = agent.run()
+             ^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/metrics/api.py", line 123, in wrapper
+    result = f(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/api.py", line 739, in run
+    self._shutdown()
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 311, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 318, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 706, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/subprocess.py", line 2047, in _wait
+    time.sleep(delay)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 1379088 got signal: 2

@@ -11,6 +11,9 @@ from transformers import TextStreamer
 from datasets import Dataset
 import json
 import pandas as pd
+from transformers import MambaConfig, MambaForCausalLM, AutoTokenizer
+#from mixer_seq_simple import MambaLMHeadModel,MambaTimeHeadModel
+
 
 max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
 dtype = None # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
@@ -34,20 +37,36 @@ fourbit_models = [
 
 def prepare_peft_model_n_tokenizer(model_name="unsloth/llama-3-70b-Instruct-bnb-4bit",\
         chat_template="llama-3.1", peft="LoRA"):
+    
     model, tokenizer = FastLanguageModel.from_pretrained(
-    # model_name = "unsloth/Meta-Llama-3.1-8B-Instruct",
+    #model_name = "openai-community/gpt2",
     model_name = model_name,
     max_seq_length = max_seq_length,
     dtype = dtype,
-    load_in_4bit = load_in_4bit,
+    load_in_4bit = False,
     # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
     )
+    '''
+
+    tokenizer = AutoTokenizer.from_pretrained("state-spaces/mamba-130m-hf")
+    model = MambaForCausalLM.from_pretrained("state-spaces/mamba-130m-hf")
+    print(model.state_dict().keys())
+    
+    '''
     if peft == "LoRA":
+        '''
+        num_layers = 24
+        target_modules = []
+        for i in range(num_layers):
+            target_modules.append(f'backbone.layer.{i}.mixer.in_proj')
+            target_modules.append(f'backbone.layer.{i}.mixer.out_proj')
+        '''
         model = FastLanguageModel.get_peft_model(
             model,
             r = 16, # Choose any number > 0 ! Suggested 8, 16, 32, 64, 128
-            target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",
+            target_modules = ["q_proj", "k_proj", "v_proj", "o_proj",#change these for mamba!!
                             "gate_proj", "up_proj", "down_proj",],
+            #target_modules=target_modules,
             lora_alpha = 16,
             lora_dropout = 0, # Supports any, but = 0 is optimized
             bias = "none",    # Supports any, but = "none" is optimized
@@ -81,6 +100,8 @@ def prepare_dataset(tokenizer, dataset_dir=None):
         data = read_json(dataset_dir)
         reformated_data = reformat_dict(data)
         data = pd.DataFrame(reformated_data)
+        print("reformatted data: ", data[:5])
+
         # shuffle data
         data = data.sample(frac=1).reset_index(drop=True)
         # Calculate the split index
@@ -88,12 +109,13 @@ def prepare_dataset(tokenizer, dataset_dir=None):
         train_dataset, eval_dataset = data.iloc[:split_index], data.iloc[split_index:]
         train_dataset = Dataset.from_dict(train_dataset.to_dict(orient="list"))
         train_dataset = standardize_sharegpt(train_dataset)
-        
+        print("train_dataset post standardize:", train_dataset[:5])
         eval_dataset = Dataset.from_dict(eval_dataset.to_dict(orient="list"))
         eval_dataset = standardize_sharegpt(eval_dataset)
-
+        
 
     train_dataset = train_dataset.map(formatting_prompts_func, batched = True,) 
+    #print("train_dataset post map:", train_dataset[:5])
     eval_dataset = eval_dataset.map(formatting_prompts_func, batched = True,) 
     return train_dataset, eval_dataset
 

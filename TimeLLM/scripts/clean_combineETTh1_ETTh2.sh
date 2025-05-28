@@ -76,7 +76,7 @@ echo "Setting rand_init to $rand_init"
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 
 llm_dim=10
-if [ "$num_params" = "130m" ]; then
+if [ "$num_params" == "130m" ]; then
   llm_dim=768
 elif [[ "$num_params" == "2.7b" || "$num_params" == "2.8b" ]]; then
   llm_dim=2560
@@ -91,48 +91,56 @@ seq_len=$((512 / downsampling_factor))
 # Define trials for different pred_len values
 for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
-  for seed in {1..3}; do
-    tag="ETTh2_to_ETTh1_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}"
-    comment="checkpoints/${tag}"
-    log_file="results/ETTh2_to_ETTh1/${tag}.txt"
-    exec > "$log_file" 2>&1
+  for seed in {1..10}; do
 
-    accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
-      --task_name long_term_forecast \
-      --is_training 1 \
-      --root_path ./dataset/ETT-small/ \
-      --data_path ETTh1.csv \
-      --data_path_pretrain ETTh2.csv \
-      --model_id ETTh2_to_ETTh1_${seq_len}_${pred_len} \
-      --model $model_name \
-      --data ETTh1 \
-      --data_pretrain ETTh2 \
-      --features M \
-      --seq_len $seq_len \
-      --label_len 48 \
-      --factor 3 \
-      --enc_in 7 \
-      --dec_in 7 \
-      --c_out 7 \
-      --pred_len $pred_len \
-      --dsampfactor $downsampling_factor \
-      --percent $percent \
-      --col_percent $col_percent \
-      --des 'Exp' \
-      --itr 1 \
-      --d_model $d_model \
-      --d_ff 32 \
-      --batch_size $batch_size \
-      --learning_rate $learning_rate \
-      --llm_layers $llm_layers \
-      --train_epochs $train_epochs \
-      --model_comment "$comment" \
-      --llm_model $llm_model \
-      --llm_dim $llm_dim \
-      --num_params $num_params \
-      --rand_init $rand_init \
-      --seed $seed
+    for init_seed in {11..20}; do
+      tag="ETTh2_to_ETTh1_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      comment="checkpoints/${tag}"
+      log_file="results/ETTh1_to_ETTh2/${tag}.txt"
+      exec > "$log_file" 2>&1
 
-    echo "ETTh1 pretrained on ETTh2 with pred_len $pred_len and seed $seed completed, saved to $comment"
+      accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
+        --task_name long_term_forecast \
+        --is_training 1 \
+        --root_path ./dataset/ETT-small/ \
+        --data_path ETTh1.csv \
+        --data_path_test ETTh2.csv \
+        --model_id ETTh1_to_ETTh2_${seq_len}_${pred_len} \
+        --model $model_name \
+        --data ETTh1 \
+        --data_pretrain ETTh2 \
+        --pretrain 1 \
+        --features M \
+        --seq_len $seq_len \
+        --label_len 48 \
+        --factor 3 \
+        --enc_in 7 \
+        --dec_in 7 \
+        --c_out 7 \
+        --pred_len $pred_len \
+        --dsampfactor $downsampling_factor \
+        --percent $percent \
+        --col_percent $col_percent \
+        --des 'Exp' \
+        --itr 1 \
+        --d_model $d_model \
+        --d_ff 32 \
+        --batch_size $batch_size \
+        --learning_rate $learning_rate \
+        --llm_layers $llm_layers \
+        --train_epochs $train_epochs \
+        --model_comment "$comment" \
+        --llm_model $llm_model \
+        --llm_dim $llm_dim \
+        --num_params $num_params \
+        --rand_init $rand_init \
+        --seed $seed \
+        --init_seed $init_seed
+
+      echo "ETTh1 pretrained on ETTh2 with init_seed $init_seed and seed $seed completed, saved to $comment"
+      if [[ "$rand_init" -eq 0 ]]; then
+          break
+      fi
+    done
   done
 done

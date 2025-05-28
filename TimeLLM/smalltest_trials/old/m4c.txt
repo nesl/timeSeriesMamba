@@ -1,0 +1,147 @@
+CUDA_VISIBLE_DEVICES: 1
+[2025-02-19 11:46:10,073] [INFO] [real_accelerator.py:191:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2025-02-19 11:46:10,178] [INFO] [comm.py:637:init_distributed] cdb=None
+[2025-02-19 11:46:10,179] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+accelerator device:  cuda:0
+border1: 34488, border2: 40000, percent: 100
+Number of rows selected: 5512
+Original data shape: (50000, 2)
+self.data_x shape (rows, covariates): (5512, 1)
+downsampling factor:  1
+data x len 5512
+data seq len 512
+data pred len 96
+border1: 39488, border2: 50000, percent: 100
+Number of rows selected: 10512
+Original data shape: (50000, 2)
+self.data_x shape (rows, covariates): (10512, 1)
+downsampling factor:  1
+data x len 10512
+data seq len 512
+data pred len 96
+border1: 0, border2: 35000, percent: 100
+Number of rows selected: 35000
+Original data shape: (50000, 2)
+self.data_x shape (rows, covariates): (35000, 1)
+downsampling factor:  1
+data x len 35000
+data seq len 512
+data pred len 96
+Using Framework:  Mamba4Cast
+0it [00:00, ?it/s]ts shape: torch.Size([24, 512, 4])
+history shape: torch.Size([24, 512, 1])
+target_dates shape: torch.Size([24, 192, 4])
+ts:  tensor([[[-0.1522,  0.1667, -0.5000, -0.5000],
+         [-0.1087,  0.1667, -0.5000, -0.5000],
+         [-0.0652,  0.1667, -0.5000, -0.5000],
+         ...,
+         [ 0.0652,  0.1667,  0.2000, -0.4425],
+         [ 0.1087,  0.1667,  0.2000, -0.4425],
+         [ 0.1522,  0.1667,  0.2000, -0.4425]],
+
+        [[-0.1087,  0.1667, -0.5000, -0.5000],
+         [-0.0652,  0.1667, -0.5000, -0.5000],
+         [-0.0217,  0.1667, -0.5000, -0.5000],
+         ...,
+         [ 0.1087,  0.1667,  0.2000, -0.4425],
+         [ 0.1522,  0.1667,  0.2000, -0.4425],
+         [ 0.1957,  0.1667,  0.2000, -0.4425]],
+
+        [[-0.0652,  0.1667, -0.5000, -0.5000],
+         [-0.0217,  0.1667, -0.5000, -0.5000],
+         [ 0.0217,  0.1667, -0.5000, -0.5000],
+         ...,
+         [ 0.1522,  0.1667,  0.2000, -0.4425],
+         [ 0.1957,  0.1667,  0.2000, -0.4425],
+         [ 0.2391,  0.1667,  0.2000, -0.4425]],
+
+        ...,
+
+        [[-0.2826,  0.3333, -0.4667, -0.4973],
+         [-0.2391,  0.3333, -0.4667, -0.4973],
+         [-0.1957,  0.3333, -0.4667, -0.4973],
+         ...,
+         [-0.0652,  0.3333,  0.2333, -0.4397],
+         [-0.0217,  0.3333,  0.2333, -0.4397],
+         [ 0.0217,  0.3333,  0.2333, -0.4397]],
+
+        [[-0.2391,  0.3333, -0.4667, -0.4973],
+         [-0.1957,  0.3333, -0.4667, -0.4973],
+         [-0.1522,  0.3333, -0.4667, -0.4973],
+         ...,
+         [-0.0217,  0.3333,  0.2333, -0.4397],
+         [ 0.0217,  0.3333,  0.2333, -0.4397],
+         [ 0.0652,  0.3333,  0.2333, -0.4397]],
+
+        [[-0.1957,  0.3333, -0.4667, -0.4973],
+         [-0.1522,  0.3333, -0.4667, -0.4973],
+         [-0.1087,  0.3333, -0.4667, -0.4973],
+         ...,
+         [ 0.0217,  0.3333,  0.2333, -0.4397],
+         [ 0.0652,  0.3333,  0.2333, -0.4397],
+         [ 0.1087,  0.3333,  0.2333, -0.4397]]], device='cuda:0')
+0it [00:00, ?it/s]
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+CUDA_VISIBLE_DEVICES: 1
+Traceback (most recent call last):
+  File "/home/nesl/oliver/timeSeriesMamba/TimeLLM/seed_process.py", line 250, in <module>
+    test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/TimeLLM/utils/tools.py", line 188, in vali
+    output = model(x, args.pred_len)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/Mamba4Cast/src_torch/training/models.py", line 88, in forward
+    self.pos_minute(self.tc(ts, MINUTE)),
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/oliver/timeSeriesMamba/Mamba4Cast/src_torch/training/models.py", line 60, in tc
+    return ts[:, :, time_index]
+           ~~^^^^^^^^^^^^^^^^^^
+IndexError: index 6 is out of bounds for dimension 2 with size 4
+[2025-02-19 11:46:51,218] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3253990) of binary: /home/nesl/anaconda3/envs/TimeMamba/bin/python
+Traceback (most recent call last):
+  File "/home/nesl/anaconda3/envs/TimeMamba/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/accelerate_cli.py", line 46, in main
+    args.func(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 1042, in launch_command
+    deepspeed_launcher(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/accelerate/commands/launch.py", line 754, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/run.py", line 803, in run
+    elastic_launch(
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 135, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nesl/anaconda3/envs/TimeMamba/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 268, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+seed_process.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-02-19_11:46:51
+  host      : sn4622120321
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3253990)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

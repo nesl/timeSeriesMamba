@@ -12,9 +12,10 @@ import pdb
 def main(args):
     seed = 3407
     seed_everything(seed)
+    
     model, tokenizer = prepare_peft_model_n_tokenizer(
-        #model_name=args.model
-        model_name='state-spaces/mamba2-1.3b'
+        model_name=args.model
+        #model_name='mistralai/Mamba-Codestral-7B-v0.1'
     )
     # train_dataset, eval_dataset  = prepare_dataset(tokenizer=tokenizer)
     train_dataset, eval_dataset  = prepare_dataset(tokenizer=tokenizer, dataset_dir=args.dataset_dir)
@@ -45,20 +46,7 @@ def main(args):
             eval_strategy = "epoch",
             eval_steps = 1,
         )
-    '''
-    trainer = SFTTrainer(
-        model = model,
-        tokenizer = tokenizer,
-        train_dataset = train_dataset,
-        eval_dataset = eval_dataset,
-        dataset_text_field = "text",
-        max_seq_length = max_seq_length,
-        data_collator = DataCollatorForSeq2Seq(tokenizer = tokenizer),
-        dataset_num_proc = 2,
-        packing = False, # Can make training 5x faster for short sequences.
-        args = trainer_args,
-    )
-    '''
+    
     trainer = SFTTrainer(
     model=model,
     processing_class=tokenizer,
@@ -94,7 +82,7 @@ if __name__ == '__main__':
         help="default use Llama-3.2-3B-Instruct"
     )
     parser.add_argument(
-        "--dataset_dir", type=str, default="/home/nesl/oliver/timeSeriesMamba/LLMFinetune/pyhrv.json", 
+        "--dataset_dir", type=str, default="/home/nesl/oliver/timeSeriesMamba/LLMFinetune/jsons/combo1.json", 
         help="Your finetuning json file"
     )
     parser.add_argument(
