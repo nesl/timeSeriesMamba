@@ -26,7 +26,7 @@ parser.add_argument("--dataset", type=str, choices=["pile", "openwebtext"], requ
 parser.add_argument("--total_steps", type=int, default=320_000)
 parser.add_argument("--save_every", type=int, default=5000)
 parser.add_argument("--seq_len", type=int, default=1024)
-parser.add_argument("--batch_size", type=int, default=2)
+parser.add_argument("--batch_size", type=int, default=8)
 args = parser.parse_args()
 
 wandb.init(
@@ -38,7 +38,7 @@ wandb.init(
         "total_steps": args.total_steps,
         "batch_size": args.batch_size,
         "seq_len": args.seq_len,
-        "lr": 5e-5,
+        "lr": 1e-4,
     }
 )
 
@@ -65,7 +65,13 @@ class TokenizedTextDataset(IterableDataset):
     def __iter__(self):
         buffer = []
         for example in self.dataset:
-            tokens = self.tokenizer(example["text"], return_attention_mask=False, return_token_type_ids=False)["input_ids"]
+            tokens = self.tokenizer(
+                example["text"],
+                return_attention_mask=False,
+                return_token_type_ids=False,
+                truncation=True,
+                max_length=self.seq_len,
+            )["input_ids"]
             buffer.extend(tokens)
             while len(buffer) >= self.seq_len:
                 chunk = buffer[:self.seq_len]
@@ -83,7 +89,9 @@ else:
     model = MambaLMHeadModel.from_pretrained(args.model_name)
 tokenizer.pad_token = tokenizer.eos_token
 model.cuda()
+assert model.config.max_position_embeddings >= args.seq_len
 
+#print("tokenizer pad token id: ", tokenizer.pad_token_id)
 # Data loader
 dataset = TokenizedTextDataset(raw_dataset, tokenizer, args.seq_len)
 collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
@@ -91,7 +99,7 @@ dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=collator
 
 # Optimizer + scheduler
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0.1)
-lr_scheduler = get_scheduler("linear", optimizer=optimizer, num_warmup_steps=2000, num_training_steps=args.total_steps)
+lr_scheduler = get_scheduler("cosine", optimizer=optimizer, num_warmup_steps=5000, num_training_steps=args.total_steps)
 
 criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
 
@@ -116,12 +124,15 @@ while step < args.total_steps:
             shift_logits.view(-1, shift_logits.size(-1)), # (B*(S-1), V)
             shift_labels.view(-1)                          # (B*(S-1))
         )
+        #print("logit shape, labels shape, loss item: \n", logits.shape, labels.shape, loss.item())
         loss.backward()
         wandb.log({
             "step": step,
             "loss": loss.item(),
-            "lr": lr_scheduler.get_last_lr()[0]
+            "lr": lr_scheduler.get_last_lr()[0],
+            "perplexity": torch.exp(loss).item(),
         }, step=step)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
         lr_scheduler.step()
         optimizer.zero_grad()

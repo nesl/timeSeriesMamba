@@ -1,3 +1,5 @@
+#THIS FILE WORKS FOR A BIT OF PRETRAINIG BUT IT IS ONLY WITH HUGGINGFACE AND DOESN'T USE ENOUGH TRAINING RUNS
+
 import os
 from datasets import load_dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments, DataCollatorForLanguageModeling

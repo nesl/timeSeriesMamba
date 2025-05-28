@@ -9,13 +9,13 @@ MODEL_NAME="gpt2"
 DATASET="pile"
 
 # Set CUDA_VISIBLE_DEVICES
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=2
 
 # Run the Python script with the specified arguments
 #python languagePretrain.py --model_type $MODEL_TYPE --model_name $MODEL_NAME --dataset $DATASET
 
-python mambaPretrain.py \
+python localPretrain.py \
   --model_name GPT2Local \
-  --dataset pile \
+  --dataset openwebtext \
   --total_steps 320000 \
   --save_every 10000

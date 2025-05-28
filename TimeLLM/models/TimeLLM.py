@@ -359,10 +359,12 @@ class Model(nn.Module):
             for name, param in self.llm_model.named_parameters():
                 if param.requires_grad:
                     if "weight" in name:
-                        init.xavier_normal_(param.data, gain=1.0)
+                        if param.data.dim() >= 2:  # Check if tensor has 2 or more dimensions
+                            init.xavier_normal_(param.data, gain=1.0)
+                        else:  # Handle 1D tensors
+                            init.normal_(param.data, mean=0.0, std=0.02)  # Fallback to normal initialization
                     elif "bias" in name:
                         init.constant_(param.data, 0)
-            #print("llm weights initialized with Xavier initialization!")
             torch.manual_seed(configs.seed)
 
 
