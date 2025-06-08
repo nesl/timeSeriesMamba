@@ -89,7 +89,7 @@ fi
 seq_len=$((512 / downsampling_factor))
 
 # Define trials for different pred_len values
-for pred_len in $((96 / downsampling_factor)) $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
+for pred_len in $((96 / downsampling_factor)) ; do #$((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
   for seed in {1..10}; do
 

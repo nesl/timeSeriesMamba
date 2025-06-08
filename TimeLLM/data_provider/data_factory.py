@@ -13,7 +13,8 @@ data_dict = {
     'Illness': Dataset_Custom,
     'Exchange': Dataset_Custom,
     'Synthetic': Dataset_Custom,
-    'Aus': Dataset_Custom
+    'Aus': Dataset_Custom,
+    'CarbonCast': Dataset_Custom
 }
 
 

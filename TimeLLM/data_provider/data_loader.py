@@ -341,12 +341,30 @@ class Dataset_Custom(Dataset):
         df_raw = pd.read_csv(os.path.join(self.root_path, self.data_path))
         
         cols = list(df_raw.columns)
-        cols.remove(self.target)
-        cols.remove('date')
+        if self.target in cols:
+            cols.remove(self.target)
+        else:
+            print(f"Warning: Target column '{self.target}' not found in the DataFrame. Skipping removal.")
+        
+        if 'date' in cols:
+            cols.remove('date')
+        else:
+            print("Warning: 'date' column not found in the DataFrame.")
+
         num_cols_to_keep = int(len(cols) * (self.col_percent / 100))
         cols = cols[:num_cols_to_keep]
-        df_raw = df_raw[['date'] + cols + [self.target]]
+
+        # Reconstruct the DataFrame with 'date' and 'target' only if they exist
+        selected_columns = []
+        if 'date' in df_raw.columns:
+            selected_columns.append('date')
+        selected_columns.extend(cols)
+        if self.target in df_raw.columns:
+            selected_columns.append(self.target)
+
+        df_raw = df_raw[selected_columns]
         print("df_raw added: ", df_raw)
+        
 
         if self.split_type == 'temporal':
             num_train = int(len(df_raw) * 0.7)
