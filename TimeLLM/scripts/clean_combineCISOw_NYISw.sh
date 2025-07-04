@@ -94,9 +94,9 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
   for seed in {1..10}; do
 
     for init_seed in {11..20}; do
-      tag="NYIStrain_CISOtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      tag="NYISwtrain_CISOwtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
-      log_file="results/NYIStrain_CISOtest/${tag}.txt"
+      log_file="results/NYISwtrain_CISOwtest/${tag}.txt"
       exec > "$log_file" 2>&1
 
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
@@ -105,10 +105,10 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --root_path ./dataset/CarbonCast/ \
         --data_path NYIS_aggregated_weather_data.csv \
         --data_path_test CISO_aggregated_weather_data.csv \
-        --model_id NYIStrain_CISOtest_${seq_len}_${pred_len} \
+        --model_id NYISwtrain_CISOwtest_${seq_len}_${pred_len} \
         --model $model_name \
-        --data CarbonCast \
-        --data_pretrain CarbonCast \
+        --data CarbonCastw \
+        --data_pretrain CarbonCastw \
         --pretrain 1 \
         --features M \
         --seq_len $seq_len \
@@ -137,7 +137,7 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --seed $seed \
         --init_seed $init_seed
 
-      echo "CISO pretrained on NYIS with init_seed $init_seed and seed $seed completed, saved to $comment"
+      echo "CISOw pretrained on NYISw with init_seed $init_seed and seed $seed completed, saved to $comment"
       if [[ "$rand_init" -eq 0 ]]; then
           break
       fi

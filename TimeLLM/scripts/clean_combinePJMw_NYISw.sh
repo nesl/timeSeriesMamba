@@ -94,9 +94,9 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
   for seed in {1..10}; do
 
     for init_seed in {11..20}; do
-      tag="NYIStrain_PJMtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      tag="NYISwtrain_PJMwtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
-      log_file="results/NYIStrain_PJMtest/${tag}.txt"
+      log_file="results/NYISwtrain_PJMwtest/${tag}.txt"
       exec > "$log_file" 2>&1
 
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
@@ -107,8 +107,8 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --data_path_test PJM_aggregated_weather_data.csv \
         --model_id NYISwtrain_PJMwtest_${seq_len}_${pred_len} \
         --model $model_name \
-        --data CarbonCast \
-        --data_pretrain CarbonCast \
+        --data CarbonCastw \
+        --data_pretrain CarbonCastw \
         --pretrain 1 \
         --features M \
         --seq_len $seq_len \

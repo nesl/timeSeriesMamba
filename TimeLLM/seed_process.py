@@ -103,6 +103,7 @@ if __name__ == '__main__':
     parser.add_argument('--rand_init', type=int, default=0, help='if nonzero, initialize weights of LLM randomly')
     parser.add_argument('--init_seed', type=int, default=0, help='seed for rand_init only')
     parser.add_argument('--finetune_llm', type=int, default=0, help='if nonzero, allow LLM weights to be trained')
+    parser.add_argument('--boundary_file', type=str, default=None, help='if not None, prevents training windows to be takena cross a concatenated datafile')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')

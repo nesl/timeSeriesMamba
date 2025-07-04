@@ -14,7 +14,8 @@ data_dict = {
     'Exchange': Dataset_Custom,
     'Synthetic': Dataset_Custom,
     'Aus': Dataset_Custom,
-    'CarbonCast': Dataset_Custom
+    'CarbonCast': Dataset_Custom,
+    'CarbonCastw': Dataset_Custom
 }
 
 
@@ -70,7 +71,8 @@ def data_provider(args, flag):
             seasonal_patterns=args.seasonal_patterns,
             dsampfactor=dsampfactor,
             pretrain=args.pretrain,
-            split_type=args.split_type
+            split_type=args.split_type,
+            boundary_file=args.boundary_file
         )
     data_loader = DataLoader(
         data_set,

@@ -21,3 +21,5 @@ uni2ts/
 Mamba4Cast/
 moment/
 mamba_ssm/
+**/archive_results/
+customLLMsForTimeSeries/

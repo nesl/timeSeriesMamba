@@ -217,6 +217,25 @@ class Model(nn.Module):
                     local_files_only=False
                 )
         elif configs.llm_model == 'GPT2Pile':
+            # Path to your .pt checkpoint file
+            checkpoint_path = './results/pile/GPT2Local_320000.pt'  # Adjust to match your .pt file path
+            
+            # Load the checkpoint from the .pt file
+            checkpoint = torch.load(checkpoint_path)
+            
+            # Extract the config from the checkpoint
+            self.gpt2_config = checkpoint['config']
+            
+            # Modify the config to output attentions and hidden states
+            self.gpt2_config.output_attentions = True
+            self.gpt2_config.output_hidden_states = True
+            
+            # Initialize the model with the config
+            self.llm_model = GPT2Model(self.gpt2_config)
+            
+            # Load the model's state dictionary from the checkpoint
+            self.llm_model.load_state_dict(checkpoint['model'])
+            '''
             self.gpt2_config = GPT2Config.from_pretrained('./results/pile/gpt2/gpt2/checkpoint-1220000')  # Path to your checkpoint
             self.gpt2_config.output_attentions = True
             self.gpt2_config.output_hidden_states = True
@@ -226,12 +245,44 @@ class Model(nn.Module):
                 local_files_only=True,  # Use local files since checkpoint is local
                 config=self.gpt2_config,
             )
+            '''
             self.tokenizer = GPT2Tokenizer.from_pretrained(
                 'openai-community/gpt2',  # Use pretrained tokenizer
                 trust_remote_code=True,
                 local_files_only=False
             )
+            
         elif configs.llm_model == 'GPT2OWT':
+            # Path to your .pt checkpoint file
+            checkpoint_path = './results/openwebtext/GPT2Local_320000.pt'  # Adjust to match your .pt file path
+            
+            # Load the checkpoint from the .pt file
+            checkpoint = torch.load(checkpoint_path)
+            
+            # Extract the config from the checkpoint
+            self.gpt2_config = checkpoint['config']
+            
+            # Modify the config to output attentions and hidden states
+            self.gpt2_config.output_attentions = True
+            self.gpt2_config.output_hidden_states = True
+            
+            # Initialize the model with the config
+            self.llm_model = GPT2Model(self.gpt2_config)
+            
+            # Remap the state dictionary keys by removing 'transformer.' prefix
+            checkpoint_state_dict = checkpoint['model']
+            remapped_state_dict = {key.replace('transformer.', ''): value for key, value in checkpoint_state_dict.items()}
+
+            # Remove the 'lm_head.weight' key if it exists
+            if 'lm_head.weight' in remapped_state_dict:
+                del remapped_state_dict['lm_head.weight']
+            # Load the remapped state dictionary
+            self.llm_model.load_state_dict(remapped_state_dict, strict=True)
+
+
+            # Load the model's state dictionary from the checkpoint
+            #self.llm_model.load_state_dict(checkpoint['model'])
+            '''
             self.gpt2_config = GPT2Config.from_pretrained('./results/openwebtext/gpt2/gpt2/checkpoint-1220000')  # Path to your checkpoint
             self.gpt2_config.output_attentions = True
             self.gpt2_config.output_hidden_states = True
@@ -241,6 +292,7 @@ class Model(nn.Module):
                 local_files_only=True,  # Use local files since checkpoint is local
                 config=self.gpt2_config,
             )
+            '''
             self.tokenizer = GPT2Tokenizer.from_pretrained(
                 'openai-community/gpt2',  # Use pretrained tokenizer
                 trust_remote_code=True,

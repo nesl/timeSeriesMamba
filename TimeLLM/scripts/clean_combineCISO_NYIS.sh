@@ -92,7 +92,6 @@ seq_len=$((512 / downsampling_factor))
 for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
   for seed in {1..10}; do
-
     for init_seed in {11..20}; do
       tag="NYIStrain_CISOtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"

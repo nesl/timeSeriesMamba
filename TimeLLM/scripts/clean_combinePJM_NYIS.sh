@@ -114,9 +114,9 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --seq_len $seq_len \
         --label_len 48 \
         --factor 3 \
-        --enc_in 7 \
-        --dec_in 7 \
-        --c_out 7 \
+        --enc_in 8 \
+        --dec_in 8 \
+        --c_out 8 \
         --pred_len $pred_len \
         --dsampfactor $downsampling_factor \
         --percent $percent \
