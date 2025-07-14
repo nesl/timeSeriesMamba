@@ -2,7 +2,7 @@ import pandas as pd
 import json
 
 # Input files
-combined_csv = 'combined_clean_49000.csv'
+combined_csv = 'combined_clean_years.csv'
 boundary_file = 'combined_clean_boundaries.json'
 
 # Load data

@@ -386,14 +386,28 @@ class Dataset_Custom(Dataset):
         df = df[sel]
 
         # temporal split
-        if self.split_type=='temporal':
-            n=len(df)
-            ntr=int(n*0.7)
-            nte=int(n*0.2)
-            nval=n-ntr-nte
-            b1s=[0,ntr-self.seq_len,n-nte-self.seq_len]
-            b2s=[ntr,ntr+nval,n]
-            b1,b2=b1s[self.set_type],b2s[self.set_type]
+        if self.split_type == 'temporal':
+            n = len(df)
+            ntr = int(n * 0.7)
+            nte = int(n * 0.2)
+            
+            if self.boundary_file is not None:
+                ntr = int(n*5/7)
+                nte = int(n*1/7)
+            nval = n - ntr - nte
+
+            if self.set_type == 0:            # train 
+                b1, b2 = 0, ntr
+            elif self.set_type == 1:          # val  
+                b1, b2 = ntr, ntr + nval
+            else:                             # test
+                if self.boundary_file is not None:
+                    b1, b2 = 0, int(n * 0.2)        # first 20% first year
+                else:
+                    b1, b2 = n - nte, n     # last 20% (legacy)
+
+            # adjust for sequence length
+            b1 = max(0, b1 - self.seq_len)
         else:
             allc=cols
             tr,temp = train_test_split(allc,train_size=0.7,random_state=42)

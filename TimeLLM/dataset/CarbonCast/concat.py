@@ -3,9 +3,9 @@ import pandas as pd
 import json
 
 input_dir = '.'
-output_csv = 'combined_clean_49000.csv'
+output_csv = 'combined_clean_years.csv'
 output_json = 'combined_clean_boundaries.json'
-rows_per_file = 7000
+rows_per_file = 8766
 
 # Columns you want to keep from input files
 columns_to_keep = ['date', 'coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
@@ -16,7 +16,7 @@ region_names = []
 current_start = 0
 
 for fname in sorted(os.listdir(input_dir)):
-    if 'clean' in fname and fname.endswith('.csv') and fname != os.path.basename(output_csv):
+    if 'clean' in fname and fname.endswith('.csv') and 'heldout' not in fname and 'combined' not in fname and fname != os.path.basename(output_csv):
         path = os.path.join(input_dir, fname)
         df = pd.read_csv(path)
 

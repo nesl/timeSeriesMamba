@@ -1,6 +1,8 @@
 #!/bin/bash
 
 model_name="TimeLLM"
+
+
 train_epochs=3
 learning_rate=0.01
 llm_layers=0
@@ -56,6 +58,7 @@ if [ "$llm_model" == "ARIMA" ]; then
   model_name="ARIMA"
 fi
 
+
 # Set default master_port if not provided
 if [ -z "$master_port" ]; then
   master_port="${master_port_base}${gpu_id}"
@@ -77,7 +80,11 @@ echo "Setting master_port to $master_port"
 echo "Setting rand_init to $rand_init"
 
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+if [ "$llm_model" == "DLinear" ]; then
+  model_name="DLinear"
+  og_tag="DLinear_l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 
+fi
 llm_dim=10
 if [ "$num_params" == "130m" ]; then
   llm_dim=768
@@ -95,7 +102,8 @@ seq_len=$((512 / downsampling_factor))
 for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
   for seed in {1..10}; do
-    for init_seed in {11..20}; do
+    #for init_seed in {11..20}; do
+    for init_seed in {11..15}; do
       tag="${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
       log_file="results/heldout_${heldout}/${tag}.txt"
