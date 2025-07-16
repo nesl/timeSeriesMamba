@@ -24,7 +24,7 @@ import numpy as np
 
 import pandas as pd
 from utils.metrics import metric
-
+import matplotlib.pyplot as plt
 import wandb 
 from torchsummary import summary
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_percent', type=int, default=100)
     parser.add_argument('--split_type', type=str, default="temporal")
 
-
+    parser.add_argument('--visualize', action='store_true', help='visualize a test example after training')
     parser.add_argument('--use_wandb', type=int, default=1)
     parser.add_argument('--verbose', type=int, default=1)
     #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
@@ -236,6 +236,52 @@ if __name__ == '__main__':
                 new_state_dict[key] = old_state_dict[key]
 
         return new_state_dict
+
+    def visualize_example(args, accelerator, model, test_loader):
+        if not accelerator.is_local_main_process:
+            return
+
+        model.eval()
+        with torch.no_grad():
+            for batch_x, batch_y, batch_x_mark, batch_y_mark in test_loader:
+                batch_x = batch_x.float().to(accelerator.device)
+                batch_y = batch_y.float().to(accelerator.device)
+                batch_x_mark = batch_x_mark.float().to(accelerator.device)
+                batch_y_mark = batch_y_mark.float().to(accelerator.device)
+
+                dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).to(accelerator.device)
+                dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1)
+
+                if args.output_attention:
+                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                else:
+                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+
+                seq_len, pred_len = args.seq_len, args.pred_len
+                f = outputs.shape[-1]
+
+                ctx = batch_x[0, :seq_len, :f].cpu().numpy()
+                gt  = batch_y[0, -pred_len:, :f].cpu().numpy()
+                pred= outputs[0, -pred_len:, :f].cpu().numpy()
+
+                T = seq_len + pred_len
+                actual = np.zeros((T, f))
+                actual[:seq_len] = ctx
+                actual[seq_len:] = gt
+
+                predicted = np.full((T, f), np.nan)
+                predicted[seq_len:] = pred
+
+                feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
+                data = {}
+                for i, name in enumerate(feature_names):
+                    data[f'{name}_actual'] = actual[:, i]
+                    data[f'{name}_pred']   = predicted[:, i]
+
+                df = pd.DataFrame(data, index=np.arange(T))
+                csv_path = f'visuals/visualize_{args.model_id}_{args.model}_randinit{args.rand_init}.csv'
+                df.to_csv(csv_path, index_label='time_step')
+                break
 
     print("Using Framework: ", args.model)
     if args.model == 'TimeLLM':
@@ -478,6 +524,9 @@ if __name__ == '__main__':
     accelerator.wait_for_everyone()
     unwrapped_model = accelerator.unwrap_model(model)
     unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
+    if args.visualize:
+        visualize_example(args, accelerator, model, test_loader)
+
     num_params = sum(p.numel() for p in unwrapped_model.parameters())
     print(f'Total number of parameters: {num_params}')
     if args.use_wandb:

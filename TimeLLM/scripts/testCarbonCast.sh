@@ -101,10 +101,10 @@ seq_len=$((512 / downsampling_factor))
 # Define trials for different pred_len values
 for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
-  for seed in {1..10}; do
+  for seed in $((1)); do
     #for init_seed in {11..20}; do
-    for init_seed in {11..15}; do
-      tag="${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+    for init_seed in $((11)); do
+      tag="testing_${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
       log_file="results/heldout_${heldout}/${tag}.txt"
       exec > "$log_file" 2>&1
@@ -146,9 +146,11 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --boundary_file "dataset/CarbonCast/combined_clean_boundaries.json" \
         --rand_init $rand_init \
         --seed $seed \
-        --init_seed $init_seed
+        --init_seed $init_seed \
+        --visualize \
+        --save_checkpoints 1
 
-      echo "${heldout} heldout with init_seed $init_seed and seed $seed completed, saved to $comment"
+      echo "test run ${heldout} heldout with init_seed $init_seed and seed $seed completed, saved to $comment"
       if [[ "$rand_init" -eq 0 ]]; then
           break
       fi

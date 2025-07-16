@@ -391,7 +391,8 @@ class Dataset_Custom(Dataset):
             ntr = int(n * 0.7)
             nte = int(n * 0.2)
             
-            if self.boundary_file is not None:
+            if "CarbonCast" in self.root_path: #self.boundary_file is not None:
+                print("we're in carboncast!")
                 ntr = int(n*5/7)
                 nte = int(n*1/7)
             nval = n - ntr - nte
