@@ -390,25 +390,33 @@ class Dataset_Custom(Dataset):
             n = len(df)
             ntr = int(n * 0.7)
             nte = int(n * 0.2)
-            
-            if "CarbonCast" in self.root_path: #self.boundary_file is not None:
-                print("we're in carboncast!")
-                ntr = int(n*5/7)
-                nte = int(n*1/7)
             nval = n - ntr - nte
+
+            if "CarbonCast" in self.root_path: #self.boundary_file is not None:
+                #print("we're in carboncast!")
+                if self.boundary_file is None: #train one test one
+                    ntr = int(n*4/5)
+                    nval = int(n*1/5) #out of 5 years
+                else:
+                    ntr = int(n*4/5) #out of the 5 years and 6 regions, keeping note of the boundary file split
+                    nval = int(n*1/5) 
+            
 
             if self.set_type == 0:            # train 
                 b1, b2 = 0, ntr
             elif self.set_type == 1:          # val  
                 b1, b2 = ntr, ntr + nval
             else:                             # test
-                if self.boundary_file is not None:
-                    b1, b2 = 0, int(n * 0.2)        # first 20% first year
+                
+                if "CarbonCast" in self.root_path: #self.boundary_file is not None:
+                    b1, b2 = 0, int(n)        # all 5 years of test to minimize variability
                 else:
+                
                     b1, b2 = n - nte, n     # last 20% (legacy)
 
             # adjust for sequence length
             b1 = max(0, b1 - self.seq_len)
+        '''
         else:
             allc=cols
             tr,temp = train_test_split(allc,train_size=0.7,random_state=42)
@@ -416,7 +424,7 @@ class Dataset_Custom(Dataset):
             split={'train':tr,'val':val,'test':te}
             df=df[['date']+split[list(type_map.keys())[self.set_type]]]
             b1=0; b2=int(len(df)*(self.percent/100))
-
+        '''
         # data values
         if self.features in ['M','MS']:
             data_df = df.iloc[:,1:]
@@ -424,7 +432,7 @@ class Dataset_Custom(Dataset):
             data_df = df[[self.target]]
 
         if self.scale:
-            trsl = data_df.iloc[:int(len(df)*0.7)] if self.split_type=='temporal' else data_df
+            trsl = data_df.iloc[:ntr] if self.split_type=='temporal' else data_df
             self.scaler = StandardScaler().fit(trsl.values)
             data = self.scaler.transform(data_df.values)
         else:

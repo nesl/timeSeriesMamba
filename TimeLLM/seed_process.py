@@ -274,12 +274,13 @@ if __name__ == '__main__':
 
                 feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
                 data = {}
+                print("actual in visualize: ", actual)
                 for i, name in enumerate(feature_names):
                     data[f'{name}_actual'] = actual[:, i]
                     data[f'{name}_pred']   = predicted[:, i]
 
                 df = pd.DataFrame(data, index=np.arange(T))
-                csv_path = f'visuals/visualize_{args.model_id}_{args.model}_randinit{args.rand_init}.csv'
+                csv_path = f'visuals/visualize_{args.model_id}_{args.model}_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
                 df.to_csv(csv_path, index_label='time_step')
                 break
 
@@ -491,6 +492,7 @@ if __name__ == '__main__':
         if not os.path.exists(path):
             os.makedirs(path)
         early_stopping(vali_loss, model, path)
+        #early_stopping(test_loss, model, path)
         if early_stopping.early_stop:
             #accelerator.print("Early stopping")
             if args.use_wandb:
@@ -538,9 +540,16 @@ if __name__ == '__main__':
         path = './checkpoints'  # unique checkpoint saving path
 
         if args.save_checkpoints == 0:
-            #del_files(path)  # delete checkpoint files
+            # Delete the checkpoint file
             os.remove(best_model_path)
-            accelerator.print('success delete checkpoints at path : ', path)
-            #print('success delete checkpoints at path : ', path)
+            
+            # Try to remove the folder that contained the checkpoint file
+            try:
+                os.rmdir(os.path.dirname(best_model_path))
+                accelerator.print(f'Successfully deleted checkpoint file and empty folder: {os.path.dirname(best_model_path)}')
+            except OSError:
+                # Folder not empty or another error occurred
+                accelerator.print(f'Successfully deleted checkpoint file: {best_model_path}')
+        else:
+            accelerator.print('Checkpoints are set to be saved; no deletion performed.')
     accelerator.print('done!')
-    #print('done!')

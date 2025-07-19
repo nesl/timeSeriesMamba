@@ -20,6 +20,7 @@ data_dict = {
 
 
 def data_provider(args, flag):
+    local_data_path = "None"
     Data = data_dict[args.data]
     timeenc = 0 if args.embed != 'timeF' else 1
     percent = args.percent
@@ -32,7 +33,7 @@ def data_provider(args, flag):
         batch_size = args.batch_size
         freq = args.freq
         if args.data_path_test is not "None":
-            args.data_path = args.data_path_test #for the purposes of ETTh1 <-> h2
+            local_data_path = args.data_path_test #for the purposes of ETTh1 <-> h2
             #also use this for covariate split
     
     else:
@@ -41,13 +42,15 @@ def data_provider(args, flag):
         batch_size = args.batch_size
         freq = args.freq
         if flag == 'val' and args.data_path_val is not "None": #mainly for covariate splitting into 3 diff datasets (not sure if val is elsewhere)
-            args.data_path = args.data_path_val
+            local_data_path = args.data_path_val
+        else:
+            local_data_path = args.data_path
 
     if args.data == 'm4':
         drop_last = False
         data_set = Data(
             root_path=args.root_path,
-            data_path=args.data_path,
+            data_path=local_data_path,
             flag=flag,
             size=[args.seq_len, args.label_len, args.pred_len],
             features=args.features,
@@ -59,7 +62,7 @@ def data_provider(args, flag):
     else:
         data_set = Data(
             root_path=args.root_path,
-            data_path=args.data_path,
+            data_path=local_data_path,
             flag=flag,
             size=[args.seq_len, args.label_len, args.pred_len],
             features=args.features,

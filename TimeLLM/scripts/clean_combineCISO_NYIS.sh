@@ -91,8 +91,8 @@ seq_len=$((512 / downsampling_factor))
 # Define trials for different pred_len values
 for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_factor)) $((336 / downsampling_factor)) $((720 / downsampling_factor)) ; do
 #for pred_len in 336; do
-  for seed in {1..10}; do
-    for init_seed in {11..20}; do
+  for seed in {1..3}; do
+    for init_seed in {11..13}; do
       tag="NYIStrain_CISOtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
       log_file="results/NYIStrain_CISOtest/${tag}.txt"
@@ -134,7 +134,9 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --num_params $num_params \
         --rand_init $rand_init \
         --seed $seed \
-        --init_seed $init_seed
+        --init_seed $init_seed \
+        --save_checkpoints 1 \
+        --visualize
 
       echo "CISO pretrained on NYIS with init_seed $init_seed and seed $seed completed, saved to $comment"
       if [[ "$rand_init" -eq 0 ]]; then
