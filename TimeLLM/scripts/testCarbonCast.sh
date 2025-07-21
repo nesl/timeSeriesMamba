@@ -124,7 +124,8 @@ for pred_len in $((96 / downsampling_factor)); do
         --checkpoint_path checkpoints/${tag}/checkpoint \
         --seed $seed \
         --init_seed $init_seed \
-        --use_wandb 1
+        --use_wandb 1 \
+        --visualize
 
       echo "Evaluation for ${heldout} heldout with init_seed $init_seed and seed $seed completed, loaded from checkpoints/${tag}/checkpoint"
       if [[ "$rand_init" -eq 0 ]]; then

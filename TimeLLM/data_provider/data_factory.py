@@ -32,7 +32,7 @@ def data_provider(args, flag):
         drop_last = True
         batch_size = args.batch_size
         freq = args.freq
-        if args.data_path_test is not "None":
+        if args.data_path_test != "None":
             local_data_path = args.data_path_test #for the purposes of ETTh1 <-> h2
             #also use this for covariate split
     
@@ -41,7 +41,7 @@ def data_provider(args, flag):
         drop_last = True
         batch_size = args.batch_size
         freq = args.freq
-        if flag == 'val' and args.data_path_val is not "None": #mainly for covariate splitting into 3 diff datasets (not sure if val is elsewhere)
+        if flag == 'val' and args.data_path_val != "None": #mainly for covariate splitting into 3 diff datasets (not sure if val is elsewhere)
             local_data_path = args.data_path_val
         else:
             local_data_path = args.data_path

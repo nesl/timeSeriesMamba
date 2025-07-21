@@ -71,6 +71,53 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
     return avg_loss, avg_mae_loss
 
 
+def visualize_example(args, accelerator, model, test_loader):
+    if not accelerator.is_local_main_process:
+        return
+
+    model.eval()
+    with torch.no_grad():
+        for batch_x, batch_y, batch_x_mark, batch_y_mark in test_loader:
+            batch_x = batch_x.float().to(accelerator.device)
+            batch_y = batch_y.float().to(accelerator.device)
+            batch_x_mark = batch_x_mark.float().to(accelerator.device)
+            batch_y_mark = batch_y_mark.float().to(accelerator.device)
+
+            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).to(accelerator.device)
+            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1)
+
+            if args.output_attention:
+                outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+            else:
+                outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+
+            seq_len, pred_len = args.seq_len, args.pred_len
+            f = outputs.shape[-1]
+
+            ctx = batch_x[0, :seq_len, :f].cpu().numpy()
+            gt = batch_y[0, -pred_len:, :f].cpu().numpy()
+            pred = outputs[0, -pred_len:, :f].cpu().numpy()
+
+            T = seq_len + pred_len
+            actual = np.zeros((T, f))
+            actual[:seq_len] = ctx
+            actual[seq_len:] = gt
+
+            predicted = np.full((T, f), np.nan)
+            predicted[seq_len:] = pred
+
+            feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
+            data = {}
+            print("actual in visualize: ", actual)
+            for i, name in enumerate(feature_names):
+                data[f'{name}_actual'] = actual[:, i]
+                data[f'{name}_pred'] = predicted[:, i]
+
+            df = pd.DataFrame(data, index=np.arange(T))
+            os.makedirs('visuals', exist_ok=True)  # Ensure the 'visuals' directory exists
+            csv_path = f'visuals/test_visualize_{args.model_id}_{args.model}_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
+            df.to_csv(csv_path, index_label='time_step')
+            break
 
 if __name__ == '__main__':
     # Argument parser
@@ -170,6 +217,7 @@ if __name__ == '__main__':
     parser.add_argument('--early_break', type=int, default=0)
     parser.add_argument('--save_checkpoints', type=int, default=0)
 
+    parser.add_argument('--use_classical_model', action='store_true', help='Use classical model like AutoARIMA/VAR')
 
     args = parser.parse_args()
 
@@ -220,10 +268,48 @@ if __name__ == '__main__':
                                             epochs=args.train_epochs,
                                             max_lr=args.learning_rate)
 
+    if not args.use_classical_model:
+        # Load model weights from checkpoint
+        model.load_state_dict(torch.load(args.checkpoint_path,  map_location=lambda storage, loc: storage))
+        
     test_loader,model,model_optim = accelerator.prepare(test_loader,model,model_optim)
 
-    # Load model weights from checkpoint
-    model.load_state_dict(torch.load(args.checkpoint_path,  map_location=lambda storage, loc: storage))
+    if args.use_classical_model:
+        from sklearn.linear_model import Ridge
+        from sklearn.multioutput import MultiOutputRegressor
+        from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+        classical_inputs = []
+        classical_outputs = []
+
+        for batch_x, batch_y, _, _ in test_loader:
+            batch_x = batch_x.squeeze(0).numpy()  # [B=1, T, D] → [T, D]
+            batch_y = batch_y.squeeze(0).numpy()  # [T, D]
+            X_flat = batch_x.reshape(-1)  # Flatten input
+            y_flat = batch_y[-args.pred_len:].reshape(-1)
+            classical_inputs.append(X_flat)
+            classical_outputs.append(y_flat)
+
+        X = np.stack(classical_inputs)
+        Y = np.stack(classical_outputs)
+
+        model = Ridge()
+        model = MultiOutputRegressor(model)
+        model.fit(X, Y)
+
+        preds = model.predict(X)
+        mse_loss = mean_squared_error(Y, preds)
+        mae_loss = mean_absolute_error(Y, preds)
+
+        print(f"[Classical] MSE: {mse_loss}")
+        print(f"[Classical] MAE: {mae_loss}")
+        
+        if args.use_wandb:
+            wandb.log({"MSE loss": mse_loss, "MAE loss": mae_loss})
+            wandb.finish()
+        exit()
+
+    
     
     # Define loss metrics
     criterion = nn.MSELoss()
@@ -272,7 +358,9 @@ if __name__ == '__main__':
     test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
     print(f"MSE loss: {test_loss}")
     print(f"MAE loss: {test_mae_loss}")
-
+    # Visualize a test example if requested
+    if args.visualize:
+        visualize_example(args, accelerator, model, test_loader)
     # Log metrics to wandb if enabled
     if args.use_wandb:
         wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss})

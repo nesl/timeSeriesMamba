@@ -368,7 +368,10 @@ class Dataset_Custom(Dataset):
             max_start = len(self.data_x)-self.seq_len-self.pred_len
             self.valid_start_indices = [i for i in all_starts if 0<=i<=max_start]
         else:
-            self.valid_start_indices = None
+            #self.valid_start_indices = None
+            # Define all possible start indices when no boundary file is provided
+            max_start = len(self.data_x) - self.seq_len - self.pred_len + 1
+            self.valid_start_indices = list(range(0, max_start))
 
         self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x)-self.seq_len-self.pred_len+1
@@ -440,7 +443,10 @@ class Dataset_Custom(Dataset):
 
         # time stamps
         raw = df['date'].iloc[b1:b2]
-        stamps = pd.to_datetime(raw, infer_datetime_format=True)
+        raw = raw.apply(lambda x: x + ':00' if len(x.split(':')) == 2 else x)
+        stamps = pd.to_datetime(raw, format='%Y-%m-%d %H:%M:%S')
+        
+        #stamps = pd.to_datetime(raw, infer_datetime_format=True)
         if self.timeenc==0:
             ts = pd.DataFrame({
                 'month':stamps.dt.month,'day':stamps.dt.day,
@@ -456,6 +462,7 @@ class Dataset_Custom(Dataset):
         self.data_stamp = data_stamp
         print(f"loaded {self.data_x.shape}")
 
+    '''
     def __getitem__(self,index):
         if self.valid_start_indices is not None:
             s = self.valid_start_indices[index]
@@ -482,7 +489,24 @@ class Dataset_Custom(Dataset):
             torch.from_numpy(xm).long(),
             torch.from_numpy(ym).long()
         )
-
+    '''
+    def __getitem__(self, index):
+        s = self.valid_start_indices[index]
+        e = s + self.seq_len
+        assert e - s == self.seq_len, f"got {e-s} rows, expected {self.seq_len}"
+        rb = e - self.label_len
+        re = rb + self.label_len + self.pred_len
+        x = self.data_x[s:e]  # Shape: (seq_len, num_features)
+        y = self.data_y[rb:re]  # Shape: (label_len + pred_len, num_features)
+        xm = self.data_stamp[s:e]
+        ym = self.data_stamp[rb:re]
+        return (
+            torch.from_numpy(x).float(),
+            torch.from_numpy(y).float(),
+            torch.from_numpy(xm).long(),
+            torch.from_numpy(ym).long()
+        )
+    
     def __len__(self):
         if self.valid_start_indices is not None:
             return len(self.valid_start_indices)

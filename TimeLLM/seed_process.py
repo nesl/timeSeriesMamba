@@ -323,38 +323,6 @@ if __name__ == '__main__':
         if args.use_wandb:
             wandb.log({f"MSE loss": test_loss, f"MAE loss": test_mae_loss})
         
-                
-    '''
-    elif args.model == 'ARIMA':
-        #print(train_data.data_x[:, 7])
-        season_length = 12 # Monthly data 
-        Y_test = (test_data.data_x)
-        print("taking in series of length: ", args.seq_len)
-        print("predicting for the next steps of horizon length: ", args.pred_len)
-        input_seq = Y_test[0:args.seq_len, -1]
-        actual = Y_test[args.seq_len+1:args.seq_len+1+args.pred_len, -1]
-        
-        # Create a DataFrame for statsforecast
-        df = pd.DataFrame({
-            'unique_id': 1,  # Single series identifier
-            'ds': pd.date_range(start='2022-01-01', periods=len(input_seq), freq='MS'), #the start date and freq don't affect anything
-            'y': input_seq
-        })
-        horizon = len(actual) # number of predictions
-        models = [AutoARIMA(season_length=season_length)]
-        sf = StatsForecast(models=models, freq='MS')
-        Y_hat_df = sf.forecast(df=df, h=horizon, fitted=True)
-        print("y_hat head:", Y_hat_df.head())
-        forecast = Y_hat_df.to_numpy()[:,2]
-        print("forecast:", forecast)
-        actual = test_data.data_x[args.seq_len+1:args.seq_len+1+args.pred_len, 6]
-        print("actual:", actual)
-        metrics = metric(forecast, actual)
-        print("metrics: ", metrics)
-        if args.use_wandb:
-            wandb.log({f"mae {args.seed}":metrics[0],f"mse {args.seed}":metrics[1], f"rmse {args.seed}":metrics[2], f"mape {args.seed}":metrics[3], f"mspe {args.seed}":metrics[4]})
-        exit()
-    '''
 
     print_gpu_memory_usage()
 
