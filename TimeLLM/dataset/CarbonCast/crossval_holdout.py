@@ -2,8 +2,8 @@ import pandas as pd
 import json
 
 # Input files
-combined_csv = 'combined_clean_years.csv'
-boundary_file = 'combined_clean_boundaries.json'
+combined_csv = 'combined3_clean_years.csv'
+boundary_file = 'combined3_clean_boundaries.json'
 
 # Load data
 df = pd.read_csv(combined_csv)
@@ -20,6 +20,6 @@ for i, (start, end) in enumerate(boundaries):
     mask |= df.index > end
     split_df = df[mask].drop(columns=['region'])
 
-    output_file = f'heldout_{held_out_region}.csv'
+    output_file = f'combined3_{held_out_region}.csv'
     split_df.to_csv(output_file, index=False)
     print(f"Saved split with held-out region '{held_out_region}': {output_file}, shape: {split_df.shape}")

@@ -5,14 +5,16 @@ import json
 input_dir = '.'
 output_csv = 'combined_clean_years.csv'
 output_json = 'combined_clean_boundaries.json'
-heldout_csv = 'heldout_CISO.csv'
+#heldout_csv = 'heldout_CISO.csv'
 
 base_rows = 8766
 train_rows = base_rows * 4
 val_rows   = base_rows
 
 columns_to_keep = ['date','coal','nat_gas','nuclear','oil','hydro','solar','wind','other']
-holdout_fname  = 'CISO_clean.csv'
+#holdout_fname  = 'CISO_clean.csv'
+#holdout_files = ["CISO_clean.csv", "TVA_clean.csv", "FR_clean.csv", "PJM_clean.csv"]
+holdout_files = ["CISO_clean.csv"]
 
 all_train_val = []
 train = []
@@ -29,7 +31,9 @@ for fname in sorted(os.listdir(input_dir)):
         and 'combined' not in fname 
         and fname != os.path.basename(output_csv)):
         # skip the holdout region file
-        if fname == holdout_fname:
+        #if fname == holdout_fname:
+        #    continue
+        if any(bad in fname for bad in holdout_files):
             continue
 
         df = pd.read_csv(os.path.join(input_dir, fname))
@@ -81,7 +85,7 @@ with open(output_json, 'w') as f:
     }, f, indent=2)
     
 combined_df.to_csv(output_csv, index=False)
-
+no_region_df = combined_df.drop(columns=['region'])
 # 3) load entire CISO as heldout
 #hold_df = pd.read_csv(os.path.join(input_dir, holdout_fname))[columns_to_keep].copy()
 #hold_df['region'] = 'CISO'
@@ -89,4 +93,6 @@ combined_df.to_csv(output_csv, index=False)
 
 print(f"train+val ▶ {output_csv} ({combined_df.shape})")
 #print(f"heldout  ▶ {heldout_csv} ({hold_df.shape})")
+no_region_df.to_csv(f'{output_csv}_no_region.csv', index=False)
+
 print(f"metadata ▶ {output_json}")
