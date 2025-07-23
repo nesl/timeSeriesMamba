@@ -3,8 +3,8 @@ import pandas as pd
 import json
 
 input_dir = '.'
-output_csv = 'combined_clean_years.csv'
-output_json = 'combined_clean_boundaries.json'
+output_csv = 'combined3_clean_years.csv'
+output_json = 'combined3_clean_boundaries.json'
 #heldout_csv = 'heldout_CISO.csv'
 
 base_rows = 8766
@@ -13,8 +13,8 @@ val_rows   = base_rows
 
 columns_to_keep = ['date','coal','nat_gas','nuclear','oil','hydro','solar','wind','other']
 #holdout_fname  = 'CISO_clean.csv'
-#holdout_files = ["CISO_clean.csv", "TVA_clean.csv", "FR_clean.csv", "PJM_clean.csv"]
-holdout_files = ["CISO_clean.csv"]
+holdout_files = ["CISO_clean.csv", "TVA_clean.csv", "FR_clean.csv", "PJM_clean.csv"]
+#holdout_files = ["CISO_clean.csv"]
 
 all_train_val = []
 train = []

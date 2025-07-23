@@ -108,17 +108,23 @@ def visualize_example(args, accelerator, model, test_loader):
 
             feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
             data = {}
-            print("actual in visualize: ", actual)
-            for i, name in enumerate(feature_names):
+            for i, name in enumerate(feature_names[:f]):  # Adjust to number of features
                 data[f'{name}_actual'] = actual[:, i]
                 data[f'{name}_pred'] = predicted[:, i]
 
-            df = pd.DataFrame(data, index=np.arange(T))
-            os.makedirs('visuals', exist_ok=True)  # Ensure the 'visuals' directory exists
-            csv_path = f'visuals/test_visualize_{args.model_id}_{args.model}_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
-            df.to_csv(csv_path, index_label='time_step')
-            break
+            # Add timestep_type column
+            timestep_type = ['context'] * seq_len + ['prediction'] * pred_len
+            data['timestep_type'] = timestep_type
 
+            df = pd.DataFrame(data, index=np.arange(T))
+            os.makedirs('visuals', exist_ok=True)
+            csv_path = f'visuals/visualize_{args.model_id}_{args.model}_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
+            df.to_csv(csv_path, index_label='time_step')
+            print(f"Visualization data saved to {csv_path}.")
+            print(f"The first {seq_len} timesteps are the context (ground truth).")
+            print(f"The last {pred_len} timesteps show the actual and predicted values.")
+            break
+            
 if __name__ == '__main__':
     # Argument parser
 

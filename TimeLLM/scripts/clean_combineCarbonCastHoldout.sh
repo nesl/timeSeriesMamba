@@ -104,6 +104,9 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
   for seed in {1..3}; do
     #for init_seed in {11..20}; do
     for init_seed in {11..13}; do
+  #for seed in $((1)); do
+  #  for init_seed in $((11)); do  
+    
       tag="${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
       log_file="results/heldout_${heldout}/${tag}.txt"
@@ -113,7 +116,7 @@ for pred_len in $((96 / downsampling_factor)) ; do # $((192 / downsampling_facto
         --task_name long_term_forecast \
         --is_training 1 \
         --root_path ./dataset/CarbonCast/ \
-        --data_path heldout_${heldout}_clean.csv \
+        --data_path combined_clean_years_no_region.csv \
         --data_path_test ${heldout}_clean.csv \
         --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
         --model $model_name \

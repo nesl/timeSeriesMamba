@@ -99,13 +99,14 @@ for pred_len in $((96 / downsampling_factor)); do
   
   #for seed in $((1)); do
     #for init_seed in $((11)); do
-      tag="testing_${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-      log_file="results/heldout_${heldout}/${tag}.txt"
+      tag="testing_NYIStrain_${heldout}test_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      checkpoint_tag="NYIStrain_CISOtest_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      log_file="results/eval_NYIStrain/${heldout}test_${tag}.txt"
       exec > "$log_file" 2>&1
 
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_evaluate.py \
         --task_name long_term_forecast \
-        --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
+        --model_id NYIStrain_${heldout}_heldout_${seq_len}_${pred_len} \
         --model $model_name \
         --data CarbonCast \
         --root_path ./dataset/CarbonCast/ \
@@ -124,7 +125,7 @@ for pred_len in $((96 / downsampling_factor)); do
         --llm_model $llm_model \
         --llm_dim $llm_dim \
         --num_params $num_params \
-        --checkpoint_path checkpoints/${tag}/checkpoint \
+        --checkpoint_path checkpoints/${checkpoint_tag}/checkpoint \
         --seed $seed \
         --init_seed $init_seed \
         --use_wandb 1 \
