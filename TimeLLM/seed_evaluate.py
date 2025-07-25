@@ -70,6 +70,22 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
     avg_mae_loss = sum(total_mae_loss) / len(total_mae_loss)
     return avg_loss, avg_mae_loss
 
+import torch.nn.functional as F
+
+class TorchRidge(nn.Module):
+    def __init__(self, in_dim, out_dim, alpha=1.0):
+        super().__init__()
+        self.linear = nn.Linear(in_dim, out_dim)
+        self.alpha = alpha
+
+    def forward(self, x):
+        return self.linear(x)
+
+    def ridge_loss(self, pred, target):
+        mse = F.mse_loss(pred, target)
+        l2 = self.alpha * torch.sum(self.linear.weight ** 2)
+        return mse + l2
+        
 
 def visualize_example(args, accelerator, model, test_loader):
     if not accelerator.is_local_main_process:
@@ -242,86 +258,7 @@ if __name__ == '__main__':
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
 
-
-    # Load test data
-    test_data, test_loader = data_provider(args, 'test')
-
-    # Initialize the model
-    if args.model == 'TimeLLM':
-        model = TimeLLM.Model(args).float()
-    elif args.model == 'Autoformer':
-        model = Autoformer.Model(args).float()
-    elif args.model == 'DLinear':
-        model = DLinear.Model(args).float()
-    else:
-        raise ValueError(f"Unknown model: {args.model}")
-
-    trained_parameters = []
-    
-    train_steps = len(test_loader) #changed from train
-    for p in model.parameters():
-        if p.requires_grad is True:
-            trained_parameters.append(p)
-
-
-    model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
-    if args.lradj == 'COS':
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
-    else:
-        scheduler = lr_scheduler.OneCycleLR(optimizer=model_optim,
-                                            steps_per_epoch=train_steps,
-                                            pct_start=args.pct_start,
-                                            epochs=args.train_epochs,
-                                            max_lr=args.learning_rate)
-
-    if not args.use_classical_model:
-        # Load model weights from checkpoint
-        model.load_state_dict(torch.load(args.checkpoint_path,  map_location=lambda storage, loc: storage))
-        
-    test_loader,model,model_optim = accelerator.prepare(test_loader,model,model_optim)
-
-    if args.use_classical_model:
-        from sklearn.linear_model import Ridge
-        from sklearn.multioutput import MultiOutputRegressor
-        from sklearn.metrics import mean_squared_error, mean_absolute_error
-
-        classical_inputs = []
-        classical_outputs = []
-
-        for batch_x, batch_y, _, _ in test_loader:
-            batch_x = batch_x.squeeze(0).numpy()  # [B=1, T, D] → [T, D]
-            batch_y = batch_y.squeeze(0).numpy()  # [T, D]
-            X_flat = batch_x.reshape(-1)  # Flatten input
-            y_flat = batch_y[-args.pred_len:].reshape(-1)
-            classical_inputs.append(X_flat)
-            classical_outputs.append(y_flat)
-
-        X = np.stack(classical_inputs)
-        Y = np.stack(classical_outputs)
-
-        model = Ridge()
-        model = MultiOutputRegressor(model)
-        model.fit(X, Y)
-
-        preds = model.predict(X)
-        mse_loss = mean_squared_error(Y, preds)
-        mae_loss = mean_absolute_error(Y, preds)
-
-        print(f"[Classical] MSE: {mse_loss}")
-        print(f"[Classical] MAE: {mae_loss}")
-        
-        if args.use_wandb:
-            wandb.log({"MSE loss": mse_loss, "MAE loss": mae_loss})
-            wandb.finish()
-        exit()
-
-    
-    
-    # Define loss metrics
-    criterion = nn.MSELoss()
-    mae_metric = nn.L1Loss()
-
-    # Initialize wandb if enabled
+     # Initialize wandb if enabled
     if args.use_wandb:
         try:
             repo = git.Repo(search_parent_directories=True)
@@ -353,6 +290,90 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"Failed to initialize wandb: {e}")
             args.use_wandb = 0
+
+    # Load test data
+    test_data, test_loader = data_provider(args, 'test')
+
+    # Initialize the model
+    if args.model == 'TimeLLM':
+        model = TimeLLM.Model(args).float()
+    elif args.model == 'Autoformer':
+        model = Autoformer.Model(args).float()
+    elif args.model == 'DLinear':
+        model = DLinear.Model(args).float()
+    elif args.model == 'Ridge':
+        model = DLinear.Model(args).float() #but realy we're going to overwrite this
+    else:
+        raise ValueError(f"Unknown model: {args.model}")
+
+    trained_parameters = []
+    
+    train_steps = len(test_loader) #changed from train
+    for p in model.parameters():
+        if p.requires_grad is True:
+            trained_parameters.append(p)
+
+
+    model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
+    if args.lradj == 'COS':
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
+    else:
+        scheduler = lr_scheduler.OneCycleLR(optimizer=model_optim,
+                                            steps_per_epoch=train_steps,
+                                            pct_start=args.pct_start,
+                                            epochs=args.train_epochs,
+                                            max_lr=args.learning_rate)
+
+    if not args.llm_model == "Ridge":
+        # Load model weights from checkpoint
+        model.load_state_dict(torch.load(args.checkpoint_path,  map_location=lambda storage, loc: storage))
+        
+    test_loader,model,model_optim = accelerator.prepare(test_loader,model,model_optim)
+
+    if args.llm_model == "Ridge":
+        in_dim = args.seq_len * args.enc_in
+        out_dim = args.pred_len * args.dec_in
+        model = TorchRidge(in_dim, out_dim, alpha=1.0).to(accelerator.device)
+
+        model.train()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+
+        X_list, Y_list = [], []
+        for batch_x, batch_y, _, _ in test_loader:
+            X_list.append(batch_x.view(batch_x.size(0), -1).to(accelerator.device))  # [B, T, D] → [B, T*D]
+            Y_list.append(batch_y[:, -args.pred_len:, :].reshape(batch_y.size(0), -1).to(accelerator.device))
+
+        X = torch.cat(X_list, dim=0)
+        Y = torch.cat(Y_list, dim=0)
+
+        for _ in range(args.train_epochs):
+            optimizer.zero_grad()
+            pred = model(X)
+            loss = model.ridge_loss(pred, Y)
+            loss.backward()
+            optimizer.step()
+
+        model.eval()
+        with torch.no_grad():
+            pred = model(X)
+            mse_loss = F.mse_loss(pred, Y).item()
+            mae_loss = F.l1_loss(pred, Y).item()
+
+        print(f"[TorchRidge] MSE: {mse_loss}")
+        print(f"[TorchRidge] MAE: {mae_loss}")
+        if args.use_wandb:
+            wandb.log({"MSE loss": mse_loss, "MAE loss": mae_loss})
+            wandb.finish()
+        exit()
+
+
+    
+    
+    # Define loss metrics
+    criterion = nn.MSELoss()
+    mae_metric = nn.L1Loss()
+
+   
 
     earlyUnwrap = accelerator.unwrap_model(model)
     num_params=sum(p.numel() for p in earlyUnwrap.parameters())

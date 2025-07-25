@@ -50,6 +50,8 @@ fi
 # Update model_name based on llm_model
 if [ "$llm_model" == "ARIMA" ]; then
   model_name="ARIMA"
+elif [ "$llm_model" == "Ridge" ]; then
+  model_name="Ridge"
 fi
 
 # Set default master_port if not provided
@@ -78,6 +80,10 @@ if [ "$llm_model" == "DLinear" ]; then
   model_name="DLinear"
   og_tag="DLinear_l${llm_layers}_d${d_model}__e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 fi
+if [ "$llm_model" == "Ridge" ]; then
+  og_tag="Ridge_l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+fi
+
 
 llm_dim=10
 if [ "$num_params" == "130m" ]; then
@@ -129,7 +135,7 @@ for pred_len in $((96 / downsampling_factor)); do
         --seed $seed \
         --init_seed $init_seed \
         --use_wandb 1 \
-        --visualize
+        --visualize \
 
       echo "Evaluation for ${heldout} heldout with init_seed $init_seed and seed $seed completed, loaded from checkpoints/${tag}/checkpoint"
       if [[ "$rand_init" -eq 0 ]]; then
