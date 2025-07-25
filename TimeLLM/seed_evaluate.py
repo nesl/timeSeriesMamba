@@ -364,6 +364,37 @@ if __name__ == '__main__':
         if args.use_wandb:
             wandb.log({"MSE loss": mse_loss, "MAE loss": mae_loss})
             wandb.finish()
+
+        if args.visualize:
+            batch_idx = 0
+            x_seq = X[batch_idx].reshape(args.seq_len, args.enc_in).cpu().numpy()
+            y_true_seq = Y[batch_idx].reshape(args.pred_len, args.dec_in).cpu().numpy()
+            y_pred_seq = pred[batch_idx].reshape(args.pred_len, args.dec_in).cpu().numpy()
+
+            T = args.seq_len + args.pred_len
+            f = args.dec_in
+
+            actual = np.zeros((T, f))
+            actual[:args.seq_len] = x_seq
+            actual[args.seq_len:] = y_true_seq
+
+            predicted = np.full((T, f), np.nan)
+            predicted[args.seq_len:] = y_pred_seq
+
+            feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
+            data = {}
+            for i, name in enumerate(feature_names[:f]):
+                data[f'{name}_actual'] = actual[:, i]
+                data[f'{name}_pred'] = predicted[:, i]
+
+            timestep_type = ['context'] * args.seq_len + ['prediction'] * args.pred_len
+            data['timestep_type'] = timestep_type
+
+            df = pd.DataFrame(data, index=np.arange(T))
+            os.makedirs('visuals', exist_ok=True)
+            csv_path = f'visuals/visualize_{args.model_id}_ridge_seed{args.seed}.csv'
+            df.to_csv(csv_path, index_label='time_step')
+            print(f"[Ridge] Visualization saved to {csv_path}")
         exit()
 
 
