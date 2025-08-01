@@ -132,6 +132,8 @@ if __name__ == '__main__':
     parser.add_argument('--early_break', type=int, default=0)
     parser.add_argument('--save_checkpoints', type=int, default=0)
 
+    parser.add_argument('--source', type=str, default="None")
+
 
     args = parser.parse_args()
     ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
@@ -170,7 +172,8 @@ if __name__ == '__main__':
             'seq_len': args.seq_len, 
             'pretrain': args.pretrain,
             'finetune_llm': args.finetune_llm,
-            'split_type': args.split_type
+            'split_type': args.split_type,
+            'source': args.source
         })
 
     def print_gpu_memory_usage():
