@@ -16,6 +16,8 @@ TimeLLM/Meta-Llama-3.1-8B
 TimeLLM/checkpoints.zip
 !TimeLLM/dataset/CarbonCast/
 !TimeLLM/dataset/CarbonCast/**
+!TimeLLM/dataset/synthetic_data/**
+!TimeLLM/dataset/synthetic_data/
 Mamba4Cast/
 Time-Series-Library/
 uni2ts/
