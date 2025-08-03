@@ -13,7 +13,10 @@ TimeLLM/Meta-Llama-3.1-8B
 **/checkpoints/
 **/wandb/
 **/dataset/
+!TimeLLM/dataset/
+!TimeLLM/dataset/*
 TimeLLM/checkpoints.zip
+TimeLLM/dataset/**
 !TimeLLM/dataset/CarbonCast/
 !TimeLLM/dataset/CarbonCast/**
 !TimeLLM/dataset/synthetic_data/**
