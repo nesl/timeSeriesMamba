@@ -131,6 +131,7 @@ if __name__ == '__main__':
     #parser.add_argument('--saveName',type=str,default="NULL",help='for smooth pipelining')
     parser.add_argument('--early_break', type=int, default=0)
     parser.add_argument('--save_checkpoints', type=int, default=0)
+    parser.add_argument('--univar', type=int, default=0)
 
     parser.add_argument('--source', type=str, default="None")
 
@@ -173,7 +174,8 @@ if __name__ == '__main__':
             'pretrain': args.pretrain,
             'finetune_llm': args.finetune_llm,
             'split_type': args.split_type,
-            'source': args.source
+            'source': args.source,
+            'univar': args.univar
         })
 
     def print_gpu_memory_usage():
@@ -275,7 +277,10 @@ if __name__ == '__main__':
                 predicted = np.full((T, f), np.nan)
                 predicted[seq_len:] = pred
 
-                feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
+                if args.source == "None":
+                    feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
+                else:
+                    feature_names = [f'{args.source}']
                 data = {}
                 print("actual in visualize: ", actual)
                 for i, name in enumerate(feature_names):
@@ -283,7 +288,7 @@ if __name__ == '__main__':
                     data[f'{name}_pred']   = predicted[:, i]
 
                 df = pd.DataFrame(data, index=np.arange(T))
-                csv_path = f'visuals/visualize_{args.model_id}_{args.model}_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
+                csv_path = f'visuals/visualize_{args.model_id}_{args.model}_{args.source}Source_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
                 df.to_csv(csv_path, index_label='time_step')
                 break
 
