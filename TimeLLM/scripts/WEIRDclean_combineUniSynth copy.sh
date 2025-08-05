@@ -14,7 +14,6 @@ num_process=1
 
 heldout=""
 source_type=""
-seed_ranges="1-3,11-13"  # Default seed ranges
 
 # Default values
 master_port_base=01180
@@ -25,20 +24,18 @@ save_checkpoints=0
 
 # Usage function
 usage() {
-  echo "Usage: $0 -n <num_params> -m <llm_model> -g <gpu_id> [-p <master_port>] [-r <rand_init>] [-z <seed_ranges>] -h <heldout> -s <source_type>"
-  echo "Example for seed_ranges: '1-3,11-13'"
+  echo "Usage: $0 -n <num_params> -m <llm_model> -g <gpu_id> [-p <master_port>] [-r <rand_init>] -h <heldout> -s <source_type>"
   exit 1
 }
 
 # Parse args
-while getopts "n:m:g:p:r:z:h:s:" opt; do
+while getopts "n:m:g:p:r:h:s:" opt; do
   case $opt in
     n) num_params=$OPTARG ;;
     m) llm_model=$OPTARG ;;
     g) gpu_id=$OPTARG ;;
     p) master_port=$OPTARG ;;
     r) rand_init=$OPTARG ;;
-    z) seed_ranges=$OPTARG ;;
     h) heldout=$OPTARG ;;
     s) source_type=$OPTARG ;;
     *) usage ;;
@@ -68,7 +65,6 @@ echo "Source type: $source_type"
 echo "Num params: $num_params"
 echo "Master port: $master_port"
 echo "Rand init: $rand_init"
-echo "Seed ranges: $seed_ranges"
 
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
 if [ "$llm_model" == "DLinear" ]; then
@@ -89,33 +85,9 @@ fi
 
 seq_len=$((512 / downsampling_factor))
 
-# Parse seed ranges
-parse_seed_ranges() {
-  local ranges=$1
-  local seed_list=()
-  IFS=',' read -ra range_array <<< "$ranges"
-  for range in "${range_array[@]}"; do
-    if [[ $range =~ ^([0-9]+)-([0-9]+)$ ]]; then
-      start=${BASH_REMATCH[1]}
-      end=${BASH_REMATCH[2]}
-      for ((i=start; i<=end; i++)); do
-        seed_list+=("$i")
-      done
-    else
-      echo "Invalid seed range format: $range. Expected format: start-end (e.g., 1-3)"
-      exit 1
-    fi
-  done
-  echo "${seed_list[@]}"
-}
-
-# Get seed and init_seed arrays
-seed_array=($(parse_seed_ranges "$seed_ranges"))
-init_seed_array=($(parse_seed_ranges "$seed_ranges"))
-
 for pred_len in $((96 / downsampling_factor)) ; do
-  for seed in "${seed_array[@]}"; do
-    for init_seed in "${init_seed_array[@]}"; do
+  for seed in {4..5}; do
+    for init_seed in {14..15}; do
       tag="uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
       log_file="results/uniSynth/${tag}.txt"
@@ -132,8 +104,8 @@ for pred_len in $((96 / downsampling_factor)) ; do
         --data_path_test $data_path_test \
         --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
         --model $model_name \
-        --data Synthetic \
-        --data_pretrain Synthetic \
+        --data CarbonCast \
+        --data_pretrain CarbonCast \
         --pretrain 1 \
         --features M \
         --seq_len $seq_len \

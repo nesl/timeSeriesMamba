@@ -3,115 +3,230 @@ import pandas as pd
 import json
 import os
 from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
 
-# ------------------------------
-# Parameters
-# ------------------------------
-duration_years = 5  # Duration of the dataset in years
-train_regions = [1, 2, 3, 4, 5, 6]  # Regions for train+val
-train_frac = 0.8  # Fraction of data for training
-start_date = datetime(2024, 1, 1, 0, 0, 0)  # Start date
+class SyntheticTSGenerator:
+    def __init__(self, duration_years=5, start_date=None, sample_freq='H'):
+        self.duration_years = duration_years
+        self.start_date = start_date or datetime.now()
+        self.sample_freq = sample_freq
+        self.num_points = int(duration_years * 365.25 * 24)
+        self.t = np.linspace(0, duration_years, self.num_points)
+        self.t_norm = self.t / duration_years
+        self.timestamps = [self.start_date + timedelta(hours=i) for i in range(self.num_points)]
 
-# ------------------------------
-# Fixed settings
-# ------------------------------
-test_region = 7  # Test region
-regions = {
-    1: {'freq': [0.1, 0.2, 1.0, 2.0], 'noise': 0.05},
-    2: {'freq': [0.11, 0.21, 1.1, 2.1], 'noise': 0.1},
-    3: {'freq': [0.12, 0.22, 1.2, 2.2], 'noise': 0.15},
-    4: {'freq': [0.13, 0.23, 1.3, 2.3], 'noise': 0.2},
-    5: {'freq': [0.14, 0.24, 1.4, 2.4], 'noise': 0.25},
-    6: {'freq': [0.15, 0.25, 1.5, 2.5], 'noise': 0.3},
-    7: {'freq': [0.2, 0.3, 2.0, 3.0], 'noise': 0.35}
-}
+    def colored_noise(self, exponent, std, seed=None):
+        if seed is not None:
+            np.random.seed(seed)
+        freqs = np.fft.rfftfreq(self.num_points, d=1)
+        freqs[0] = freqs[1]
+        spectrum = np.power(freqs, -exponent / 2.0)
+        phases = np.exp(2j * np.pi * np.random.rand(len(freqs)))
+        fft_vals = spectrum * phases
+        y = np.fft.irfft(fft_vals, n=self.num_points)
+        y = y / np.std(y) * std
+        return y
 
-# ------------------------------
-# Helper functions
-# ------------------------------
-def generate_time_series(t, frequencies, noise_std, seed):
-    np.random.seed(seed)
-    amplitudes = [1 / f for f in frequencies]
-    phases = np.random.uniform(0, 2 * np.pi, len(frequencies))
-    y = np.zeros_like(t)
-    for a, f, p in zip(amplitudes, frequencies, phases):
-        y += a * np.sin(2 * np.pi * f * t + p)
-    y += np.random.normal(0, noise_std, t.shape)
-    return y
+    def calculate_spectral_entropy(self, signal):
+        from scipy.fft import rfft
+        psd = np.abs(rfft(signal))**2
+        psd = psd / np.sum(psd)
+        entropy = -np.sum(psd * np.log2(psd + 1e-10))
+        return entropy
 
-def generate_timestamps(start_date, num_points, freq='H'):
-    return [start_date + timedelta(hours=i) for i in range(num_points)]
+    def generate_signal(self, freqs, amplitudes, phases=None, seed=None):
+        if len(freqs) != len(amplitudes):
+            raise ValueError("Number of frequencies and amplitudes must match.")
+        if seed is not None:
+            np.random.seed(seed)
+        phases = phases or np.random.uniform(0, 2 * np.pi, len(freqs))
+        y = np.zeros(self.num_points)
+        for f, a, p in zip(freqs, amplitudes, phases):
+            y += a * np.sin(2 * np.pi * f * self.t + p)
+        return y
 
-# ------------------------------
-# Generate dataset
-# ------------------------------
-num_points = int(duration_years * 365.25 * 24)  # Total hours
-train_split = int(train_frac * num_points)  # Train points per region
-val_split = num_points - train_split  # Val points per region
-t = np.linspace(0, duration_years, num_points)
-timestamps = generate_timestamps(start_date, num_points)
+    def generate_trend(self, trend_type, trend_params):
+        if trend_type == 'linear':
+            if not isinstance(trend_params, (int, float)):
+                raise ValueError("For 'linear' trend, trend_params should be a scalar slope.")
+            slope = trend_params
+            trend = slope * (self.t_norm - 0.5)
+        elif trend_type == 'polynomial':
+            if not isinstance(trend_params, list):
+                raise ValueError("For 'polynomial' trend, trend_params should be a list of coefficients.")
+            trend = np.zeros_like(self.t)
+            for k, a_k in enumerate(trend_params):
+                trend += a_k * np.power(self.t_norm, k)
+        else:
+            raise ValueError(f"Unknown trend_type: {trend_type}")
+        return trend
 
-# Generate train and val data
-train_data = []
-val_data = []
-for region_id in train_regions:
-    ts = generate_time_series(t, regions[region_id]['freq'], regions[region_id]['noise'], seed=region_id)
-    train_ts = ts[:train_split]
-    val_ts = ts[train_split:]
-    train_df = pd.DataFrame({
-        'date': timestamps[:train_split],
-        'synth': train_ts
-    })
-    val_df = pd.DataFrame({
-        'date': timestamps[train_split:],
-        'synth': val_ts
-    })
-    train_data.append(train_df)
-    val_data.append(val_df)
+    def synthesize(self, freqs, amplitudes, trend_type, trend_params, season_weight, noise_exponent, snr_target, seed=None):
+        base_seasonal = self.generate_signal(freqs, amplitudes, seed=seed)
+        trend = self.generate_trend(trend_type, trend_params)
+        signal = season_weight * base_seasonal + trend
+        noise_std = np.sqrt(np.var(signal) / snr_target)
+        noise = self.colored_noise(noise_exponent, noise_std, seed=seed)
+        return signal + noise
 
-# Concatenate train and val
-train_df_concat = pd.concat(train_data, ignore_index=True)
-val_df_concat = pd.concat(val_data, ignore_index=True)
-train_val_df = pd.concat([train_df_concat, val_df_concat], ignore_index=True)
+    def save_plot(self, df, region_id, part, cfg, out_dir='region_plots'):
+        os.makedirs(out_dir, exist_ok=True)
+        snippet = df.iloc[:608]
+        plt.figure(figsize=(12, 4))
+        plt.plot(snippet['date'], snippet['synth'], linewidth=1)
 
-# Generate test data
-test_ts = generate_time_series(t, regions[test_region]['freq'], regions[test_region]['noise'], seed=test_region)
-test_df = pd.DataFrame({
-    'date': timestamps,
-    'synth': test_ts
-})
+        title = (
+            f'Region {region_id} - {part} | '
+            f'snr={cfg["snr"]} | season_w={cfg["season_w"]} | '
+            f'noise_exp={cfg["noise_exp"]} | trend={cfg["trend_type"]}'
+        )
+        plt.title(title)
+        plt.xlabel('Date')
+        plt.ylabel('Value')
+        plt.tight_layout()
 
-# ------------------------------
-# Create boundaries
-# ------------------------------
-boundaries = []
-regions_list = []
-for k, region_id in enumerate(train_regions):
-    start_train = k * train_split
-    end_train = start_train + train_split - 1
-    boundaries.append([start_train, end_train])
-    regions_list.append(f'Region {region_id}')
-val_start_offset = len(train_regions) * train_split
-for k, region_id in enumerate(train_regions):
-    start_val = val_start_offset + k * val_split
-    end_val = start_val + val_split - 1
-    boundaries.append([start_val, end_val])
-    regions_list.append(f'Region {region_id}')
+        fname = (
+            f'Region_{region_id}_{part}_snr{cfg["snr"]}_'
+            f'sw{cfg["season_w"]}_exp{cfg["noise_exp"]}_'
+            f'{cfg["trend_type"]}.png'
+        )
+        fname = fname.replace('.', 'p')  # safe filename
+        plt.savefig(os.path.join(out_dir, fname))
+        plt.close()
 
-boundaries_dict = {
-    'boundaries': boundaries,
-    'regions': regions_list
-}
 
-# ------------------------------
-# Save files
-# ------------------------------
-#if not os.path.exists('synthetic_data'):
-#    os.makedirs('synthetic_data')
-train_val_df.to_csv('train_val.csv', index=False)
-test_df.to_csv('test.csv', index=False)
-with open('train_boundaries.json', 'w') as f:
-    json.dump(boundaries_dict, f, indent=2)
+    def generate_dataset(self, regions, train_regions, test_region, train_frac=0.8, out_dir='synthetic_data'):
+        os.makedirs(out_dir, exist_ok=True)
+        split = int(train_frac * self.num_points)
+        val_size = self.num_points - split
+        train_list, val_list = [], []
+        boundaries, regions_list = [], []
 
-print(f"Generated train_val.csv and test.csv with {duration_years} years of data.")
-print(f"train_boundaries.json reflects 6 train + 6 val regions.")
+        for idx, rid in enumerate(train_regions):
+            cfg = regions[rid]
+            y = self.synthesize(
+                cfg['freq'], cfg['amplitudes'], cfg['trend_type'], cfg['trend_params'],
+                cfg['season_w'], cfg['noise_exp'], cfg['snr'], seed=rid
+            )
+            df = pd.DataFrame({'date': self.timestamps, 'synth': y})
+            train_df = df.iloc[:split]
+            val_df = df.iloc[split:]
+            train_list.append(train_df)
+            val_list.append(val_df)
+
+            start_t = idx * split
+            end_t = start_t + split - 1
+            boundaries.append([start_t, end_t])
+            regions_list.append(f'Region {rid}')
+            self.save_plot(train_df, rid, 'train', cfg)
+
+        val_offset = len(train_regions) * split
+        for idx, rid in enumerate(train_regions):
+            start_v = val_offset + idx * val_size
+            end_v = start_v + val_size - 1
+            boundaries.append([start_v, end_v])
+            regions_list.append(f'Region {rid}')
+            self.save_plot(val_list[idx], rid, 'val', cfg)
+
+        train_val_df = pd.concat(train_list + val_list, ignore_index=True)
+        train_val_df.to_csv(os.path.join(out_dir, 'train_val.csv'), index=False)
+
+        bdict = {'boundaries': boundaries, 'regions': regions_list}
+        with open(os.path.join(out_dir, 'train_boundaries.json'), 'w') as f:
+            json.dump(bdict, f, indent=2)
+
+        if test_region in regions:
+            cfg = regions[test_region]
+            y_test = self.synthesize(
+                cfg['freq'], cfg['amplitudes'], cfg['trend_type'], cfg['trend_params'],
+                cfg['season_w'], cfg['noise_exp'], cfg['snr'], seed=test_region
+            )
+            test_df = pd.DataFrame({'date': self.timestamps, 'synth': y_test})
+            test_df.to_csv(os.path.join(out_dir, 'test.csv'), index=False)
+            self.save_plot(test_df, test_region, 'test', cfg)
+
+        with open(os.path.join(out_dir, 'region_config_details.json'), 'w') as f:
+            json.dump(regions, f, indent=2)
+        print(f"Generated train_val.csv, test.csv, and plots in '{out_dir}' and 'region_plots'")
+
+
+# Example usage
+if __name__ == "__main__":
+    duration_years = 5
+    start_date = datetime(2024, 1, 1)
+    train_regions = [1, 2, 3, 4, 5, 6]
+    test_region = 7
+    train_frac = 0.8
+
+    # Fixed frequencies (cycles per year): half-daily, daily, weekly, monthly, yearly
+    fixed_freqs = [2 * 365.25, 365.25, 52.18, 12, 1]
+    
+    # Regions with different amplitudes and trends
+    regions = {
+        1: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.5, 2.0, 1.0, 0.3, 0.2],  # High amplitude for daily
+            'trend_type': 'linear',
+            'trend_params': 0.5,  # Linear slope
+            'season_w': 1.0,
+            'noise_exp': 1, #0 is white noise, 1 is pink noise, 2 is brown noise
+            'snr': 5
+        },
+        2: {
+            'freq': fixed_freqs,
+            'amplitudes': [1.2, 1.5, 0.5, 0.4, 0.1],  # semidaily and daily
+            'trend_type': 'polynomial',
+            'trend_params': [0, 0.3, 0.1],  # Polynomial: a0 + a1*t + a2*t^2
+            'season_w': 0.8,
+            'noise_exp': 1, 
+            'snr': 3 
+        },
+        3: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.2, 0.2, 1.0, 1.0, 0.5],  # monthly and weekly
+            'trend_type': 'polynomial',
+            'trend_params': [0, 0.5, 0.1],  # Polynomial: a0 + a1*t + a2*t^2
+            'season_w': 0.8,
+            'noise_exp': 1,
+            'snr': 3
+        },
+        4: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.1, 0.5, 1.0, 1.3, 0.5],  # High amplitude for weekly and monthly
+            'trend_type': 'linear',
+            'trend_params': -1.5,  # Linear slope
+            'season_w': 1.0,
+            'noise_exp': 1, #0 is white noise, 1 is pink noise, 2 is brown noise
+            'snr': 5
+        },
+        5: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.3, 1.2, 1.5, 0.4, 0.1],  # daily and weekly
+            'trend_type': 'polynomial',
+            'trend_params': [0, -0.3, 2],  # Polynomial: a0 + a1*t + a2*t^2
+            'season_w': 0.8,
+            'noise_exp': 1, 
+            'snr': 3 
+        },
+        6: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.2, 0.5, 0.4, 1.2, 1.1],  # monthly and yearly
+            'trend_type': 'polynomial',
+            'trend_params': [0, 0.3, -1],  # Polynomial: a0 + a1*t + a2*t^2
+            'season_w': 0.8,
+            'noise_exp': 1,
+            'snr': 3
+        },
+        7: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.4, 0.4, 0.8, 1.0, 0.6], #increase
+            'trend_type': 'polynomial',
+            'trend_params': [-0.3, 0.4, -0.2],
+            'season_w': 0.5, #higher will reduce the noise
+            'noise_exp': 1,
+            'snr': 3
+        }
+    }
+
+    gen = SyntheticTSGenerator(duration_years, start_date)
+    gen.generate_dataset(regions, train_regions, test_region, train_frac, out_dir='.')
