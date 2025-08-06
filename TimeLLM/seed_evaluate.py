@@ -86,7 +86,6 @@ class TorchRidge(nn.Module):
         l2 = self.alpha * torch.sum(self.linear.weight ** 2)
         return mse + l2
         
-
 def visualize_example(args, accelerator, model, test_loader):
     if not accelerator.is_local_main_process:
         return
@@ -108,37 +107,36 @@ def visualize_example(args, accelerator, model, test_loader):
                 outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
             seq_len, pred_len = args.seq_len, args.pred_len
-            f = outputs.shape[-1]
+            f = batch_x.shape[-1]  # Dynamically set number of features
 
-            ctx = batch_x[0, :seq_len, :f].cpu().numpy()
-            gt = batch_y[0, -pred_len:, :f].cpu().numpy()
-            pred = outputs[0, -pred_len:, :f].cpu().numpy()
+            ctx = batch_x[0, :seq_len, :f].cpu().numpy()  # Shape: (seq_len, f)
+            gt = batch_y[0, -pred_len:, :f].cpu().numpy()  # Shape: (pred_len, f)
+            pred = outputs[0, -pred_len:, :f].cpu().numpy()  # Shape: (pred_len, f)
 
             T = seq_len + pred_len
-            actual = np.zeros((T, f))
+            actual = np.zeros((T, f))  # Shape: (T, f)
             actual[:seq_len] = ctx
             actual[seq_len:] = gt
 
-            predicted = np.full((T, f), np.nan)
+            predicted = np.full((T, f), np.nan)  # Shape: (T, f)
             predicted[seq_len:] = pred
 
-            feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other']
+            # Set feature names based on args.source
+            if args.source == "None":
+                feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other'][:f]
+            else:
+                feature_names = [args.source] if f == 1 else [f'{args.source}_{i}' for i in range(f)]
+
+            # Populate data dictionary
             data = {}
-            for i, name in enumerate(feature_names[:f]):  # Adjust to number of features
-                data[f'{name}_actual'] = actual[:, i]
-                data[f'{name}_pred'] = predicted[:, i]
+            for i, name in enumerate(feature_names):
+                data[f'{name}_actual'] = actual[:, i]  # Shape: (T,)
+                data[f'{name}_pred'] = predicted[:, i]  # Shape: (T,)
 
-            # Add timestep_type column
-            timestep_type = ['context'] * seq_len + ['prediction'] * pred_len
-            data['timestep_type'] = timestep_type
-
+            # Create DataFrame and save to CSV
             df = pd.DataFrame(data, index=np.arange(T))
-            os.makedirs('visuals', exist_ok=True)
-            csv_path = f'visuals/visualize_{args.model_id}_{args.model}_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
+            csv_path = f'visuals/visualize_{args.model_id}_{args.model}_{args.source}Source_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
             df.to_csv(csv_path, index_label='time_step')
-            print(f"Visualization data saved to {csv_path}.")
-            print(f"The first {seq_len} timesteps are the context (ground truth).")
-            print(f"The last {pred_len} timesteps show the actual and predicted values.")
             break
             
 if __name__ == '__main__':
@@ -231,6 +229,7 @@ if __name__ == '__main__':
     parser.add_argument('--col_percent', type=int, default=100)
     parser.add_argument('--train_percent', type=int, default=100)
     parser.add_argument('--split_type', type=str, default="temporal")
+    parser.add_argument('--source', type=str, default="None")
 
     parser.add_argument('--visualize', action='store_true', help='visualize a test example after training')
     parser.add_argument('--use_wandb', type=int, default=1)

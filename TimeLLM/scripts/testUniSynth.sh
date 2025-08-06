@@ -120,25 +120,23 @@ init_seed_array=($(parse_seed_ranges "$init_seed_ranges"))
 for pred_len in $((96 / downsampling_factor)); do
   for seed in "${seed_array[@]}"; do
     for init_seed in "${init_seed_array[@]}"; do
-      tag="uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-      comment="checkpoints/${tag}"
-      log_file="results/uniSynth/${tag}.txt"
+      tag="testing_uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      checkpoint_tag="uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      #comment="checkpoints/${tag}"
+      log_file="results/eval_uniSynth/${tag}.txt"
       exec > "$log_file" 2>&1
 
       data_path="train_val.csv"
       data_path_test="test.csv"
 
-      accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
+      accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_evaluate.py \
         --task_name long_term_forecast \
-        --is_training 1 \
         --root_path ./dataset/synthetic_data/ \
         --data_path $data_path \
         --data_path_test $data_path_test \
         --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
         --model $model_name \
         --data Synthetic \
-        --data_pretrain Synthetic \
-        --pretrain 1 \
         --features M \
         --seq_len $seq_len \
         --label_len 48 \
@@ -147,30 +145,21 @@ for pred_len in $((96 / downsampling_factor)); do
         --dec_in 1 \
         --c_out 1 \
         --pred_len $pred_len \
-        --dsampfactor $downsampling_factor \
-        --percent $percent \
-        --col_percent $col_percent \
-        --des 'Exp' \
-        --itr 1 \
         --d_model $d_model \
         --d_ff 32 \
-        --batch_size $batch_size \
-        --learning_rate $learning_rate \
         --llm_layers $llm_layers \
-        --train_epochs $train_epochs \
-        --model_comment "$comment" \
         --llm_model $llm_model \
         --llm_dim $llm_dim \
         --num_params $num_params \
-        --boundary_file "dataset/synthetic_data/train_boundaries.json" \
         --rand_init $rand_init \
+        --checkpoint_path checkpoints/${checkpoint_tag}/checkpoint \
         --seed $seed \
         --init_seed $init_seed \
-        --save_checkpoints 1 \
+        --visualize \
         --source $source_type \
-        --univar 1
-#no visualize for now, do it in the test eval version
-      echo "${heldout} heldout (${source_type}) with init_seed $init_seed and seed $seed completed, saved to $comment"
+        --use_wandb 1 \
+
+      echo "eval of ${heldout} heldout (${source_type}) with init_seed $init_seed and seed $seed completed, saved to $comment"
       if [[ "$rand_init" -eq 0 ]]; then
           break
       fi

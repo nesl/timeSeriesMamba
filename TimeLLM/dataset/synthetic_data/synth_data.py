@@ -67,7 +67,8 @@ class SyntheticTSGenerator:
         signal = season_weight * base_seasonal + trend
         noise_std = np.sqrt(np.var(signal) / snr_target)
         noise = self.colored_noise(noise_exponent, noise_std, seed=seed)
-        return signal + noise
+        ideal_mse = np.mean(noise**2)
+        return signal + noise, ideal_mse
 
     def save_plot(self, df, region_id, part, cfg, out_dir='region_plots'):
         os.makedirs(out_dir, exist_ok=True)
@@ -104,7 +105,7 @@ class SyntheticTSGenerator:
 
         for idx, rid in enumerate(train_regions):
             cfg = regions[rid]
-            y = self.synthesize(
+            y,ideal_mse = self.synthesize(
                 cfg['freq'], cfg['amplitudes'], cfg['trend_type'], cfg['trend_params'],
                 cfg['season_w'], cfg['noise_exp'], cfg['snr'], seed=rid
             )
@@ -137,7 +138,7 @@ class SyntheticTSGenerator:
 
         if test_region in regions:
             cfg = regions[test_region]
-            y_test = self.synthesize(
+            y_test, ideal_mse = self.synthesize(
                 cfg['freq'], cfg['amplitudes'], cfg['trend_type'], cfg['trend_params'],
                 cfg['season_w'], cfg['noise_exp'], cfg['snr'], seed=test_region
             )
@@ -148,7 +149,7 @@ class SyntheticTSGenerator:
         with open(os.path.join(out_dir, 'region_config_details.json'), 'w') as f:
             json.dump(regions, f, indent=2)
         print(f"Generated train_val.csv, test.csv, and plots in '{out_dir}' and 'region_plots'")
-
+        print(f"Ideal MSE for this test region is empirically {ideal_mse}")
 
 # Example usage
 if __name__ == "__main__":
