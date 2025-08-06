@@ -93,52 +93,66 @@ def visualize_example(args, accelerator, model, test_loader):
     model.eval()
     with torch.no_grad():
         for batch_x, batch_y, batch_x_mark, batch_y_mark in test_loader:
+            # Check for NaN in target data
+            if torch.isnan(batch_y).any():
+                print("Skipping batch with NaN in batch_y")
+                continue
+
             batch_x = batch_x.float().to(accelerator.device)
             batch_y = batch_y.float().to(accelerator.device)
             batch_x_mark = batch_x_mark.float().to(accelerator.device)
             batch_y_mark = batch_y_mark.float().to(accelerator.device)
 
+            # Prepare decoder input
             dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).to(accelerator.device)
             dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1)
 
+            # Get model predictions
             if args.output_attention:
                 outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
             else:
                 outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
+            # Check for NaN in predictions
+            if torch.isnan(outputs).any():
+                print("Model outputs contain NaN for this batch")
+                continue
+
             seq_len, pred_len = args.seq_len, args.pred_len
-            f = batch_x.shape[-1]  # Dynamically set number of features
+            f = batch_x.shape[-1]  # Number of features (1 for univariate)
 
-            ctx = batch_x[0, :seq_len, :f].cpu().numpy()  # Shape: (seq_len, f)
-            gt = batch_y[0, -pred_len:, :f].cpu().numpy()  # Shape: (pred_len, f)
-            pred = outputs[0, -pred_len:, :f].cpu().numpy()  # Shape: (pred_len, f)
+            # Extract data for visualization
+            ctx = batch_x[0, :seq_len, :f].cpu().numpy()  # Input sequence
+            gt = batch_y[0, -pred_len:, :f].cpu().numpy()  # Ground truth
+            pred = outputs[0, -pred_len:, :f].cpu().numpy()  # Predictions
 
+            # Final NaN check on pred
+            if np.isnan(pred).any():
+                print("Predictions contain NaN for this sample")
+                continue
+
+            # Construct actual and predicted arrays
             T = seq_len + pred_len
-            actual = np.zeros((T, f))  # Shape: (T, f)
+            actual = np.zeros((T, f))
             actual[:seq_len] = ctx
             actual[seq_len:] = gt
 
-            predicted = np.full((T, f), np.nan)  # Shape: (T, f)
+            predicted = np.full((T, f), np.nan)
             predicted[seq_len:] = pred
 
-            # Set feature names based on args.source
-            if args.source == "None":
-                feature_names = ['coal', 'nat_gas', 'nuclear', 'oil', 'hydro', 'solar', 'wind', 'other'][:f]
-            else:
-                feature_names = [args.source] if f == 1 else [f'{args.source}_{i}' for i in range(f)]
-
-            # Populate data dictionary
+            # Create CSV data
+            feature_names = [args.source] if f == 1 else [f'{args.source}_{i}' for i in range(f)]
             data = {}
             for i, name in enumerate(feature_names):
-                data[f'{name}_actual'] = actual[:, i]  # Shape: (T,)
-                data[f'{name}_pred'] = predicted[:, i]  # Shape: (T,)
+                data[f'{name}_actual'] = actual[:, i]
+                data[f'{name}_pred'] = predicted[:, i]
 
-            # Create DataFrame and save to CSV
             df = pd.DataFrame(data, index=np.arange(T))
             csv_path = f'visuals/visualize_{args.model_id}_{args.model}_{args.source}Source_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
             df.to_csv(csv_path, index_label='time_step')
-            break
-            
+            print(f"Visualization saved to {csv_path}")
+            break  # Process only one valid batch
+                        
 if __name__ == '__main__':
     # Argument parser
 

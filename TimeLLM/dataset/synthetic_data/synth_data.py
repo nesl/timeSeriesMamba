@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 
 class SyntheticTSGenerator:
     def __init__(self, duration_years=5, start_date=None, sample_freq='H'):
@@ -77,9 +78,8 @@ class SyntheticTSGenerator:
         plt.plot(snippet['date'], snippet['synth'], linewidth=1)
 
         title = (
-            f'Region {region_id} - {part} | '
-            f'snr={cfg["snr"]} | season_w={cfg["season_w"]} | '
-            f'noise_exp={cfg["noise_exp"]} | trend={cfg["trend_type"]}'
+            f"Region {region_id} - {part} | snr={cfg['snr']} | season_w={cfg['season_w']} | "
+            f"noise_exp={cfg['noise_exp']} | trend={cfg['trend_type']}"
         )
         plt.title(title)
         plt.xlabel('Date')
@@ -87,14 +87,10 @@ class SyntheticTSGenerator:
         plt.tight_layout()
 
         fname = (
-            f'Region_{region_id}_{part}_snr{cfg["snr"]}_'
-            f'sw{cfg["season_w"]}_exp{cfg["noise_exp"]}_'
-            f'{cfg["trend_type"]}.png'
-        )
-        fname = fname.replace('.', 'p')  # safe filename
+            f"Region_{region_id}_{part}_snr{cfg['snr']}_sw{cfg['season_w']}_exp{cfg['noise_exp']}_{cfg['trend_type']}.png"
+        ).replace('.', 'p')
         plt.savefig(os.path.join(out_dir, fname))
         plt.close()
-
 
     def generate_dataset(self, regions, train_regions, test_region, train_frac=0.8, out_dir='synthetic_data'):
         os.makedirs(out_dir, exist_ok=True)
@@ -102,13 +98,40 @@ class SyntheticTSGenerator:
         val_size = self.num_points - split
         train_list, val_list = [], []
         boundaries, regions_list = [], []
+        metrics_list = []
 
+        # helper to scale and compute metrics
+        def compute_metrics(y, ideal_mse, cfg, part):
+            # fit on train portion
+            y_train = y[:split].reshape(-1, 1)
+            scaler = StandardScaler().fit(y_train)
+            y_norm = scaler.transform(y.reshape(-1, 1)).flatten()
+
+            # normalized ideal MSE
+            ideal_mse_norm = ideal_mse / (scaler.scale_[0] ** 2)
+            # entropy & variance on normalized series
+            ent = self.calculate_spectral_entropy(y_norm)
+            var_y = np.var(y_norm)
+
+            metrics_list.append({
+                'region': cfg['region_id'],
+                'part': part,
+                'snr': cfg['snr'],
+                'ideal_mse_norm': ideal_mse_norm,
+                'spectral_entropy_norm': ent,
+                'variance_norm': var_y
+            })
+
+        # process train regions
         for idx, rid in enumerate(train_regions):
             cfg = regions[rid]
-            y,ideal_mse = self.synthesize(
+            cfg['region_id'] = rid
+            y, ideal_mse = self.synthesize(
                 cfg['freq'], cfg['amplitudes'], cfg['trend_type'], cfg['trend_params'],
                 cfg['season_w'], cfg['noise_exp'], cfg['snr'], seed=rid
             )
+            compute_metrics(y, ideal_mse, cfg, 'train')
+
             df = pd.DataFrame({'date': self.timestamps, 'synth': y})
             train_df = df.iloc[:split]
             val_df = df.iloc[split:]
@@ -118,38 +141,46 @@ class SyntheticTSGenerator:
             start_t = idx * split
             end_t = start_t + split - 1
             boundaries.append([start_t, end_t])
-            regions_list.append(f'Region {rid}')
+            regions_list.append(f"Region {rid}")
             self.save_plot(train_df, rid, 'train', cfg)
 
+        # validation plots
         val_offset = len(train_regions) * split
         for idx, rid in enumerate(train_regions):
             start_v = val_offset + idx * val_size
             end_v = start_v + val_size - 1
             boundaries.append([start_v, end_v])
-            regions_list.append(f'Region {rid}')
-            self.save_plot(val_list[idx], rid, 'val', cfg)
+            regions_list.append(f"Region {rid}")
+            self.save_plot(val_list[idx], rid, 'val', regions[rid])
 
+        # save train+val
         train_val_df = pd.concat(train_list + val_list, ignore_index=True)
         train_val_df.to_csv(os.path.join(out_dir, 'train_val.csv'), index=False)
-
-        bdict = {'boundaries': boundaries, 'regions': regions_list}
         with open(os.path.join(out_dir, 'train_boundaries.json'), 'w') as f:
-            json.dump(bdict, f, indent=2)
+            json.dump({'boundaries': boundaries, 'regions': regions_list}, f, indent=2)
 
+        # process test region
         if test_region in regions:
             cfg = regions[test_region]
-            y_test, ideal_mse = self.synthesize(
+            cfg['region_id'] = test_region
+            y_test, ideal_mse_test = self.synthesize(
                 cfg['freq'], cfg['amplitudes'], cfg['trend_type'], cfg['trend_params'],
                 cfg['season_w'], cfg['noise_exp'], cfg['snr'], seed=test_region
             )
+            compute_metrics(y_test, ideal_mse_test, cfg, 'test')
+
             test_df = pd.DataFrame({'date': self.timestamps, 'synth': y_test})
             test_df.to_csv(os.path.join(out_dir, 'test.csv'), index=False)
             self.save_plot(test_df, test_region, 'test', cfg)
 
+        # save metrics
+        pd.DataFrame(metrics_list).to_csv(os.path.join(out_dir, 'region_metrics.csv'), index=False)
+
+        # save config
         with open(os.path.join(out_dir, 'region_config_details.json'), 'w') as f:
             json.dump(regions, f, indent=2)
-        print(f"Generated train_val.csv, test.csv, and plots in '{out_dir}' and 'region_plots'")
-        print(f"Ideal MSE for this test region is empirically {ideal_mse}")
+
+        print(f"Generated train_val.csv, test.csv, metrics in '{out_dir}' and plots in 'region_plots'")
 
 # Example usage
 if __name__ == "__main__":
@@ -221,6 +252,15 @@ if __name__ == "__main__":
         7: {
             'freq': fixed_freqs,
             'amplitudes': [0.4, 0.4, 0.8, 1.0, 0.6], #increase
+            'trend_type': 'polynomial',
+            'trend_params': [-0.3, 0.4, -0.2],
+            'season_w': 0.5, #higher will reduce the noise
+            'noise_exp': 1,
+            'snr': 3
+        },
+        8: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.5, 0.5, 0.5, 0.5, 0.5],
             'trend_type': 'polynomial',
             'trend_params': [-0.3, 0.4, -0.2],
             'season_w': 0.5, #higher will reduce the noise

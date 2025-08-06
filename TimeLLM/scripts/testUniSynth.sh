@@ -127,7 +127,7 @@ for pred_len in $((96 / downsampling_factor)); do
       exec > "$log_file" 2>&1
 
       data_path="train_val.csv"
-      data_path_test="test.csv"
+      data_path_test="region${heldout}.csv"
 
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_evaluate.py \
         --task_name long_term_forecast \

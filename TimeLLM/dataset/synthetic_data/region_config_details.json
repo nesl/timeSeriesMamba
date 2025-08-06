@@ -18,7 +18,8 @@
     "trend_params": 0.5,
     "season_w": 1.0,
     "noise_exp": 1,
-    "snr": 5
+    "snr": 5,
+    "region_id": 1
   },
   "2": {
     "freq": [
@@ -43,7 +44,8 @@
     ],
     "season_w": 0.8,
     "noise_exp": 1,
-    "snr": 3
+    "snr": 3,
+    "region_id": 2
   },
   "3": {
     "freq": [
@@ -68,7 +70,8 @@
     ],
     "season_w": 0.8,
     "noise_exp": 1,
-    "snr": 3
+    "snr": 3,
+    "region_id": 3
   },
   "4": {
     "freq": [
@@ -89,7 +92,8 @@
     "trend_params": -1.5,
     "season_w": 1.0,
     "noise_exp": 1,
-    "snr": 5
+    "snr": 5,
+    "region_id": 4
   },
   "5": {
     "freq": [
@@ -114,7 +118,8 @@
     ],
     "season_w": 0.8,
     "noise_exp": 1,
-    "snr": 3
+    "snr": 3,
+    "region_id": 5
   },
   "6": {
     "freq": [
@@ -139,7 +144,8 @@
     ],
     "season_w": 0.8,
     "noise_exp": 1,
-    "snr": 3
+    "snr": 3,
+    "region_id": 6
   },
   "7": {
     "freq": [
@@ -155,6 +161,32 @@
       0.8,
       1.0,
       0.6
+    ],
+    "trend_type": "polynomial",
+    "trend_params": [
+      -0.3,
+      0.4,
+      -0.2
+    ],
+    "season_w": 0.5,
+    "noise_exp": 1,
+    "snr": 3,
+    "region_id": 7
+  },
+  "8": {
+    "freq": [
+      730.5,
+      365.25,
+      52.18,
+      12,
+      1
+    ],
+    "amplitudes": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
     ],
     "trend_type": "polynomial",
     "trend_params": [
