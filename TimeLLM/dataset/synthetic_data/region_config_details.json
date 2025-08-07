@@ -170,8 +170,7 @@
     ],
     "season_w": 0.5,
     "noise_exp": 1,
-    "snr": 3,
-    "region_id": 7
+    "snr": 3
   },
   "8": {
     "freq": [
@@ -197,5 +196,31 @@
     "season_w": 0.5,
     "noise_exp": 1,
     "snr": 3
+  },
+  "9": {
+    "freq": [
+      730.5,
+      365.25,
+      52.18,
+      12,
+      1
+    ],
+    "amplitudes": [
+      0.2,
+      0.5,
+      0.5,
+      1.5,
+      0.75
+    ],
+    "trend_type": "polynomial",
+    "trend_params": [
+      -0.3,
+      4,
+      -0.2
+    ],
+    "season_w": 0.5,
+    "noise_exp": 2,
+    "snr": 0.003,
+    "region_id": 9
   }
 }

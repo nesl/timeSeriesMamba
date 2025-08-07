@@ -170,7 +170,7 @@ class SyntheticTSGenerator:
             compute_metrics(y_test, ideal_mse_test, cfg, 'test')
 
             test_df = pd.DataFrame({'date': self.timestamps, 'synth': y_test})
-            test_df.to_csv(os.path.join(out_dir, 'test.csv'), index=False)
+            test_df.to_csv(os.path.join(out_dir, f'region{rid}.csv'), index=False)
             self.save_plot(test_df, test_region, 'test', cfg)
 
         # save metrics
@@ -180,14 +180,14 @@ class SyntheticTSGenerator:
         with open(os.path.join(out_dir, 'region_config_details.json'), 'w') as f:
             json.dump(regions, f, indent=2)
 
-        print(f"Generated train_val.csv, test.csv, metrics in '{out_dir}' and plots in 'region_plots'")
+        print(f"Generated train_val.csv, region{rid}.csv, metrics in '{out_dir}' and plots in 'region_plots'")
 
 # Example usage
 if __name__ == "__main__":
     duration_years = 5
     start_date = datetime(2024, 1, 1)
     train_regions = [1, 2, 3, 4, 5, 6]
-    test_region = 7
+    test_region = 9
     train_frac = 0.8
 
     # Fixed frequencies (cycles per year): half-daily, daily, weekly, monthly, yearly
@@ -266,6 +266,15 @@ if __name__ == "__main__":
             'season_w': 0.5, #higher will reduce the noise
             'noise_exp': 1,
             'snr': 3
+        },
+        9: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.2, 0.5, 0.5, 1.5, 0.75],
+            'trend_type': 'polynomial',
+            'trend_params': [-0.3, 4, -0.2],
+            'season_w': 0.5, #higher will reduce the noise
+            'noise_exp': 2,
+            'snr': 0.003
         }
     }
 
