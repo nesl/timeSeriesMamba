@@ -1,5 +1,11 @@
 {
   "spectral_entropy_norm": 2.548293165894297,
   "variance_norm": 1.0808811315213012,
+  "autocorr_lag1": 0.9348059322671276,
+  "adf_pvalue": 2.2470086821514728e-14,
+  "hurst_exponent": 0.4559816856569698,
+  "zero_crossing_rate": 0.08258343774917416,
+  "trend_r2": 0.008377697853572674,
+  "seasonal_strength": 0.7226438708896431,
   "filename": "CISO_solar.csv"
 }

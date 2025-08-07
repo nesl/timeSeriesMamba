@@ -1,5 +1,11 @@
 {
   "spectral_entropy_norm": 5.082553237342516,
   "variance_norm": 0.985800660187954,
+  "autocorr_lag1": 0.9512491559705403,
+  "adf_pvalue": 0.0,
+  "hurst_exponent": 0.6254566888141504,
+  "zero_crossing_rate": 0.09500558990622647,
+  "trend_r2": 0.007066726650917232,
+  "seasonal_strength": 0.3071630972321491,
   "filename": "region7.csv"
 }

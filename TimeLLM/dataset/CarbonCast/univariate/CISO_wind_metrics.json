@@ -1,5 +1,11 @@
 {
   "spectral_entropy_norm": 8.09785267632052,
   "variance_norm": 0.984790619871328,
+  "autocorr_lag1": 0.9792302682110146,
+  "adf_pvalue": 2.5289359652351886e-30,
+  "hurst_exponent": 0.5096178331219454,
+  "zero_crossing_rate": 0.054311424991456886,
+  "trend_r2": 0.004621502946819067,
+  "seasonal_strength": 0.21783249333272645,
   "filename": "CISO_wind.csv"
 }

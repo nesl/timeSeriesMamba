@@ -170,7 +170,7 @@ class SyntheticTSGenerator:
             compute_metrics(y_test, ideal_mse_test, cfg, 'test')
 
             test_df = pd.DataFrame({'date': self.timestamps, 'synth': y_test})
-            test_df.to_csv(os.path.join(out_dir, f'region{rid}.csv'), index=False)
+            test_df.to_csv(os.path.join(out_dir, f'region{test_region}.csv'), index=False)
             self.save_plot(test_df, test_region, 'test', cfg)
 
         # save metrics
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     duration_years = 5
     start_date = datetime(2024, 1, 1)
     train_regions = [1, 2, 3, 4, 5, 6]
-    test_region = 9
+    test_region = 10
     train_frac = 0.8
 
     # Fixed frequencies (cycles per year): half-daily, daily, weekly, monthly, yearly
@@ -275,6 +275,15 @@ if __name__ == "__main__":
             'season_w': 0.5, #higher will reduce the noise
             'noise_exp': 2,
             'snr': 0.003
+        },
+        10: {
+            'freq': fixed_freqs,
+            'amplitudes': [0.2, 0.5, 0.3, 0.5, 1.2],
+            'trend_type': 'linear',
+            'trend_params': 0,
+            'season_w': 1,
+            'noise_exp': 0,
+            'snr': 1
         }
     }
 

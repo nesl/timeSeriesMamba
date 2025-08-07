@@ -299,7 +299,9 @@ if __name__ == '__main__':
             'seq_len': args.seq_len, 
             'pretrain': args.pretrain,
             'finetune_llm': args.finetune_llm,
-            'split_type': args.split_type
+            'split_type': args.split_type,
+            'source': args.source,
+            'heldout': args.heldout
         })
         except Exception as e:
             print(f"Failed to initialize wandb: {e}")

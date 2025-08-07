@@ -1,5 +1,11 @@
 {
   "spectral_entropy_norm": 4.358326080459289,
   "variance_norm": 1.4963781603060289,
+  "autocorr_lag1": 0.9858294643192964,
+  "adf_pvalue": 1.1080724382228815e-07,
+  "hurst_exponent": 0.8991878122024702,
+  "zero_crossing_rate": 0.03348900785966511,
+  "trend_r2": 0.5988500486526095,
+  "seasonal_strength": 0.5055884975851094,
   "filename": "CISO_coal.csv"
 }
