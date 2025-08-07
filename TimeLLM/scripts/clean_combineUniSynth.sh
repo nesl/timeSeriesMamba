@@ -74,7 +74,7 @@ echo "Rand init: $rand_init"
 echo "Seed ranges: $seed_ranges"
 echo "Init seed ranges: $init_seed_ranges"
 
-og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}_h${heldout}"
 if [ "$llm_model" == "DLinear" ]; then
   model_name="DLinear"
   og_tag="DLinear_l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
@@ -126,7 +126,7 @@ for pred_len in $((96 / downsampling_factor)); do
       exec > "$log_file" 2>&1
 
       data_path="train_val.csv"
-      data_path_test="test.csv"
+      data_path_test="region${heldout}.csv"
 
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
         --task_name long_term_forecast \

@@ -148,11 +148,11 @@ def visualize_example(args, accelerator, model, test_loader):
                 data[f'{name}_pred'] = predicted[:, i]
 
             df = pd.DataFrame(data, index=np.arange(T))
-            csv_path = f'visuals/visualize_{args.model_id}_{args.model}_{args.source}Source_randinit{args.rand_init}_seed{args.seed}_initseed{args.init_seed}.csv'
+            csv_path = f'visuals/visualize_{args.model_id}_{args.llm_model}_{args.source}Source_randinit{args.rand_init}_h{args.heldout}_seed{args.seed}_initseed{args.init_seed}.csv'
             df.to_csv(csv_path, index_label='time_step')
             print(f"Visualization saved to {csv_path}")
             break  # Process only one valid batch
-                        
+
 if __name__ == '__main__':
     # Argument parser
 
@@ -244,6 +244,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_percent', type=int, default=100)
     parser.add_argument('--split_type', type=str, default="temporal")
     parser.add_argument('--source', type=str, default="None")
+    parser.add_argument('--heldout', type=str, default="None")
 
     parser.add_argument('--visualize', action='store_true', help='visualize a test example after training')
     parser.add_argument('--use_wandb', type=int, default=1)

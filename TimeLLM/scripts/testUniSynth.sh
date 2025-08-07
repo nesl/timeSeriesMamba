@@ -120,7 +120,7 @@ init_seed_array=($(parse_seed_ranges "$init_seed_ranges"))
 for pred_len in $((96 / downsampling_factor)); do
   for seed in "${seed_array[@]}"; do
     for init_seed in "${init_seed_array[@]}"; do
-      tag="testing_uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      tag="testing_uniSynth_${og_tag}_h${heldout}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       checkpoint_tag="uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       #comment="checkpoints/${tag}"
       log_file="results/eval_uniSynth/${tag}.txt"
@@ -158,6 +158,7 @@ for pred_len in $((96 / downsampling_factor)); do
         --visualize \
         --source $source_type \
         --use_wandb 1 \
+        --heldout $heldout
 
       echo "eval of ${heldout} heldout (${source_type}) with init_seed $init_seed and seed $seed completed, saved to $comment"
       if [[ "$rand_init" -eq 0 ]]; then
