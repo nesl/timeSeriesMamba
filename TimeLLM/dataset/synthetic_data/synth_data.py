@@ -187,7 +187,7 @@ if __name__ == "__main__":
     duration_years = 5
     start_date = datetime(2024, 1, 1)
     train_regions = [1, 2, 3, 4, 5, 6]
-    test_region = 10
+    test_region = 13
     train_frac = 0.8
 
     # Fixed frequencies (cycles per year): half-daily, daily, weekly, monthly, yearly
@@ -284,6 +284,33 @@ if __name__ == "__main__":
             'season_w': 1,
             'noise_exp': 0,
             'snr': 1
+        },
+        11: {  # coal-like
+            'freq': fixed_freqs,
+            'amplitudes': [0.1, 0.6, 0.6, 0.8, 0.6],
+            'trend_type': 'linear',
+            'trend_params': 2.0,
+            'season_w': 0.6,
+            'noise_exp': 1.8,
+            'snr': 3
+        },
+        12: {  # wind-like
+            'freq': fixed_freqs,
+            'amplitudes': [0.1, 0.2, 0.3, 0.2, 0.2],
+            'trend_type': 'linear',
+            'trend_params': 0.0,
+            'season_w': 0.2,
+            'noise_exp': 0.0,
+            'snr': 0.5
+        },
+        13: {  # solar-like
+            'freq': fixed_freqs,
+            'amplitudes': [0.2, 4.0, 0.3, 0.1, 0.05],
+            'trend_type': 'linear',
+            'trend_params': 0.0,
+            'season_w': 1.2,
+            'noise_exp': 1.0,
+            'snr': 20
         }
     }
 

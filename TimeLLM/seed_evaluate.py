@@ -36,11 +36,66 @@ os.environ['CURL_CA_BUNDLE'] = ''
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
 
 from utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, load_content
+
+
+
+def MASE(pred, true, seasonality=1, eps=1e-8):
+    """
+    Robust MASE:
+    - pred, true: torch.Tensor or np.ndarray. Shapes supported: (B,T), (B,T,1), (T,), (T,1)
+    - seasonality: integer lag m
+    - returns mean MASE across series in batch
+    """
+    # convert torch -> numpy if needed
+    if isinstance(pred, torch.Tensor):
+        pred = pred.detach().cpu().numpy()
+    if isinstance(true, torch.Tensor):
+        true = true.detach().cpu().numpy()
+
+    pred = np.squeeze(pred)
+    true = np.squeeze(true)
+
+    # ensure 2D: (B, T)
+    if true.ndim == 1:
+        true = true[np.newaxis, :]
+        pred = pred[np.newaxis, :]
+    elif true.ndim == 2:
+        pass
+    else:
+        raise ValueError(f"Unexpected true.ndim={true.ndim}, expected 1 or 2 after squeeze")
+
+    B, T = true.shape
+    m = int(seasonality)
+
+    # compute denominator: mean absolute difference at lag m per series
+    if m < 1:
+        raise ValueError("seasonality must be >= 1")
+    if m >= T:
+        # cannot compute seasonal naive; fallback to one-step diff
+        diffs = np.abs(true[:, 1:] - true[:, :-1])  # shape (B, T-1)
+    else:
+        diffs = np.abs(true[:, m:] - true[:, :-m])  # shape (B, T-m)
+
+    denom = diffs.mean(axis=1)  # per-series denom, shape (B,)
+
+    # numerator: mean abs error over forecast horizon, per series
+    # if pred and true shapes differ in T, align on last axis
+    if pred.shape[1] != T:
+        raise ValueError(f"pred T ({pred.shape[1]}) != true T ({T})")
+    mae = np.mean(np.abs(pred - true), axis=1)  # shape (B,)
+
+    # avoid division by zero; use eps for stability
+    denom_safe = np.where(denom < eps, eps, denom)
+    mase_per_series = mae / denom_safe
+
+    return mase_per_series.mean()
+
 # Validation function
 def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric):
     model.eval()
     total_loss = []
     total_mae_loss = []
+    total_mase_loss = []
     with torch.no_grad():
         for batch_x, batch_y, batch_x_mark, batch_y_mark in test_loader:
             batch_x = batch_x.float().to(accelerator.device)
@@ -62,13 +117,15 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
 
             loss = criterion(outputs, batch_y)
             mae_loss = mae_metric(outputs, batch_y)
-
+            mase_loss = MASE(outputs,batch_y,seasonality=1)
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
+            total_mase_loss.append(mase_loss.item())
 
     avg_loss = sum(total_loss) / len(total_loss)
     avg_mae_loss = sum(total_mae_loss) / len(total_mae_loss)
-    return avg_loss, avg_mae_loss
+    avg_mase_loss = sum(total_mase_loss) / len(total_mase_loss)
+    return avg_loss, avg_mae_loss, avg_mase_loss
 
 import torch.nn.functional as F
 
@@ -429,13 +486,14 @@ if __name__ == '__main__':
         wandb.config.update({'num_params':num_params})
 
     # Run evaluation
-    test_loss, test_mae_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
+    test_loss, test_mae_loss, test_mase_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
     print(f"MSE loss: {test_loss}")
     print(f"MAE loss: {test_mae_loss}")
+    print(f"MASE loss: {test_mase_loss}")
     # Visualize a test example if requested
     if args.visualize:
         visualize_example(args, accelerator, model, test_loader)
     # Log metrics to wandb if enabled
     if args.use_wandb:
-        wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss})
+        wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss, "MASE loss": test_mase_loss})
         wandb.finish()

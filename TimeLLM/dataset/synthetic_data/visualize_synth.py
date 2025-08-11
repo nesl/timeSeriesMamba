@@ -42,4 +42,4 @@ def visualize_ts(filename, portion_size=608, start_idx=0, save_dir='.'):
 # Example usage
 if __name__ == "__main__":
     # Replace with your desired filename
-    visualize_ts('test.csv')
+    visualize_ts('region13.csv')

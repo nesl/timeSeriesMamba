@@ -241,7 +241,70 @@
     "trend_params": 0,
     "season_w": 1,
     "noise_exp": 0,
-    "snr": 1,
-    "region_id": 10
+    "snr": 1
+  },
+  "11": {
+    "freq": [
+      730.5,
+      365.25,
+      52.18,
+      12,
+      1
+    ],
+    "amplitudes": [
+      0.1,
+      0.6,
+      0.6,
+      0.8,
+      0.6
+    ],
+    "trend_type": "linear",
+    "trend_params": 2.0,
+    "season_w": 0.6,
+    "noise_exp": 1.8,
+    "snr": 3
+  },
+  "12": {
+    "freq": [
+      730.5,
+      365.25,
+      52.18,
+      12,
+      1
+    ],
+    "amplitudes": [
+      0.1,
+      0.2,
+      0.3,
+      0.2,
+      0.2
+    ],
+    "trend_type": "linear",
+    "trend_params": 0.0,
+    "season_w": 0.2,
+    "noise_exp": 0.0,
+    "snr": 0.5
+  },
+  "13": {
+    "freq": [
+      730.5,
+      365.25,
+      52.18,
+      12,
+      1
+    ],
+    "amplitudes": [
+      0.2,
+      4.0,
+      0.3,
+      0.1,
+      0.05
+    ],
+    "trend_type": "linear",
+    "trend_params": 0.0,
+    "season_w": 1.2,
+    "noise_exp": 1.0,
+    "snr": 20,
+    "region_id": 13
   }
 }
