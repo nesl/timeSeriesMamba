@@ -187,7 +187,7 @@ if __name__ == "__main__":
     duration_years = 5
     start_date = datetime(2024, 1, 1)
     train_regions = [1, 2, 3, 4, 5, 6]
-    test_region = 13
+    test_region = 14
     train_frac = 0.8
 
     # Fixed frequencies (cycles per year): half-daily, daily, weekly, monthly, yearly
@@ -311,6 +311,15 @@ if __name__ == "__main__":
             'season_w': 1.2,
             'noise_exp': 1.0,
             'snr': 20
+        },
+        14: {  # super entropy
+            'freq': fixed_freqs,
+            'amplitudes': [0.1, 0.4, 0.4, 0.4, 0.2],
+            'trend_type': 'linear',
+            'trend_params': 0.0,
+            'season_w': 0.2,
+            'noise_exp': 0.0,
+            'snr': 0.1
         }
     }
 

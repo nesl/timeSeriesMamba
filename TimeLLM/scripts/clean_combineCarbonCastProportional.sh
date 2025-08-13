@@ -135,7 +135,6 @@ for pred_len in $((96 / downsampling_factor)) ; do
         --seed $seed \
         --init_seed $init_seed \
         --save_checkpoints 1 \
-        --visualize \
         --source $source_type
 
       echo "${heldout} heldout (${source_type}) with init_seed $init_seed and seed $seed completed, saved to $comment"
