@@ -9,7 +9,7 @@ rand_init=0 # Default value for rand_init
 num_params='2.8b'
 batch_size=8
 d_model=32
-d_ff=128
+d_ff=32
 num_process=1
 
 # Function to display usage information

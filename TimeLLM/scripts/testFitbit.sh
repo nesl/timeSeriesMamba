@@ -11,7 +11,7 @@ rand_init=0
 num_params='2.8b'
 batch_size=16
 d_model=32
-d_ff=128
+d_ff=32
 num_process=1
 
 # Defaults
@@ -99,9 +99,6 @@ og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}
 root_path="${dataset_dir}"
 data_path="train.csv"
 data_path_test="heldout/heldout_${heldout}.csv"
-boundary_file="${dataset_dir}/boundaries.json"
-
-mkdir -p "results/fitbit" "checkpoints"
 
 # Univariate settings
 features="M"
@@ -117,17 +114,13 @@ for pred_len in ${pred_base}; do
       log_file="results/fitbit/${tag}.txt"
       exec > "$log_file" 2>&1
 
-      accelerate launch --mixed_precision bf16 --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
+      accelerate launch --mixed_precision bf16 --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
         --task_name long_term_forecast \
-        --is_training 1 \
         --root_path "${root_path}/" \
-        --data_path "${data_path}" \
         --data_path_test "${data_path_test}" \
         --model_id "fitbit_${source}_${heldout}_heldout" \
         --model "${model_name}" \
         --data "${data_name}" \
-        --data_pretrain "${data_name}" \
-        --pretrain 1 \
         --features "${features}" \
         --seq_len ${seq_len} \
         --label_len 48 \
@@ -139,24 +132,20 @@ for pred_len in ${pred_base}; do
         --dsampfactor ${downsampling_factor} \
         --percent ${percent} \
         --col_percent ${col_percent} \
-        --des 'Exp' \
-        --itr 1 \
         --d_model ${d_model} \
         --d_ff ${d_ff} \
         --batch_size ${batch_size} \
-        --learning_rate ${learning_rate} \
         --llm_layers ${llm_layers} \
-        --train_epochs ${train_epochs} \
-        --model_comment "${comment}" \
         --llm_model "${llm_model}" \
         --llm_dim ${llm_dim} \
         --num_params "${num_params}" \
-        --boundary_file "${boundary_file}" \
+        --checkpoint_path "checkpoints/${checkpoint_tag}/checkpoint" \
         --rand_init ${rand_init} \
         --seed ${seed} \
         --init_seed ${init_seed} \
-        --save_checkpoints ${save_checkpoints} \
-        --source "${source}"
+        --source "${source}" \
+        --use_wandb 1 \
+        --visualize
 
       echo "Heldout ${heldout} (source=${source}) with init_seed ${init_seed} and seed ${seed} done → ${comment}"
       [[ "${rand_init}" -eq 0 ]] && break
