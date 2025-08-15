@@ -38,8 +38,151 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
 from utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, load_content
 
 
+# ---------- Spectral metrics (no SciPy needed) ----------
+def _to_np(x):
+    if isinstance(x, torch.Tensor):
+        x = x.detach().cpu().numpy()
+    return np.asarray(x)
 
-def MASE(pred, true, seasonality=1, eps=1e-8):
+def _band_lims(fs, N, f_low, f_high):
+    # bin freqs for rfft
+    freqs = np.fft.rfftfreq(N, d=1.0/fs)
+    lo = 0 if f_low is None else np.searchsorted(freqs, f_low, side='left')
+    hi = len(freqs) if f_high is None else np.searchsorted(freqs, f_high, side='right')
+    lo = max(lo, 1)  # drop DC by default
+    hi = max(hi, lo+1)
+    return lo, hi, freqs
+
+def spectral_entropy_1d(x, fs=1.0, f_low=None, f_high=None, eps=1e-12, detrend='mean'):
+    """
+    Normalized spectral entropy in [0,1] for one series x.
+    - fs: sampling rate; for hourly, fs=1.0
+    - f_low/f_high: optional bandlimits; if None, uses all (except DC)
+    - detrend: 'mean' (remove mean), 'lin' (remove best-fit line), or None
+    """
+    x = np.asarray(x).astype(np.float64)
+    N = x.shape[0]
+    if N < 8:  # too short; return NaN to avoid nonsense
+        return np.nan
+
+    if detrend == 'mean':
+        x = x - np.nanmean(x)
+    elif detrend == 'lin':
+        t = np.arange(N)
+        A = np.vstack([t, np.ones(N)]).T
+        m, b = np.linalg.lstsq(A, x, rcond=None)[0]
+        x = x - (m * t + b)
+
+    # Hann window to reduce leakage (keeps things lightweight)
+    w = np.hanning(N)
+    xw = x * w
+
+    X = np.fft.rfft(xw, n=N)
+    Pxx = (np.abs(X) ** 2)  # power spectrum (unnormalized)
+
+    lo, hi, _ = _band_lims(fs, N, f_low, f_high)
+    band = Pxx[lo:hi].astype(np.float64)
+    s = band.sum()
+    if s <= eps:
+        return 0.0  # no power in band ⇒ "fully regular" by this measure
+
+    p = band / (s + eps)         # normalize to probability mass
+    H = -np.sum(p * np.log(p + eps))
+    H_max = np.log(len(p))
+    return float(H / (H_max + eps))
+
+def seasonality_strength_1d(x, fs=1.0, f_peak_window=None, detrend='mean'):
+    """
+    Simple seasonality strength proxy in [0,1]: peak power / (peak power + rest).
+    - f_peak_window: (f_lo, f_hi) to look for the dominant seasonal band (e.g., around 1/day).
+      If None, just takes global max (excluding DC).
+    """
+    x = np.asarray(x).astype(np.float64)
+    N = x.shape[0]
+    if N < 8:
+        return np.nan
+    if detrend == 'mean':
+        x = x - np.nanmean(x)
+    elif detrend == 'lin':
+        t = np.arange(N)
+        A = np.vstack([t, np.ones(N)]).T
+        m, b = np.linalg.lstsq(A, x, rcond=None)[0]
+        x = x - (m * t + b)
+
+    w = np.hanning(N)
+    X = np.fft.rfft(x * w, n=N)
+    Pxx = (np.abs(X) ** 2)
+    lo, hi, freqs = _band_lims(fs, N, f_low=None, f_high=None)
+
+    if f_peak_window is not None:
+        flo, fhi = f_peak_window
+        lo = max(lo, np.searchsorted(freqs, flo, side='left'))
+        hi = min(hi, np.searchsorted(freqs, fhi, side='right'))
+
+    band = Pxx[lo:hi]
+    if band.size == 0:
+        return np.nan
+    peak = float(np.max(band))
+    rest = float(band.sum() - peak)
+    if peak <= 0:
+        return 0.0
+    return peak / (peak + rest + 1e-12)
+
+def batch_spectral_metrics(ctx, fut, fs=1.0, f_low=None, f_high=None, detrend='mean',
+                           season_band=None):
+    """
+    ctx: np array [B, L, D] context window (what model sees)
+    fut: np array [B, H, D] future ground truth window
+    Returns dict of per-batch aggregates and (optionally) per-d feature arrays.
+    """
+    ctx = _to_np(ctx)
+    fut = _to_np(fut)
+    B, L, D = ctx.shape
+    _, H, D2 = fut.shape
+    assert D == D2
+
+    se_ctx = np.full((B, D), np.nan)
+    se_fut = np.full((B, D), np.nan)
+    seas_ctx = np.full((B, D), np.nan)
+    seas_fut = np.full((B, D), np.nan)
+
+    # choose f_low based on window to avoid under-resolved low freq
+    # if not provided: drop < 1/L for ctx, < 1/H for fut by passing None here and relying on detrend+DC drop
+    for b in range(B):
+        for d in range(D):
+            x_ctx = ctx[b, :, d]
+            x_fut = fut[b, :, d]
+
+            se_ctx[b, d]  = spectral_entropy_1d(x_ctx, fs=fs, f_low=f_low, f_high=f_high, detrend=detrend)
+            se_fut[b, d]  = spectral_entropy_1d(x_fut, fs=fs, f_low=f_low, f_high=f_high, detrend=detrend)
+            seas_ctx[b, d] = seasonality_strength_1d(x_ctx, fs=fs, f_peak_window=season_band, detrend=detrend)
+            seas_fut[b, d] = seasonality_strength_1d(x_fut, fs=fs, f_peak_window=season_band, detrend=detrend)
+
+    out = {
+        "SE_ctx_mean": float(np.nanmean(se_ctx)),
+        "SE_future_mean": float(np.nanmean(se_fut)),
+        "SE_ctx_med": float(np.nanmedian(se_ctx)),
+        "SE_future_med": float(np.nanmedian(se_fut)),
+        "Season_ctx_mean": float(np.nanmean(seas_ctx)),
+        "Season_future_mean": float(np.nanmean(seas_fut)),
+    }
+    # also return per-d arrays for optional per-feature logging
+    out_arrays = {
+        "SE_ctx_per_dim": se_ctx, "SE_future_per_dim": se_fut,
+        "Season_ctx_per_dim": seas_ctx, "Season_future_per_dim": seas_fut
+    }
+    return out, out_arrays
+
+def quick_stats(x):
+    """Return variance and a rough 'SNR-like' proxy (var/mean(|Δx|))."""
+    x = _to_np(x)
+    var = float(np.var(x))
+    dif = np.abs(np.diff(x, axis=-2)).mean() if x.ndim >= 2 and x.shape[-2] > 1 else np.nan
+    snr_like = float(var / (dif + 1e-12)) if not np.isnan(dif) else np.nan
+    return var, snr_like
+
+
+def MASE(pred, true, seasonality=1, eps=0):
     """
     Robust MASE:
     - pred, true: torch.Tensor or np.ndarray. Shapes supported: (B,T), (B,T,1), (T,), (T,1)
@@ -91,11 +234,21 @@ def MASE(pred, true, seasonality=1, eps=1e-8):
     return mase_per_series.mean()
 
 # Validation function
+# Place near top of vali
 def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric):
     model.eval()
-    total_loss = []
-    total_mae_loss = []
-    total_mase_loss = []
+    total_loss, total_mae_loss, total_mase_loss = [], [], []
+    se_ctx_list, se_fut_list = [], []
+    seas_ctx_list, seas_fut_list = [], []
+    var_ctx_list, snr_ctx_list = [], []
+    var_fut_list, snr_fut_list = [], []
+
+    # set sampling rate based on your freq; hourly → fs=1.0
+    fs = 1.0
+    # Optionally define a season band (e.g., around 1/day = 1/24 ≈ 0.0417 cycles/hour)
+    season_band = (1/30.0, 1/20.0) if args.freq in ['h', 'H'] else None
+    detrend_mode = 'mean'  # or 'lin' if your series are trendy
+
     with torch.no_grad():
         for batch_x, batch_y, batch_x_mark, batch_y_mark in test_loader:
             batch_x = batch_x.float().to(accelerator.device)
@@ -113,18 +266,60 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
 
             f_dim = -1 if args.features == 'MS' else 0
             outputs = outputs[:, -args.pred_len:, f_dim:]
-            batch_y = batch_y[:, -args.pred_len:, f_dim:].to(accelerator.device)
+            gt = batch_y[:, -args.pred_len:, f_dim:].to(accelerator.device)
 
-            loss = criterion(outputs, batch_y)
-            mae_loss = mae_metric(outputs, batch_y)
-            mase_loss = MASE(outputs,batch_y,seasonality=1)
+            # ---- spectral metrics (computed on CPU numpy) ----
+            ctx_np = batch_x[:, :args.seq_len, f_dim:].detach().cpu().numpy()   # [B, L, D]
+            fut_np = gt.detach().cpu().numpy()                                   # [B, H, D]
+
+            spec_dict, _ = batch_spectral_metrics(
+                ctx_np, fut_np, fs=fs, f_low=None, f_high=None,
+                detrend=detrend_mode, season_band=season_band
+            )
+            se_ctx_list.append(spec_dict["SE_ctx_mean"])
+            se_fut_list.append(spec_dict["SE_future_mean"])
+            seas_ctx_list.append(spec_dict["Season_ctx_mean"])
+            seas_fut_list.append(spec_dict["Season_future_mean"])
+
+            v_ctx, snr_ctx = quick_stats(ctx_np)
+            v_fut, snr_fut = quick_stats(fut_np)
+            var_ctx_list.append(v_ctx); snr_ctx_list.append(snr_ctx)
+            var_fut_list.append(v_fut); snr_fut_list.append(snr_fut)
+            # --------------------------------------------------
+
+            loss = criterion(outputs, gt)
+            mae_loss = mae_metric(outputs, gt)
+            mase_loss = MASE(outputs, gt, seasonality=1)
+
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
             total_mase_loss.append(mase_loss.item())
 
-    avg_loss = sum(total_loss) / len(total_loss)
-    avg_mae_loss = sum(total_mae_loss) / len(total_mae_loss)
-    avg_mase_loss = sum(total_mase_loss) / len(total_mase_loss)
+    avg_loss = float(np.mean(total_loss))
+    avg_mae_loss = float(np.mean(total_mae_loss))
+    avg_mase_loss = float(np.mean(total_mase_loss))
+
+    # Aggregate spectral metrics
+    se_ctx = float(np.nanmean(se_ctx_list)) if len(se_ctx_list) else np.nan
+    se_fut = float(np.nanmean(se_fut_list)) if len(se_fut_list) else np.nan
+    seas_ctx = float(np.nanmean(seas_ctx_list)) if len(seas_ctx_list) else np.nan
+    seas_fut = float(np.nanmean(seas_fut_list)) if len(seas_fut_list) else np.nan
+    var_ctx = float(np.nanmean(var_ctx_list)) if len(var_ctx_list) else np.nan
+    var_fut = float(np.nanmean(var_fut_list)) if len(var_fut_list) else np.nan
+    snr_ctx = float(np.nanmean(snr_ctx_list)) if len(snr_ctx_list) else np.nan
+    snr_fut = float(np.nanmean(snr_fut_list)) if len(snr_fut_list) else np.nan
+
+    # W&B logging (only on main process)
+    if getattr(accelerator, "is_local_main_process", True) and args.use_wandb:
+        wandb.log({
+            "MSE loss": avg_loss, "MAE loss": avg_mae_loss, "MASE loss": avg_mase_loss,
+            "SE_ctx_mean": se_ctx, "SE_future_mean": se_fut,
+            "Season_ctx_mean": seas_ctx, "Season_future_mean": seas_fut,
+            "Var_ctx": var_ctx, "Var_future": var_fut,
+            "SNR_ctx_proxy": snr_ctx, "SNR_future_proxy": snr_fut
+        })
+
+    # optionally return the spectral summaries alongside losses
     return avg_loss, avg_mae_loss, avg_mase_loss
 
 import torch.nn.functional as F

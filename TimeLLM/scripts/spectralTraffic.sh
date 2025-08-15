@@ -10,7 +10,7 @@
   num_params='2.8b'
   batch_size=16
   d_model=32
-  d_ff=128
+  d_ff=32
   num_process=1
 
   # Required: -m <llm_model> -g <gpu_id> -h <heldout:{low_entropy|high_entropy}> -s <source_type:{R1|R3|R6}>
@@ -120,7 +120,7 @@
     og_tag="DLinear_l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
   fi
 
-  for seed in {2..3}; do
+  for seed in {1..3}; do
     for init_seed in {11..13}; do
       tag="pems_${source_type}_${heldout}_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}"
       comment="checkpoints/${tag}"

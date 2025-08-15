@@ -109,9 +109,10 @@ c_out=1
 for pred_len in ${pred_base}; do
   for seed in {1..3}; do
     for init_seed in {11..13}; do
-      tag="fitbit_${source}_${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-      comment="checkpoints/${tag}"
-      log_file="results/fitbit/${tag}.txt"
+      tag="test_fitbit_${source}_${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      checkpoint_tag="fitbit_${source}_U001_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+
+      log_file="results/fitbit_eval/${tag}.txt"
       exec > "$log_file" 2>&1
 
       accelerate launch --mixed_precision bf16 --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
@@ -147,7 +148,7 @@ for pred_len in ${pred_base}; do
         --use_wandb 1 \
         --visualize
 
-      echo "Heldout ${heldout} (source=${source}) with init_seed ${init_seed} and seed ${seed} done → ${comment}"
+      echo "Heldout ${heldout} (source=${source}) with init_seed ${init_seed} and seed ${seed} done "
       [[ "${rand_init}" -eq 0 ]] && break
     done
   done
