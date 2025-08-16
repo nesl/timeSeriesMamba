@@ -9,7 +9,7 @@ rand_init=0
 num_params='2.8b'
 batch_size=16
 d_model=32
-d_ff=128
+d_ff=32
 num_process=1
 
 heldout=""

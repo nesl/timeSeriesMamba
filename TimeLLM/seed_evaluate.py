@@ -151,6 +151,60 @@ def batch_forecastability(ctx, fut):
         "LLE_ctx_med": float(np.nanmedian(lle_ctx)),
         "LLE_future_med": float(np.nanmedian(lle_fut)),
     }
+# ---- Cross-dataset safe metrics ----
+def _to_np2(x):
+    if isinstance(x, torch.Tensor):
+        x = x.detach().cpu().numpy()
+    return np.asarray(x)
+
+def MASE_batched(pred, true, insample, seasonality=1, eps=1e-12, reduce="mean"):
+    """
+    pred,true: [B, H, D]
+    insample:  [B, L, D]  (context; used for denominator)
+    seasonality: lag m (e.g., 1 non-seasonal, 24 for hourly with daily seasonality)
+    returns scalar unless reduce=None (then [B,D])
+    """
+    pred  = _to_np2(pred)
+    true  = _to_np2(true)
+    ins   = _to_np2(insample)
+    assert pred.shape == true.shape, f"{pred.shape} != {true.shape}"
+    B, H, D = true.shape
+    m = int(seasonality)
+    if m < 1:
+        raise ValueError("seasonality must be >= 1")
+
+    # denominator from in-sample context
+    denom = np.full((B, D), np.nan, dtype=np.float64)
+    for b in range(B):
+        for d in range(D):
+            y = ins[b, :, d].astype(np.float64)
+            y = y[~np.isnan(y)]
+            if y.size < 2:
+                continue
+            if m >= y.size:
+                diffs = np.abs(np.diff(y))
+            else:
+                diffs = np.abs(y[m:] - y[:-m])
+            if diffs.size:
+                denom[b, d] = diffs.mean()
+
+    # numerator: MAE over horizon
+    mae = np.nanmean(np.abs(pred - true), axis=1)  # [B,D]
+
+    denom = np.where(~np.isfinite(denom) | (denom < eps), eps, denom)
+    mase = mae / denom  # [B,D]
+    return float(np.nanmean(mase)) if reduce == "mean" else mase
+
+def sMAPE_batched(pred, true, eps=1e-12):
+    """
+    sMAPE in [0,2]; commonly reported as % by *100.
+    pred,true: [B, H, D] or broadcastable thereto
+    """
+    pred = _to_np2(pred); true = _to_np2(true)
+    num = np.abs(pred - true)
+    den = (np.abs(true) + np.abs(pred)) + eps
+    smape = 2.0 * num / den  # [B,H,D]
+    return float(np.nanmean(smape))
 
 def _to_np(x):
     if isinstance(x, torch.Tensor):
@@ -366,10 +420,9 @@ def MASE(pred, true, seasonality=1, eps=0):
     return mase_per_series.mean()
 
 # Validation function
-# Place near top of vali
 def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric):
     model.eval()
-    total_loss, total_mae_loss, total_mase_loss, total_wape_loss = [], [], [], []
+    total_loss, total_mae_loss, total_mase_loss, total_smape_loss = [], [], [], []
     se_ctx_list, se_fut_list = [], []
     seas_ctx_list, seas_fut_list = [], []
     var_ctx_list, snr_ctx_list = [], []
@@ -377,12 +430,11 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
     omega_ctx_list, omega_fut_list = [], []
     lle_ctx_list,   lle_fut_list   = [], []
 
-
-    # set sampling rate based on your freq; hourly → fs=1.0
     fs = 1.0
-    # Optionally define a season band (e.g., around 1/day = 1/24 ≈ 0.0417 cycles/hour)
     season_band = (1/30.0, 1/20.0) if args.freq in ['h', 'H'] else None
-    detrend_mode = 'mean'  # or 'lin' if your series are trendy
+    detrend_mode = 'mean'
+    # Choose seasonality for MASE (adjust if you truly want daily seasonality)
+    mase_m = 24 if args.freq in ['h', 'H'] else 1
 
     with torch.no_grad():
         for batch_x, batch_y, batch_x_mark, batch_y_mark in test_loader:
@@ -400,20 +452,22 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
                 outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
             f_dim = -1 if args.features == 'MS' else 0
-            outputs = outputs[:, -args.pred_len:, f_dim:]
-            gt = batch_y[:, -args.pred_len:, f_dim:].to(accelerator.device)
+            outputs = outputs[:, -args.pred_len:, f_dim:]  # [B,H,D]
+            gt = batch_y[:, -args.pred_len:, f_dim:]       # [B,H,D]
 
-            # ---- spectral metrics (computed on CPU numpy) ----
-            ctx_np = batch_x[:, :args.seq_len, f_dim:].detach().cpu().numpy()   # [B, L, D]
-            fut_np = gt.detach().cpu().numpy()                                   # [B, H, D]
-            # ---- forecastability metrics (Ω & LLE) ----
+            # ---- metrics that need numpy ----
+            ctx_np  = batch_x[:, :args.seq_len, f_dim:].detach().cpu().numpy()  # [B,L,D]
+            fut_np  = gt.detach().cpu().numpy()                                  # [B,H,D]
+            pred_np = outputs.detach().cpu().numpy()                             # [B,H,D]
+
+            # Forecastability (Ω & LLE)
             fcast = batch_forecastability(ctx_np, fut_np)
             omega_ctx_list.append(fcast["Omega_ctx_mean"])
             omega_fut_list.append(fcast["Omega_future_mean"])
             lle_ctx_list.append(fcast["LLE_ctx_mean"])
             lle_fut_list.append(fcast["LLE_future_mean"])
-            # -------------------------------------------
 
+            # Spectral metrics
             spec_dict, _ = batch_spectral_metrics(
                 ctx_np, fut_np, fs=fs, f_low=None, f_high=None,
                 detrend=detrend_mode, season_band=season_band
@@ -427,52 +481,53 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
             v_fut, snr_fut = quick_stats(fut_np)
             var_ctx_list.append(v_ctx); snr_ctx_list.append(snr_ctx)
             var_fut_list.append(v_fut); snr_fut_list.append(snr_fut)
-            # --------------------------------------------------
 
+            # Base losses
             loss = criterion(outputs, gt)
             mae_loss = mae_metric(outputs, gt)
-            mase_loss = MASE(outputs, gt, seasonality=1)
-            wape_loss = WAPE(outputs, gt)
-            
-            total_wape_loss.append(wape_loss)
+
+            # Scale-free cross-dataset metrics
+            mase_loss  = MASE_batched(pred_np, fut_np, insample=ctx_np, seasonality=mase_m)
+            smape_loss = sMAPE_batched(pred_np, fut_np)
+
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
-            total_mase_loss.append(mase_loss.item())
+            total_mase_loss.append(mase_loss)
+            total_smape_loss.append(smape_loss)
 
-    avg_loss = float(np.mean(total_loss))
-    avg_mae_loss = float(np.mean(total_mae_loss))
-    avg_mase_loss = float(np.mean(total_mase_loss))
-    avg_wape_loss = float(np.mean(total_wape_loss))
-    
+    avg_loss  = float(np.mean(total_loss))
+    avg_mae   = float(np.mean(total_mae_loss))
+    avg_mase  = float(np.mean(total_mase_loss))
+    avg_smape = float(np.mean(total_smape_loss))
+
     Omega_ctx = float(np.nanmean(omega_ctx_list)) if omega_ctx_list else np.nan
     Omega_fut = float(np.nanmean(omega_fut_list)) if omega_fut_list else np.nan
     LLE_ctx   = float(np.nanmean(lle_ctx_list))   if lle_ctx_list   else np.nan
-    #LLE_fut   = float(np.nanmean(lle_fut_list))   if lle_fut_list   else np.nan
 
-    # Aggregate spectral metrics
-    se_ctx = float(np.nanmean(se_ctx_list)) if len(se_ctx_list) else np.nan
-    se_fut = float(np.nanmean(se_fut_list)) if len(se_fut_list) else np.nan
-    seas_ctx = float(np.nanmean(seas_ctx_list)) if len(seas_ctx_list) else np.nan
-    seas_fut = float(np.nanmean(seas_fut_list)) if len(seas_fut_list) else np.nan
-    var_ctx = float(np.nanmean(var_ctx_list)) if len(var_ctx_list) else np.nan
-    var_fut = float(np.nanmean(var_fut_list)) if len(var_fut_list) else np.nan
-    snr_ctx = float(np.nanmean(snr_ctx_list)) if len(snr_ctx_list) else np.nan
-    snr_fut = float(np.nanmean(snr_fut_list)) if len(snr_fut_list) else np.nan
+    se_ctx = float(np.nanmean(se_ctx_list)) if se_ctx_list else np.nan
+    se_fut = float(np.nanmean(se_fut_list)) if se_fut_list else np.nan
+    seas_ctx = float(np.nanmean(seas_ctx_list)) if seas_ctx_list else np.nan
+    seas_fut = float(np.nanmean(seas_fut_list)) if seas_fut_list else np.nan
+    var_ctx = float(np.nanmean(var_ctx_list)) if var_ctx_list else np.nan
+    var_fut = float(np.nanmean(var_fut_list)) if var_fut_list else np.nan
+    snr_ctx = float(np.nanmean(snr_ctx_list)) if snr_ctx_list else np.nan
+    snr_fut = float(np.nanmean(snr_fut_list)) if snr_fut_list else np.nan
 
-    # W&B logging (only on main process)
     if getattr(accelerator, "is_local_main_process", True) and args.use_wandb:
         wandb.log({
-            "MSE loss": avg_loss, "MAE loss": avg_mae_loss, "MASE loss": avg_mase_loss, "WAPE loss": avg_wape_loss,
+            "MSE loss": avg_loss,
+            "MAE loss": avg_mae,
+            "MASE loss": avg_mase,
+            "sMAPE": avg_smape,           # replace WAPE with sMAPE
             "SE_ctx_mean": se_ctx,
-            "Season_ctx_mean": seas_ctx, 
-            "Var_ctx": var_ctx, 
-            "SNR_ctx_proxy": snr_ctx, 
+            "Season_ctx_mean": seas_ctx,
+            "Var_ctx": var_ctx,
+            "SNR_ctx_proxy": snr_ctx,
             "Omega_ctx_mean": Omega_ctx,
             "LLE_ctx_mean": LLE_ctx
         })
 
-    # optionally return the spectral summaries alongside losses
-    return avg_loss, avg_mae_loss, avg_mase_loss, avg_wape_loss
+    return avg_loss, avg_mae, avg_mase, avg_smape
 
 import torch.nn.functional as F
 
@@ -833,15 +888,15 @@ if __name__ == '__main__':
         wandb.config.update({'num_params':num_params})
 
     # Run evaluation
-    test_loss, test_mae_loss, test_mase_loss, test_wape_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
+    test_loss, test_mae_loss, test_mase_loss, test_smape_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
     print(f"MSE loss: {test_loss}")
     print(f"MAE loss: {test_mae_loss}")
     print(f"MASE loss: {test_mase_loss}")
-    print(f"WAPE loss: {test_wape_loss}")
+    print(f"sMAPE loss: {test_smape_loss}")
     # Visualize a test example if requested
     if args.visualize:
         visualize_example(args, accelerator, model, test_loader)
     # Log metrics to wandb if enabled
     if args.use_wandb:
-        wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss, "MASE loss": test_mase_loss, "WAPE loss": test_wape_loss})
+        wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss, "MASE loss": test_mase_loss, "sMAPE loss": test_smape_loss})
         wandb.finish()

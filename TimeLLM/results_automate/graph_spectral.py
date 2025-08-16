@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Build a tidy CSV from wandb-style text logs, then plot sMAPE vs spectral entropy.
+- Strictly parse tier/rand_init/seed/init_seed from filename pattern.
+- Average over BOTH seed and init_seed -> one point per (tier, rand_init).
+- Overlay all raw runs (faint triangles) behind mean±std markers.
+- Robust de-duplication: keep newest per (tier, rand_init, seed, init_seed, run_id/log_path).
+"""
+
 import os
 import re
 import sys
-import json
 from glob import glob
 from typing import Dict, Any, List
 
@@ -10,26 +19,43 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# -------- config --------
-LOG_DIR = sys.argv[1] if len(sys.argv) > 1 else "./logs"
+# ---------------- config ----------------
+LOG_DIR = "../results/pems_eval/"
 OUT_CSV = "local_wandb_summary.csv"
-OUT_PNG = "wape_vs_se.png"
+OUT_AGG = "local_wandb_summary_agg.csv"
+OUT_PNG = "sMAPE_vs_se.png"
 
 # Colors/markers: triangles for all; rand_init=1 -> orange, 0 -> blue
 COLOR_MAP = {0: "tab:blue", 1: "tab:orange"}
 MARKER = "^"
 
-# -------- helpers --------
-num_pat = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
+# numeric literal
+NUM_PAT = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
 
+# strict filename parser
+FILE_RE = re.compile(
+    r"""
+    ^pems_testing_
+    (?P<tier>low|medium|high)      # tier
+    .*?                            # anything
+    _r(?P<rand>[01])_              # rand_init
+    .*?
+    _seed(?P<seed>\d+)             # seed
+    _init(?P<init>\d+)             # init_seed
+    \.txt$
+    """,
+    re.IGNORECASE | re.VERBOSE
+)
+
+# ---------------- helpers ----------------
 def norm_key(s: str) -> str:
-    """normalize 'WAPE loss' -> 'wape_loss', 'SE_ctx_mean' -> 'se_ctx_mean'"""
+    """normalize keys to snake_case, lowercase: 'sMAPE loss' -> 'smape_loss'."""
     s = s.strip()
     s = re.sub(r"\s+", "_", s)
     return s.lower()
 
 def parse_run_summary(lines: List[str]) -> Dict[str, Any]:
-    """Scan lines; after 'wandb: Run summary:' collect wandb metric lines if numeric."""
+    """Scan lines; after 'wandb: Run summary:' collect numeric metric lines."""
     metrics: Dict[str, Any] = {}
     in_block = False
     for line in lines:
@@ -38,8 +64,7 @@ def parse_run_summary(lines: List[str]) -> Dict[str, Any]:
             continue
         if not in_block:
             continue
-        # Try to match a metric line like: "wandb:       WAPE loss 0.15352"
-        m = re.match(r"^\s*wandb:\s+(.+?)\s+(" + num_pat + r")\s*$", line)
+        m = re.match(r"^\s*wandb:\s+(.+?)\s+(" + NUM_PAT + r")\s*$", line)
         if m:
             key = norm_key(m.group(1))
             try:
@@ -47,128 +72,164 @@ def parse_run_summary(lines: List[str]) -> Dict[str, Any]:
             except ValueError:
                 continue
             metrics[key] = val
-            continue
-        # Non-metric wandb lines or an empty stretch can appear; keep scanning.
-        # We don't hard-stop; we just skip non-matching lines.
     return metrics
 
-def parse_tail_metadata(text: str) -> Dict[str, Any]:
-    md: Dict[str, Any] = {}
-
-    # Example: "Evaluation for high with init_seed 13 and seed 2 completed"
-    m = re.search(r"Evaluation\s+for\s+(\w+)\s+with\s+init_seed\s+(\d+)\s+and\s+seed\s+(\d+)", text)
-    if m:
-        md["tier"] = m.group(1)
-        md["init_seed"] = int(m.group(2))
-        md["seed"] = int(m.group(3))
-
-    # Pull run_id from URL if present:
-    m = re.search(r"runs/([a-z0-9]+)", text)
-    if m:
-        md["run_id"] = m.group(1)
-
-    # Parse rand_init and tier from file paths in "Logging to ..." or result lines
-    # e.g., ... pems_testing_high_l0_d32_e10_m..._r1_..._seed3_init11.txt
-    m = re.search(r"pems_testing_(low|medium|high)", text, re.IGNORECASE)
-    if m and "tier" not in md:
-        md["tier"] = m.group(1)
-
-    m = re.search(r"_r([01])_", text)
-    if m:
-        md["rand_init"] = int(m.group(1))
-
-    # If seed/init appear inside filename (_seed3_ / _init11_)
-    m = re.search(r"_seed(\d+)_", text)
-    if m and "seed" not in md:
-        md["seed"] = int(m.group(1))
-    m = re.search(r"_init(\d+)", text)
-    if m and "init_seed" not in md:
-        md["init_seed"] = int(m.group(1))
-
-    return md
+def parse_from_filename(path: str) -> Dict[str, Any]:
+    """Parse tier/rand_init/seed/init_seed strictly from basename."""
+    b = os.path.basename(path)
+    m = FILE_RE.match(b)
+    if not m:
+        return {}
+    return {
+        "tier": m.group("tier").lower(),
+        "rand_init": int(m.group("rand")),
+        "seed": int(m.group("seed")),
+        "init_seed": int(m.group("init")),
+    }
 
 def coerce_cols(df: pd.DataFrame) -> pd.DataFrame:
-    # Ensure expected columns exist; fill missing with NaN
-    expected = ["se_ctx_mean", "wape_loss", "mase_loss", "mae_loss", "mse_loss",
-                "lle_ctx_mean", "omega_ctx_mean", "snr_ctx_proxy",
-                "season_ctx_mean", "var_ctx"]
+    """Ensure expected metric columns exist and coerce numeric."""
+    expected = [
+        "se_ctx_mean", "smape_loss", "mase_loss", "mae_loss", "mse_loss",
+        "lle_ctx_mean", "omega_ctx_mean", "snr_ctx_proxy",
+        "season_ctx_mean", "var_ctx"
+    ]
     for col in expected:
         if col not in df.columns:
             df[col] = np.nan
-    # metadata defaults
-    for col, default in [("tier", "unknown"), ("init_seed", np.nan),
-                         ("seed", np.nan), ("rand_init", 0)]:
-        if col not in df.columns:
-            df[col] = default
+    # coerce numeric metrics
+    for c in expected:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
     return df
 
-# -------- main scrape --------
-rows = []
-files = sorted(glob(os.path.join(LOG_DIR, "**", "*.txt"), recursive=True))
-if not files:
-    print(f"No .txt logs found under: {LOG_DIR}", file=sys.stderr)
-    sys.exit(1)
+# ---------------- main ----------------
+def main() -> None:
+    files = sorted(glob(os.path.join(LOG_DIR, "**", "*.txt"), recursive=True))
+    if not files:
+        print(f"No .txt logs found under: {LOG_DIR}", file=sys.stderr)
+        sys.exit(1)
 
-for path in files:
-    try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            text = f.read()
-        lines = text.splitlines()
+    rows = []
+    for path in files:
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                text = f.read()
+            lines = text.splitlines()
+            metrics = parse_run_summary(lines)
+            if not metrics:
+                continue
+            rows.append({
+                **metrics,
+                "log_path": path,
+                "mtime": os.path.getmtime(path)
+            })
+        except Exception as e:
+            print(f"[warn] failed to parse {path}: {e}", file=sys.stderr)
 
-        metrics = parse_run_summary(lines)
-        if not metrics:
-            # Some logs might be short; skip silently
-            continue
+    if not rows:
+        print("Parsed zero summaries. Check your log patterns.", file=sys.stderr)
+        sys.exit(1)
 
-        md = parse_tail_metadata(text)
-        row = {**metrics, **md, "log_path": path}
-        rows.append(row)
-    except Exception as e:
-        print(f"[warn] failed to parse {path}: {e}", file=sys.stderr)
+    df = pd.DataFrame(rows)
+    df = coerce_cols(df)
 
-if not rows:
-    print("Parsed zero summaries. Check your log patterns.", file=sys.stderr)
-    sys.exit(1)
+    # attach filename metadata strictly
+    meta = df["log_path"].apply(parse_from_filename)
+    meta_df = pd.DataFrame(list(meta))
+    df = pd.concat([df, meta_df], axis=1)
 
-df = pd.DataFrame(rows)
-df = coerce_cols(df)
+    # require valid tier / rand_init
+    df = df[
+        df["tier"].isin(["low", "medium", "high"]) &
+        df["rand_init"].isin([0, 1])
+    ].copy()
 
-# Persist tidy CSV
-df.to_csv(OUT_CSV, index=False)
-print(f"Saved {OUT_CSV} with {len(df)} rows.")
+    # non-finite cleanup
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df = df.dropna(subset=["smape_loss", "se_ctx_mean", "seed", "init_seed"], how="any")
 
-# -------- aggregate + plot --------
-# Group by condition (tier, rand_init, init_seed) and aggregate over repeated 'seed'
-group_cols = ["tier", "rand_init", "init_seed"]
-agg = df.groupby(group_cols, dropna=False).agg(
-    wape_mean=("wape_loss", "mean"),
-    wape_std=("wape_loss", "std"),
-    se_mean=("se_ctx_mean", "mean"),
-    se_std=("se_ctx_mean", "std"),
-    n=("wape_loss", "count"),
-).reset_index()
+    # optional: capture run_id from URL if present in file text (best-effort)
+    # (we didn't keep full text; okay—use log_path as identity)
+    df["identity"] = df["log_path"]
 
-# If std is NaN because only one sample, set to 0 so errorbar draws as a point
-for c in ["wape_std", "se_std"]:
-    agg[c] = agg[c].fillna(0.0)
+    # robust de-duplication: keep newest mtime per (tier, rand_init, seed, init_seed, identity)
+    df["dedup_key"] = list(zip(
+        df["tier"], df["rand_init"], df["seed"], df["init_seed"], df["identity"]
+    ))
+    df = df.sort_values("mtime").drop_duplicates(subset=["dedup_key"], keep="last")
+    df = df.drop_duplicates(subset=["log_path"])  # belt + suspenders
 
-plt.figure(figsize=(7, 5))
-for (tier, rand_init), g in agg.groupby(["tier", "rand_init"], dropna=False):
-    color = COLOR_MAP.get(int(rand_init) if pd.notna(rand_init) else 0, "tab:blue")
-    label = f"{tier} | rand_init={int(rand_init)}" if pd.notna(rand_init) else f"{tier} | rand_init=?"
-    plt.errorbar(
-        g["se_mean"], g["wape_mean"],
-        xerr=g["se_std"], yerr=g["wape_std"],
-        fmt=MARKER, linestyle="none", capsize=3, label=label, alpha=0.9, markersize=7,
-        markeredgewidth=0.8, markeredgecolor="black", color=color,
+    # save tidy
+    df.to_csv(OUT_CSV, index=False)
+    print(f"Saved {OUT_CSV} with {len(df)} rows.")
+
+    # aggregate across BOTH seed and init_seed → one row per (tier, rand_init)
+    agg = df.groupby(["tier", "rand_init"], as_index=False).agg(
+        smape_mean=("smape_loss", "mean"),
+        smape_std=("smape_loss", "std"),
+        se_mean=("se_ctx_mean", "mean"),
+        se_std=("se_ctx_mean", "std"),
+        n=("smape_loss", "count"),
     )
+    for c in ["smape_std", "se_std"]:
+        agg[c] = agg[c].fillna(0.0)
 
-plt.xlabel("se_ctx_mean")
-plt.ylabel("wape_loss")
-plt.title("WAPE vs SE (aggregated by tier, rand_init, init_seed)")
-plt.legend(title="Condition", fontsize=8)
-plt.grid(True, linestyle="--", alpha=0.3)
-plt.tight_layout()
-plt.savefig(OUT_PNG, dpi=300)
-plt.close()
-print(f"Saved {OUT_PNG}")
+    # sanity: ensure at most one row per (tier, rand_init)
+    dups = agg.groupby(["tier", "rand_init"]).size()
+    bad = dups[dups > 1]
+    if not bad.empty:
+        print("[WARN] duplicate groups in agg; collapsing again.\n", bad)
+        agg = agg.groupby(["tier", "rand_init"], as_index=False).agg({
+            "smape_mean": "mean",
+            "smape_std": "mean",
+            "se_mean": "mean",
+            "se_std": "mean",
+            "n": "sum"
+        })
+
+    # stable order
+    tier_order = {"low": 0, "medium": 1, "high": 2}
+    agg["__ord"] = agg["tier"].map(tier_order)
+    agg = agg.sort_values(["__ord", "rand_init"]).drop(columns="__ord")
+
+    agg.to_csv(OUT_AGG, index=False)
+    print(f"Saved {OUT_AGG} with {len(agg)} rows.")
+
+    # ---------------- plot ----------------
+    plt.figure(figsize=(7, 5))
+
+    # raw runs (faint)
+    for ri, g in df.groupby("rand_init"):
+        if g.empty:
+            continue
+        plt.scatter(
+            g["se_ctx_mean"], g["smape_loss"],
+            marker=MARKER, s=35, alpha=0.25, edgecolors="none",
+            c=COLOR_MAP.get(int(ri), "tab:blue"),
+            label="_nolegend_"
+        )
+
+    # means ± std (exactly two points per tier if both r0/r1 exist)
+    for _, row in agg.iterrows():
+        tier, ri = row["tier"], int(row["rand_init"])
+        color = COLOR_MAP.get(ri, "tab:blue")
+        label = f"{tier} | rand_init={ri} (n={int(row['n'])})"
+        plt.errorbar(
+            row["se_mean"], row["smape_mean"],
+            xerr=row["se_std"], yerr=row["smape_std"],
+            fmt=MARKER, linestyle="none", capsize=3, alpha=0.95, markersize=8,
+            markeredgewidth=0.9, markeredgecolor="black", color=color, label=label
+        )
+
+    plt.xlabel("se_ctx_mean")
+    plt.ylabel("smape_loss")
+    plt.title("PEMS: sMAPE vs SE (mean ± std over seeds & init_seeds)")
+    plt.legend(title="Condition", fontsize=8)
+    plt.grid(True, linestyle="--", alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(OUT_PNG, dpi=300)
+    plt.close()
+    print(f"Saved {OUT_PNG}")
+
+if __name__ == "__main__":
+    main()

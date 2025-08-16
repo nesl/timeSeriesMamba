@@ -1,0 +1,46 @@
+{
+  "percentiles": [
+    5,
+    25,
+    50,
+    75,
+    95
+  ],
+  "heldout": [
+    {
+      "percentile": 5,
+      "region": "CISO::solar",
+      "se": 0.26010092300474696,
+      "rows": 43896,
+      "csv": "heldout/CISO__solar__p05.csv"
+    },
+    {
+      "percentile": 25,
+      "region": "PJM::nat_gas",
+      "se": 0.3866188191388363,
+      "rows": 43895,
+      "csv": "heldout/PJM__nat_gas__p25.csv"
+    },
+    {
+      "percentile": 50,
+      "region": "FR::wind",
+      "se": 0.4662967077719001,
+      "rows": 52680,
+      "csv": "heldout/FR__wind__p50.csv"
+    },
+    {
+      "percentile": 75,
+      "region": "SWPP::nat_gas",
+      "se": 0.5386283399458233,
+      "rows": 43896,
+      "csv": "heldout/SWPP__nat_gas__p75.csv"
+    },
+    {
+      "percentile": 95,
+      "region": "PJM::oil",
+      "se": 0.7189278121238717,
+      "rows": 43895,
+      "csv": "heldout/PJM__oil__p95.csv"
+    }
+  ]
+}

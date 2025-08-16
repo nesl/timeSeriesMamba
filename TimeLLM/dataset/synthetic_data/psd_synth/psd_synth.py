@@ -13,7 +13,11 @@ Outputs:
     }
   (Train boundaries first, then val boundaries, matching the concatenation order.)
 - One CSV per held-out test region: region_test_om{Ω}.csv
-- Metadata for traceability.
+- Calibration plots + metadata for traceability.
+
+To reduce total length/time:
+- YEARS: shorten (e.g., 5 → 0.5)
+- SAMPLE_EVERY_HOURS: increase (e.g., 1 → 3)
 """
 
 import os
@@ -87,16 +91,16 @@ def make_psd(alpha: float, n: int, peak_bins: List[int], width_bins: float = 2.0
     return psd
 
 
-def synth_from_psd(psd: np.ndarray, seed: int = None) -> np.ndarray:
+def synth_from_psd(psd: np.ndarray, n_out: int, seed: int | None = None) -> np.ndarray:
     """
     Sample a real-valued series whose magnitude spectrum matches psd (in expectation).
-    Randomize phases uniformly and irfft. Normalize to unit std.
+    Use irfft(..., n=n_out) so we exactly control the output length, even when n_out is odd.
     """
     rng = np.random.default_rng(seed)
     mag = np.sqrt(psd * psd.size)  # keep variance O(1)
     phase = rng.uniform(0, 2 * np.pi, size=psd.size)
     spec = mag * (np.cos(phase) + 1j * np.sin(phase))
-    y = np.fft.irfft(spec, n=(psd.size - 1) * 2)
+    y = np.fft.irfft(spec, n=n_out)  # ← use n_out, not (psd.size - 1) * 2
     return y / (y.std() + 1e-12)
 
 
@@ -105,7 +109,7 @@ def synth_from_psd(psd: np.ndarray, seed: int = None) -> np.ndarray:
 def calibrate_alpha_to_omega(
     n: int,
     peak_bins: List[int],
-    alphas: np.ndarray = np.linspace(0, 1, 21),
+    alphas: np.ndarray = np.linspace(0, 1, 11),  # fewer points → faster
     width_bins: float = 2.0,
     seed: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -116,7 +120,7 @@ def calibrate_alpha_to_omega(
     pairs = []
     for a in alphas:
         psd = make_psd(a, n, peak_bins, width_bins=width_bins)
-        y = synth_from_psd(psd, seed=seed)
+        y = synth_from_psd(psd, n, seed=seed)
         omega = spectral_predictability(y)
         pairs.append((a, omega))
     a_grid, om_grid = np.array(pairs).T
@@ -134,12 +138,13 @@ def alpha_for_target_omega(omega_target: float, a_grid: np.ndarray, om_grid: np.
 
 # --------------------------- Convenience utils ----------------------
 
-def hourly_bins_for_periods(n: int, periods_in_hours: List[float]) -> List[int]:
+def bins_for_periods(n: int, periods_in_hours: List[float], sample_every_hours: int) -> List[int]:
     """
-    Map desired periods (in hours) to rFFT bin indices for a length-n hourly series.
-    Bin k corresponds to frequency k/n cycles/sample; period P hours ⇒ freq 1/P ⇒ bin ~ n/P.
+    Map desired periods (in hours) to rFFT bin indices for a length-n series sampled
+    every `sample_every_hours`. With stride S, bin ≈ n * S / P.
     """
-    bins = [int(round(n / P)) for P in periods_in_hours if P > 0]
+    S = float(sample_every_hours)
+    bins = [int(round(n * S / P)) for P in periods_in_hours if P > 0]
     return [b for b in bins if 1 <= b <= n // 2]
 
 def omega_tag(x: float) -> str:
@@ -157,25 +162,30 @@ class RegionMeta:
     n: int
     periods_hours: List[float]
     width_bins: float
+    years: float
+    sample_every_hours: int
 
 
 # ------------------------------- Main --------------------------------
 
 def main():
-    # ---- Config ----
+    # ---- Speed/size knobs ----
+    YEARS = 0.5              # ↓ from 5.0 → ~10× shorter
+    SAMPLE_EVERY_HOURS = 1   # set to 3 (or 6) for extra 3× (or 6×) reduction
+
     out_dir = "."
     os.makedirs(out_dir, exist_ok=True)
 
-    years = 5
-    samples_per_hour = 1  # hourly data
-    N = int(years * 365.25 * 24 * samples_per_hour)
+    # total samples N for stride sampling
+    hours_total = YEARS * 365.25 * 24
+    N = int(round(hours_total / SAMPLE_EVERY_HOURS))  # e.g., 0.5y @ 1h ≈ 4.4k
 
     # Domain-relevant periodicities (in hours)
     periods_hours = [24, 24 * 7]  # daily, weekly
-    peak_bins = hourly_bins_for_periods(N, periods_hours)
+    peak_bins = bins_for_periods(N, periods_hours, sample_every_hours=SAMPLE_EVERY_HOURS)
 
-    width_bins = 2.0                      # Gaussian peak width in FFT bins
-    alpha_grid_input = np.linspace(0, 1, 21)
+    width_bins = 2.0
+    alpha_grid_input = np.linspace(0, 1, 11)  # fewer alpha points → faster
 
     # Targets for Ω (training regions)
     omega_targets_train = np.linspace(0.15, 0.85, 8).tolist()
@@ -204,32 +214,32 @@ def main():
     plt.close()
 
     # ---- Generate TRAIN regions (Ω targets), build train_val.csv + boundaries ----
-    train_chunks = []    # list of DataFrames (train part per region)
-    val_chunks = []      # list of DataFrames (val part per region)
-    boundaries = []      # [[start, end], ...] (train regions first, then val regions)
-    regions_names = []   # ["Region 1", ...] aligned with boundaries entries
+    train_chunks = []    # DataFrames (train per region)
+    val_chunks = []      # DataFrames (val per region)
+    boundaries = []      # [[start, end], ...] (train first, then val)
+    regions_names = []   # names aligned with boundaries
     train_metas: List[RegionMeta] = []
 
     split_idx = int(train_frac * N)
     val_len = N - split_idx
 
-    # timestamps for the whole series
-    all_dates = pd.date_range("2024-01-01", periods=N, freq="H")
+    # timestamps for stride sampling
+    start_ts = pd.Timestamp("2024-01-01 00:00:00")
+    freq_str = f"{SAMPLE_EVERY_HOURS}H"
+    all_dates = pd.date_range(start_ts, periods=N, freq=freq_str)
 
-    # Generate each training region
     for ridx, om_t in enumerate(omega_targets_train, start=1):
         a = alpha_for_target_omega(om_t, a_grid, om_grid)
-        seed = 100_000 + 17 * ridx  # deterministic, distinct per region
+        seed = 100_000 + 17 * ridx  # deterministic per region
 
         psd = make_psd(a, N, peak_bins, width_bins=width_bins)
-        y = synth_from_psd(psd, seed=seed)
+        y = synth_from_psd(psd, N, seed=seed)
         om_ach = spectral_predictability(y)
 
         # split
         y_train = y[:split_idx]
         y_val   = y[split_idx:]
 
-        # assemble DataFrames
         df_train = pd.DataFrame({"date": all_dates[:split_idx], "synth": y_train})
         df_val   = pd.DataFrame({"date": all_dates[split_idx:], "synth": y_val})
 
@@ -242,7 +252,6 @@ def main():
         boundaries.append([start_tr, end_tr])
         regions_names.append(f"Region {ridx}")
 
-        # record meta
         train_metas.append(
             RegionMeta(
                 region_id=ridx,
@@ -254,6 +263,8 @@ def main():
                 n=N,
                 periods_hours=periods_hours,
                 width_bins=width_bins,
+                years=YEARS,
+                sample_every_hours=SAMPLE_EVERY_HOURS,
             )
         )
 
@@ -270,7 +281,7 @@ def main():
     train_val_path = os.path.join(out_dir, "train_val.csv")
     train_val_df.to_csv(train_val_path, index=False)
 
-    # Boundary file (exact structure you requested)
+    # Boundary file (your exact structure)
     boundaries_path = os.path.join(out_dir, "train_boundaries.json")
     with open(boundaries_path, "w") as f:
         json.dump({"boundaries": boundaries, "regions": regions_names}, f, indent=2)
@@ -284,10 +295,10 @@ def main():
     test_metas: List[RegionMeta] = []
     for tidx, om_t in enumerate(omega_targets_test, start=1):
         a = alpha_for_target_omega(om_t, a_grid, om_grid)
-        seed = 900_000 + 9973 * tidx  # different seed family for test
+        seed = 900_000 + 9973 * tidx  # distinct seed family
 
         psd = make_psd(a, N, peak_bins, width_bins=width_bins)
-        y = synth_from_psd(psd, seed=seed)
+        y = synth_from_psd(psd,N, seed=seed)
         om_ach = spectral_predictability(y)
 
         df_test = pd.DataFrame({"date": all_dates, "synth": y})
@@ -305,6 +316,8 @@ def main():
                 n=N,
                 periods_hours=periods_hours,
                 width_bins=width_bins,
+                years=YEARS,
+                sample_every_hours=SAMPLE_EVERY_HOURS,
             )
         )
 
@@ -313,7 +326,6 @@ def main():
     )
 
     # ---- Diagnostics (optional) ----
-    # Achieved Ω for train regions
     plt.figure(figsize=(5, 3))
     plt.plot([m.omega_target for m in train_metas],
              [m.omega_achieved for m in train_metas], "o")
@@ -329,6 +341,7 @@ def main():
     print(f"[OK] Wrote:\n  {train_val_path}\n  {boundaries_path}")
     print(f"  {len(test_metas)} held-out test CSVs named by Ω in '{out_dir}'")
     print("  train_metadata.csv and test_metadata.csv for traceability")
+    print(f"  N per region: {N} samples (YEARS={YEARS}, SAMPLE_EVERY_HOURS={SAMPLE_EVERY_HOURS})")
 
 
 if __name__ == "__main__":

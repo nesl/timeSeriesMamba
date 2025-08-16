@@ -49,7 +49,7 @@ while getopts "n:m:g:p:r:z:i:h:s:" opt; do
 done
 
 # Required arg check
-if [ -z "$llm_model" ] || [ -z "$gpu_id" ] || [ -z "$heldout" ] || [ -z "$source_type" ]; then
+if [ -z "$llm_model" ] || [ -z "$gpu_id" ] || [ -z "$source_type" ]; then
   usage
 fi
 
@@ -66,7 +66,7 @@ fi
 export CUDA_VISIBLE_DEVICES=$((gpu_id % 4))
 
 echo "Using model: $llm_model"
-echo "Heldout: $heldout"
+echo "Heldout: To Be Looped"
 echo "Source type: $source_type"
 echo "Num params: $num_params"
 echo "Master port: $master_port"
@@ -117,53 +117,57 @@ parse_seed_ranges() {
 seed_array=($(parse_seed_ranges "$seed_ranges"))
 init_seed_array=($(parse_seed_ranges "$init_seed_ranges"))
 
-for pred_len in $((96 / downsampling_factor)); do
-  for seed in "${seed_array[@]}"; do
-    for init_seed in "${init_seed_array[@]}"; do
-      tag="testing_uniSynth_${og_tag}_h${heldout}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-      checkpoint_tag="uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-      #comment="checkpoints/${tag}"
-      log_file="results/eval_uniSynth/${tag}.txt"
-      exec > "$log_file" 2>&1
+# Outer loop for heldout values
+for heldout in 200 300 400 500 600 700 800; do
+  echo "Running heldout $heldout"
+  for pred_len in $((96 / downsampling_factor)); do
+    for seed in "${seed_array[@]}"; do
+      for init_seed in "${init_seed_array[@]}"; do
+        tag="testing_uniSynthPSD_${og_tag}_h${heldout}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+        checkpoint_tag="uniSynthPSD_${og_tag}_h200_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+        #comment="checkpoints/${tag}"
+        log_file="results/uniSynthPSD_eval/${tag}.txt"
+        exec > "$log_file" 2>&1
 
-      data_path="train_val.csv"
-      data_path_test="region${heldout}.csv"
+        data_path="train.csv"
+        data_path_test="region_test_om0p${heldout}.csv"
 
-      accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_evaluate.py \
-        --task_name long_term_forecast \
-        --root_path ./dataset/synthetic_data/ \
-        --data_path $data_path \
-        --data_path_test $data_path_test \
-        --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
-        --model $model_name \
-        --data Synthetic \
-        --features M \
-        --seq_len $seq_len \
-        --label_len 48 \
-        --factor 3 \
-        --enc_in 1 \
-        --dec_in 1 \
-        --c_out 1 \
-        --pred_len $pred_len \
-        --d_model $d_model \
-        --d_ff 32 \
-        --llm_layers $llm_layers \
-        --llm_model $llm_model \
-        --llm_dim $llm_dim \
-        --num_params $num_params \
-        --rand_init $rand_init \
-        --checkpoint_path checkpoints/${checkpoint_tag}/checkpoint \
-        --seed $seed \
-        --init_seed $init_seed \
-        --visualize \
-        --source $source_type \
-        --use_wandb 1 \
-        --heldout $heldout
+        accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_evaluate.py \
+          --task_name long_term_forecast \
+          --root_path ./dataset/synthetic_data/psd_synth/ \
+          --data_path $data_path \
+          --data_path_test $data_path_test \
+          --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
+          --model $model_name \
+          --data Synthetic \
+          --features M \
+          --seq_len $seq_len \
+          --label_len 48 \
+          --factor 3 \
+          --enc_in 1 \
+          --dec_in 1 \
+          --c_out 1 \
+          --pred_len $pred_len \
+          --d_model $d_model \
+          --d_ff 32 \
+          --llm_layers $llm_layers \
+          --llm_model $llm_model \
+          --llm_dim $llm_dim \
+          --num_params $num_params \
+          --rand_init $rand_init \
+          --checkpoint_path checkpoints/${checkpoint_tag}/checkpoint \
+          --seed $seed \
+          --init_seed $init_seed \
+          --visualize \
+          --source $source_type \
+          --use_wandb 1 \
+          --heldout $heldout
 
-      echo "eval of ${heldout} heldout (${source_type}) with init_seed $init_seed and seed $seed completed, saved to $comment"
-      if [[ "$rand_init" -eq 0 ]]; then
-          break
-      fi
+        echo "eval of ${heldout} heldout (${source_type}) with init_seed $init_seed and seed $seed completed, saved to $comment"
+        if [[ "$rand_init" -eq 0 ]]; then
+            break
+        fi
+      done
     done
   done
 done

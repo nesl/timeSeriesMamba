@@ -9,7 +9,7 @@ llm_layers=0
 rand_init=0
 num_params='2.8b'
 d_model=32
-d_ff=128
+d_ff=32
 num_process=1
 
 heldout=""

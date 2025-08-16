@@ -22,7 +22,7 @@ col_percent=100
 save_checkpoints=1
 
 # New: data/source settings
-dataset_dir="dataset/fitbit/fitbit_ds_v1/"           # pipeline output dir (has train.csv, boundaries.json, heldout/)
+dataset_dir="dataset/fitbit/fitbit_ds_v2/"           # pipeline output dir (has train.csv, boundaries.json, heldout/)
 heldout=""               # e.g., U001
 data_name="Fitbit"       # change if your code expects something else
 source="hr"              # <- per your request; kept and passed via --source
@@ -59,7 +59,6 @@ done
 [[ -z "${dataset_dir}" || -z "${heldout}" || -z "${llm_model}" || -z "${gpu_id:-}" ]] && usage
 [[ ! -f "${dataset_dir}/train.csv" ]] && { echo "ERROR: ${dataset_dir}/train.csv not found"; exit 2; }
 [[ ! -f "${dataset_dir}/boundaries.json" ]] && { echo "ERROR: ${dataset_dir}/boundaries.json not found"; exit 2; }
-[[ ! -f "${dataset_dir}/heldout/heldout_${heldout}.csv" ]] && { echo "ERROR: ${dataset_dir}/heldout/heldout_${heldout}.csv not found"; exit 2; }
 
 # Model name overrides
 [[ "$llm_model" == "ARIMA"   ]] && model_name="ARIMA"
@@ -98,7 +97,7 @@ og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}
 # Paths
 root_path="${dataset_dir}"
 data_path="train.csv"
-data_path_test="heldout/heldout_${heldout}.csv"
+data_path_test="test_${heldout}.csv"
 
 # Univariate settings
 features="M"
@@ -110,7 +109,7 @@ for pred_len in ${pred_base}; do
   for seed in {1..3}; do
     for init_seed in {11..13}; do
       tag="test_fitbit_${source}_${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-      checkpoint_tag="fitbit_${source}_U001_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      checkpoint_tag="fitbit_${source}_high_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
 
       log_file="results/fitbit_eval/${tag}.txt"
       exec > "$log_file" 2>&1
@@ -126,6 +125,7 @@ for pred_len in ${pred_base}; do
         --seq_len ${seq_len} \
         --label_len 48 \
         --factor 3 \
+        --freq t \
         --enc_in ${enc_in} \
         --dec_in ${dec_in} \
         --c_out ${c_out} \
