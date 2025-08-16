@@ -39,6 +39,119 @@ from utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali, lo
 
 
 # ---------- Spectral metrics (no SciPy needed) ----------
+# ---------- Forecastability metrics (Ω and LLE) ----------
+def _detrend_linear(y):
+    t = np.arange(len(y))
+    a, b = np.polyfit(t, y, 1)
+    return y - (a*t + b)
+
+def spectral_predictability(y):
+    """
+    Ω(y) = 1 - H(y)/ln(2π), with linear detrend + Hann window.
+    Higher => more forecastable. Returns ~[0,1].
+    """
+    y = np.asarray(y, float)
+    if y.size < 8:
+        return np.nan
+    y = _detrend_linear(y)
+    w = np.hanning(len(y))
+    yw = (y - y.mean()) * w
+    spec = np.fft.rfft(yw)
+    psd = (spec.real**2 + spec.imag**2)
+    psd = np.clip(psd, 1e-20, None)
+    p = psd / psd.sum()
+    H = -np.sum(p * np.log(p))
+    return float(1.0 - H / np.log(2*np.pi))
+
+def _auto_tau_acf(y, max_lag=200):
+    y = y - np.nanmean(y)
+    acf = np.correlate(y, y, mode='full')[len(y)-1:]
+    acf = acf / (acf[0] + 1e-12)
+    for lag in range(2, min(max_lag, len(y)//3)):
+        if acf[lag-1] > acf[lag] < acf[lag+1]:
+            return lag
+    return 1
+
+def largest_lyapunov_rosenstein(y, m=6, tau=None, max_t=50, theiler=10):
+    """
+    Rosenstein LLE estimator (slope of mean log-distance growth).
+    Larger => more chaotic/harder. Returns float or NaN.
+    """
+    y = np.asarray(y, float)
+    if y.size < 50:
+        return np.nan
+    y = (y - np.nanmean(y)) / (np.nanstd(y) + 1e-12)
+    if tau is None:
+        tau = _auto_tau_acf(y)
+
+    N = len(y) - (m-1)*tau
+    if N < max(50, 2*m*tau):
+        return np.nan
+
+    X = np.stack([y[i:i+N] for i in range(0, m*tau, tau)], axis=1)
+
+    d0, nn_idx = [], []
+    for i in range(N):
+        lo = max(0, i-theiler); hi = min(N, i+theiler+1)
+        mask = np.ones(N, bool); mask[lo:hi] = False
+        if not mask.any(): continue
+        D = np.linalg.norm(X[mask] - X[i], axis=1)
+        j_rel = np.argmin(D); j = np.arange(N)[mask][j_rel]
+        if D[j_rel] <= 0: continue
+        d0.append(D[j_rel]); nn_idx.append(j)
+    if len(d0) < 10:
+        return np.nan
+
+    max_t = min(max_t, N-1-max(nn_idx))
+    if max_t < 5:
+        return np.nan
+
+    lns = []
+    for t in range(1, max_t+1):
+        vals = []
+        for i, j in enumerate(nn_idx):
+            ii = i; jj = j
+            if ii+t >= N or jj+t >= N: continue
+            di = np.linalg.norm(X[ii+t] - X[jj+t])
+            vals.append(np.log(di + 1e-12) - np.log(d0[i]))
+        lns.append(np.mean(vals) if vals else np.nan)
+
+    ts = np.arange(1, max_t+1)
+    ys = np.array(lns)
+    msk = ~np.isnan(ys)
+    if msk.sum() < 5:
+        return np.nan
+    A = np.vstack([ts[msk], np.ones(msk.sum())]).T
+    slope, _ = np.linalg.lstsq(A, ys[msk], rcond=None)[0]
+    return float(slope)
+
+def batch_forecastability(ctx, fut):
+    """
+    ctx: [B, L, D], fut: [B, H, D]
+    Returns per-batch means of Ω and LLE for context and future.
+    """
+    ctx = _to_np(ctx); fut = _to_np(fut)
+    B, L, D = ctx.shape
+    om_ctx = []; om_fut = []; lle_ctx = []; lle_fut = []
+    for b in range(B):
+        for d in range(D):
+            x = ctx[b, :, d]; y = fut[b, :, d]
+            om_ctx.append(spectral_predictability(x))
+            om_fut.append(spectral_predictability(y))
+            lle_ctx.append(largest_lyapunov_rosenstein(x, m=6, tau=None, max_t=50, theiler=10))
+            lle_fut.append(largest_lyapunov_rosenstein(y, m=6, tau=None, max_t=50, theiler=10))
+    # robust aggregates
+    return {
+        "Omega_ctx_mean": float(np.nanmean(om_ctx)),
+        "Omega_future_mean": float(np.nanmean(om_fut)),
+        "LLE_ctx_mean": float(np.nanmean(lle_ctx)),
+        "LLE_future_mean": float(np.nanmean(lle_fut)),
+        "Omega_ctx_med": float(np.nanmedian(om_ctx)),
+        "Omega_future_med": float(np.nanmedian(om_fut)),
+        "LLE_ctx_med": float(np.nanmedian(lle_ctx)),
+        "LLE_future_med": float(np.nanmedian(lle_fut)),
+    }
+
 def _to_np(x):
     if isinstance(x, torch.Tensor):
         x = x.detach().cpu().numpy()
@@ -52,6 +165,25 @@ def _band_lims(fs, N, f_low, f_high):
     lo = max(lo, 1)  # drop DC by default
     hi = max(hi, lo+1)
     return lo, hi, freqs
+
+def WAPE(pred, true, eps=1e-8):
+    # Convert to numpy
+    if isinstance(pred, torch.Tensor):
+        pred = pred.detach().cpu().numpy()
+    if isinstance(true, torch.Tensor):
+        true = true.detach().cpu().numpy()
+
+    pred = np.squeeze(pred)
+    true = np.squeeze(true)
+
+    if true.ndim == 1:
+        true = true[np.newaxis, :]
+        pred = pred[np.newaxis, :]
+
+    numerator = np.sum(np.abs(true - pred))
+    denominator = np.sum(np.abs(true))
+    return numerator / max(denominator, eps)
+
 
 def spectral_entropy_1d(x, fs=1.0, f_low=None, f_high=None, eps=1e-12, detrend='mean'):
     """
@@ -237,11 +369,14 @@ def MASE(pred, true, seasonality=1, eps=0):
 # Place near top of vali
 def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric):
     model.eval()
-    total_loss, total_mae_loss, total_mase_loss = [], [], []
+    total_loss, total_mae_loss, total_mase_loss, total_wape_loss = [], [], [], []
     se_ctx_list, se_fut_list = [], []
     seas_ctx_list, seas_fut_list = [], []
     var_ctx_list, snr_ctx_list = [], []
     var_fut_list, snr_fut_list = [], []
+    omega_ctx_list, omega_fut_list = [], []
+    lle_ctx_list,   lle_fut_list   = [], []
+
 
     # set sampling rate based on your freq; hourly → fs=1.0
     fs = 1.0
@@ -271,6 +406,13 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
             # ---- spectral metrics (computed on CPU numpy) ----
             ctx_np = batch_x[:, :args.seq_len, f_dim:].detach().cpu().numpy()   # [B, L, D]
             fut_np = gt.detach().cpu().numpy()                                   # [B, H, D]
+            # ---- forecastability metrics (Ω & LLE) ----
+            fcast = batch_forecastability(ctx_np, fut_np)
+            omega_ctx_list.append(fcast["Omega_ctx_mean"])
+            omega_fut_list.append(fcast["Omega_future_mean"])
+            lle_ctx_list.append(fcast["LLE_ctx_mean"])
+            lle_fut_list.append(fcast["LLE_future_mean"])
+            # -------------------------------------------
 
             spec_dict, _ = batch_spectral_metrics(
                 ctx_np, fut_np, fs=fs, f_low=None, f_high=None,
@@ -290,7 +432,9 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
             loss = criterion(outputs, gt)
             mae_loss = mae_metric(outputs, gt)
             mase_loss = MASE(outputs, gt, seasonality=1)
-
+            wape_loss = WAPE(outputs, gt)
+            
+            total_wape_loss.append(wape_loss)
             total_loss.append(loss.item())
             total_mae_loss.append(mae_loss.item())
             total_mase_loss.append(mase_loss.item())
@@ -298,6 +442,12 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
     avg_loss = float(np.mean(total_loss))
     avg_mae_loss = float(np.mean(total_mae_loss))
     avg_mase_loss = float(np.mean(total_mase_loss))
+    avg_wape_loss = float(np.mean(total_wape_loss))
+    
+    Omega_ctx = float(np.nanmean(omega_ctx_list)) if omega_ctx_list else np.nan
+    Omega_fut = float(np.nanmean(omega_fut_list)) if omega_fut_list else np.nan
+    LLE_ctx   = float(np.nanmean(lle_ctx_list))   if lle_ctx_list   else np.nan
+    #LLE_fut   = float(np.nanmean(lle_fut_list))   if lle_fut_list   else np.nan
 
     # Aggregate spectral metrics
     se_ctx = float(np.nanmean(se_ctx_list)) if len(se_ctx_list) else np.nan
@@ -312,15 +462,17 @@ def vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric
     # W&B logging (only on main process)
     if getattr(accelerator, "is_local_main_process", True) and args.use_wandb:
         wandb.log({
-            "MSE loss": avg_loss, "MAE loss": avg_mae_loss, "MASE loss": avg_mase_loss,
-            "SE_ctx_mean": se_ctx, "SE_future_mean": se_fut,
-            "Season_ctx_mean": seas_ctx, "Season_future_mean": seas_fut,
-            "Var_ctx": var_ctx, "Var_future": var_fut,
-            "SNR_ctx_proxy": snr_ctx, "SNR_future_proxy": snr_fut
+            "MSE loss": avg_loss, "MAE loss": avg_mae_loss, "MASE loss": avg_mase_loss, "WAPE loss": avg_wape_loss,
+            "SE_ctx_mean": se_ctx,
+            "Season_ctx_mean": seas_ctx, 
+            "Var_ctx": var_ctx, 
+            "SNR_ctx_proxy": snr_ctx, 
+            "Omega_ctx_mean": Omega_ctx,
+            "LLE_ctx_mean": LLE_ctx
         })
 
     # optionally return the spectral summaries alongside losses
-    return avg_loss, avg_mae_loss, avg_mase_loss
+    return avg_loss, avg_mae_loss, avg_mase_loss, avg_wape_loss
 
 import torch.nn.functional as F
 
@@ -681,14 +833,15 @@ if __name__ == '__main__':
         wandb.config.update({'num_params':num_params})
 
     # Run evaluation
-    test_loss, test_mae_loss, test_mase_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
+    test_loss, test_mae_loss, test_mase_loss, test_wape_loss = vali(args, accelerator, model, test_data, test_loader, criterion, mae_metric)
     print(f"MSE loss: {test_loss}")
     print(f"MAE loss: {test_mae_loss}")
     print(f"MASE loss: {test_mase_loss}")
+    print(f"WAPE loss: {test_wape_loss}")
     # Visualize a test example if requested
     if args.visualize:
         visualize_example(args, accelerator, model, test_loader)
     # Log metrics to wandb if enabled
     if args.use_wandb:
-        wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss, "MASE loss": test_mase_loss})
+        wandb.log({"MSE loss": test_loss, "MAE loss": test_mae_loss, "MASE loss": test_mase_loss, "WAPE loss": test_wape_loss})
         wandb.finish()

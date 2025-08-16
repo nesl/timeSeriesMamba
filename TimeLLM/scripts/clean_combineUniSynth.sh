@@ -120,18 +120,18 @@ init_seed_array=($(parse_seed_ranges "$init_seed_ranges"))
 for pred_len in $((96 / downsampling_factor)); do
   for seed in "${seed_array[@]}"; do
     for init_seed in "${init_seed_array[@]}"; do
-      tag="uniSynth_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
+      tag="uniSynthPSD_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       comment="checkpoints/${tag}"
-      log_file="results/uniSynth/${tag}.txt"
+      log_file="results/uniSynthPSD/${tag}.txt"
       exec > "$log_file" 2>&1
 
-      data_path="train_val.csv"
-      data_path_test="region${heldout}.csv"
+      data_path="train.csv"
+      data_path_test="region_test_om0p${heldout}.csv"
 
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
         --task_name long_term_forecast \
         --is_training 1 \
-        --root_path ./dataset/synthetic_data/ \
+        --root_path ./dataset/synthetic_data/psd_synth/ \
         --data_path $data_path \
         --data_path_test $data_path_test \
         --model_id ${heldout}_heldout_${seq_len}_${pred_len} \
@@ -162,7 +162,7 @@ for pred_len in $((96 / downsampling_factor)); do
         --llm_model $llm_model \
         --llm_dim $llm_dim \
         --num_params $num_params \
-        --boundary_file "dataset/synthetic_data/train_boundaries.json" \
+        --boundary_file "dataset/synthetic_data/psd_synth/train_boundaries.json" \
         --rand_init $rand_init \
         --seed $seed \
         --init_seed $init_seed \

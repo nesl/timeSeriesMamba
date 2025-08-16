@@ -22,8 +22,8 @@ col_percent=100
 save_checkpoints=1
 
 # New: data/source settings
-dataset_dir="dataset/fitbit/fitbit_ds_v1/"           # pipeline output dir (has train.csv, boundaries.json, heldout/)
-heldout=""               # e.g., U001
+dataset_dir="dataset/fitbit/fitbit_ds_v2/"           # pipeline output dir (has train.csv, boundaries.json, heldout/)
+heldout="high"               # e.g., U001
 data_name="Fitbit"       # change if your code expects something else
 source="hr"              # <- per your request; kept and passed via --source
 
@@ -59,7 +59,7 @@ done
 [[ -z "${dataset_dir}" || -z "${heldout}" || -z "${llm_model}" || -z "${gpu_id:-}" ]] && usage
 [[ ! -f "${dataset_dir}/train.csv" ]] && { echo "ERROR: ${dataset_dir}/train.csv not found"; exit 2; }
 [[ ! -f "${dataset_dir}/boundaries.json" ]] && { echo "ERROR: ${dataset_dir}/boundaries.json not found"; exit 2; }
-[[ ! -f "${dataset_dir}/heldout/heldout_${heldout}.csv" ]] && { echo "ERROR: ${dataset_dir}/heldout/heldout_${heldout}.csv not found"; exit 2; }
+[[ ! -f "${dataset_dir}/test_${heldout}.csv" ]] && { echo "ERROR: ${dataset_dir}/test_${heldout}.csv not found"; exit 2; }
 
 # Model name overrides
 [[ "$llm_model" == "ARIMA"   ]] && model_name="ARIMA"
@@ -98,7 +98,7 @@ og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}
 # Paths
 root_path="${dataset_dir}"
 data_path="train.csv"
-data_path_test="heldout/heldout_${heldout}.csv"
+data_path_test="test_${heldout}.csv"
 boundary_file="${dataset_dir}/boundaries.json"
 
 mkdir -p "results/fitbit" "checkpoints"

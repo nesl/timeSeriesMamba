@@ -1,0 +1,106 @@
+[
+  {
+    "file": "series_omega0p150_alpha0p204.csv",
+    "omega_target": 0.15,
+    "alpha_used": 0.20423375481444983,
+    "omega_achieved": 0.12930032485277243,
+    "seed": 150000,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p250_alpha0p343.csv",
+    "omega_target": 0.25,
+    "alpha_used": 0.3425827252620641,
+    "omega_achieved": 0.2361357284279465,
+    "seed": 250000,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p350_alpha0p478.csv",
+    "omega_target": 0.35,
+    "alpha_used": 0.4776486160468435,
+    "omega_achieved": 0.2934782667031717,
+    "seed": 350000,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p450_alpha0p611.csv",
+    "omega_target": 0.44999999999999996,
+    "alpha_used": 0.6113698617704991,
+    "omega_achieved": 0.3552260664860041,
+    "seed": 449999,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p550_alpha0p744.csv",
+    "omega_target": 0.5499999999999999,
+    "alpha_used": 0.7437108676290626,
+    "omega_achieved": 0.4582730131282484,
+    "seed": 549999,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p650_alpha0p873.csv",
+    "omega_target": 0.6499999999999999,
+    "alpha_used": 0.8727634345601077,
+    "omega_achieved": 0.6374655813906441,
+    "seed": 649999,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p750_alpha0p990.csv",
+    "omega_target": 0.75,
+    "alpha_used": 0.9903787461649519,
+    "omega_achieved": 0.7395549673325746,
+    "seed": 750000,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  },
+  {
+    "file": "series_omega0p850_alpha1p000.csv",
+    "omega_target": 0.85,
+    "alpha_used": 1.0,
+    "omega_achieved": 0.7503287047968534,
+    "seed": 850000,
+    "n": 43830,
+    "periods_hours": [
+      24,
+      168
+    ],
+    "width_bins": 2.0
+  }
+]
