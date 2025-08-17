@@ -191,6 +191,7 @@ for pl in $pred_len; do
         fi
       fi
 
+      
       accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port \
         seed_evaluate_baseline.py "${COMMON_ARGS[@]}" "${EXTRA_ARGS[@]}"
 

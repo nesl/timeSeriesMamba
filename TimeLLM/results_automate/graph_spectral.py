@@ -2,60 +2,70 @@
 # -*- coding: utf-8 -*-
 
 """
-Build a tidy CSV from wandb-style text logs, then plot sMAPE vs spectral entropy.
-- Strictly parse tier/rand_init/seed/init_seed from filename pattern.
-- Average over BOTH seed and init_seed -> one point per (tier, rand_init).
-- Overlay all raw runs (faint triangles) behind mean±std markers.
-- Robust de-duplication: keep newest per (tier, rand_init, seed, init_seed, run_id/log_path).
+Aggregate sMAPE vs SE by "setting" (basename minus _rX_, _seedY, _initZ), split r0/r1.
+Two-stage aggregation:
+  1) Within each (domain, model, base_key, seed): average across init_seeds.
+  2) Across seeds: mean + 95% CI for (SE, sMAPE).
+
+Models (from filename only):
+  - contains "DLinear"  -> DLinear
+  - contains "LLAMA3.2" + "_r0_" -> Language Pretrained
+  - contains "LLAMA3.2" + "_r1_" -> Random Init
+  - else -> skip
+
+Domains are the top-level result directories you pass (each gets its own CSV/PNG),
+plus an ALL combined.
+
+Usage:
+  python smape_se_hier.py --log-dirs "../results/pems_eval,../results/fitbit_eval,../results/spectralUniTest,../results/uniSynthPSD_eval" --out-dir ./out
 """
 
 import os
 import re
 import sys
+import argparse
 from glob import glob
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
-# ---------------- config ----------------
-LOG_DIR = "../results/pems_eval/"
-OUT_CSV = "local_wandb_summary.csv"
-OUT_AGG = "local_wandb_summary_agg.csv"
-OUT_PNG = "sMAPE_vs_se.png"
+# optional: exact t critical; fallback to normal if SciPy isn't available
+try:
+    from scipy.stats import t as _t_dist  # type: ignore
+except Exception:  # noqa: BLE001
+    _t_dist = None
 
-# Colors/markers: triangles for all; rand_init=1 -> orange, 0 -> blue
-COLOR_MAP = {0: "tab:blue", 1: "tab:orange"}
+# ------------------- Defaults -------------------
+DEFAULT_LOG_DIRS = [
+    "../results/pems_eval/",
+    "../results/fitbit_eval/",
+    "../results/spectralUniTest/",
+    "../results/uniSynthPSD_eval/",
+]
+DEFAULT_OUT_DIR = "./out"
+DOMAIN_NAME_FIX = {"spectralUniTest": "CarbonCast"}
+
+# ------------------- Plot styling -------------------
 MARKER = "^"
+MODEL_COLOR = {
+    "Language Pretrained": "tab:blue",
+    "Random Init": "tab:orange",
+    "DLinear": "tab:green",
+}
+ALPHA_RAW = 0.28
 
-# numeric literal
+# ------------------- Parsing helpers -------------------
 NUM_PAT = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
+SMAPE_PATS = [re.compile(r"\bsmape(_loss)?\b"), re.compile(r"\bsym(_)?mape\b")]
+SE_PATS = [re.compile(r"\bse_ctx_mean\b"), re.compile(r"\bspectral_entropy(_ctx)?_mean\b"), re.compile(r"\bse_mean\b")]
 
-# strict filename parser
-FILE_RE = re.compile(
-    r"""
-    ^pems_testing_
-    (?P<tier>low|medium|high)      # tier
-    .*?                            # anything
-    _r(?P<rand>[01])_              # rand_init
-    .*?
-    _seed(?P<seed>\d+)             # seed
-    _init(?P<init>\d+)             # init_seed
-    \.txt$
-    """,
-    re.IGNORECASE | re.VERBOSE
-)
-
-# ---------------- helpers ----------------
 def norm_key(s: str) -> str:
-    """normalize keys to snake_case, lowercase: 'sMAPE loss' -> 'smape_loss'."""
-    s = s.strip()
-    s = re.sub(r"\s+", "_", s)
-    return s.lower()
+    return re.sub(r"\s+", "_", s.strip().lower())
 
 def parse_run_summary(lines: List[str]) -> Dict[str, Any]:
-    """Scan lines; after 'wandb: Run summary:' collect numeric metric lines."""
+    """Collect numeric metrics after 'wandb: Run summary:'."""
     metrics: Dict[str, Any] = {}
     in_block = False
     for line in lines:
@@ -74,162 +84,278 @@ def parse_run_summary(lines: List[str]) -> Dict[str, Any]:
             metrics[key] = val
     return metrics
 
-def parse_from_filename(path: str) -> Dict[str, Any]:
-    """Parse tier/rand_init/seed/init_seed strictly from basename."""
+def choose_metric(row: Dict[str, Any], patterns: List[re.Pattern]) -> Optional[float]:
+    for k, v in row.items():
+        if not isinstance(v, (int, float, np.floating)):
+            continue
+        if not np.isfinite(v):
+            continue
+        if any(pat.search(norm_key(k)) for pat in patterns):
+            return float(v)
+    return None
+
+def infer_model_and_r(path: str) -> Optional[str]:
+    u = os.path.basename(path).upper()
+    if "DLINEAR" in u:
+        return "DLinear"
+    if "LLAMA3.2" in u:
+        if "_R0_" in u:
+            return "Language Pretrained"
+        if "_R1_" in u:
+            return "Random Init"
+        return None  # ambiguous LLAMA3.2 w/o r0/r1 -> skip
+    return None
+
+def parse_seed_init(path: str) -> Dict[str, Optional[int]]:
     b = os.path.basename(path)
-    m = FILE_RE.match(b)
-    if not m:
-        return {}
+    seed = re.search(r"_seed(\d+)", b)
+    init = re.search(r"_init(\d+)", b)
     return {
-        "tier": m.group("tier").lower(),
-        "rand_init": int(m.group("rand")),
-        "seed": int(m.group("seed")),
-        "init_seed": int(m.group("init")),
+        "seed": int(seed.group(1)) if seed else None,
+        "init_seed": int(init.group(1)) if init else None,
     }
 
-def coerce_cols(df: pd.DataFrame) -> pd.DataFrame:
-    """Ensure expected metric columns exist and coerce numeric."""
-    expected = [
-        "se_ctx_mean", "smape_loss", "mase_loss", "mae_loss", "mse_loss",
-        "lle_ctx_mean", "omega_ctx_mean", "snr_ctx_proxy",
-        "season_ctx_mean", "var_ctx"
-    ]
-    for col in expected:
-        if col not in df.columns:
-            df[col] = np.nan
-    # coerce numeric metrics
-    for c in expected:
-        df[c] = pd.to_numeric(df[c], errors="coerce")
-    return df
+def make_base_key(path: str) -> str:
+    """
+    Base key = basename without: _r[01]_, _seed\d+, _init\d+
+    This groups runs that are identical except for r/seed/init.
+    """
+    b = os.path.basename(path)
+    b = re.sub(r"_r[01]_", "_", b)     # drop r flag
+    b = re.sub(r"_seed\d+", "", b)     # drop seed
+    b = re.sub(r"_init\d+", "", b)     # drop init
+    b = re.sub(r"\.txt$", "", b)
+    b = re.sub(r"__+", "_", b).strip("_")
+    return b
 
-# ---------------- main ----------------
-def main() -> None:
-    files = sorted(glob(os.path.join(LOG_DIR, "**", "*.txt"), recursive=True))
-    if not files:
-        print(f"No .txt logs found under: {LOG_DIR}", file=sys.stderr)
-        sys.exit(1)
+def domain_name_from_dir(dir_path: str) -> str:
+    base = os.path.basename(os.path.normpath(dir_path))
+    return DOMAIN_NAME_FIX.get(base, base)
 
+def tcrit95(n: int) -> float:
+    if n <= 1:
+        return 0.0
+    if _t_dist is not None:
+        return float(_t_dist.ppf(0.975, n - 1))
+    return 1.96  # normal approx
+
+def ci_halfwidth(std: float, n: int) -> float:
+    if not np.isfinite(std) or n <= 1:
+        return 0.0
+    return tcrit95(n) * (std / np.sqrt(n))
+
+# ------------------- Data loading -------------------
+def load_domain(dir_path: str) -> pd.DataFrame:
+    """Return raw runs: [log_path, model, base_key, seed, init_seed, se, smape]."""
+    files = sorted(glob(os.path.join(dir_path, "**", "*.txt"), recursive=True))
     rows = []
     for path in files:
         try:
+            model = infer_model_and_r(path)
+            if model is None:
+                continue  # ignore models we don't care about or ambiguous LLAMA
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 text = f.read()
             lines = text.splitlines()
             metrics = parse_run_summary(lines)
             if not metrics:
                 continue
+            smape = choose_metric(metrics, SMAPE_PATS)
+            se = choose_metric(metrics, SE_PATS)
+            if smape is None or se is None:
+                continue
+
+            seeds = parse_seed_init(path)
+            base_key = make_base_key(path)
             rows.append({
-                **metrics,
                 "log_path": path,
-                "mtime": os.path.getmtime(path)
+                "model": model,
+                "base_key": base_key,
+                "seed": seeds["seed"],
+                "init_seed": seeds["init_seed"],
+                "se": float(se),
+                "smape": float(smape),
+                "mtime": os.path.getmtime(path),
             })
         except Exception as e:
             print(f"[warn] failed to parse {path}: {e}", file=sys.stderr)
 
     if not rows:
-        print("Parsed zero summaries. Check your log patterns.", file=sys.stderr)
-        sys.exit(1)
+        return pd.DataFrame(columns=["log_path","model","base_key","seed","init_seed","se","smape"])
 
     df = pd.DataFrame(rows)
-    df = coerce_cols(df)
+    # keep newest duplicate log_path if any
+    df = df.sort_values("mtime").drop_duplicates(subset=["log_path"], keep="last")
+    df = df.drop(columns=["mtime"], errors="ignore")
+    return df
 
-    # attach filename metadata strictly
-    meta = df["log_path"].apply(parse_from_filename)
-    meta_df = pd.DataFrame(list(meta))
-    df = pd.concat([df, meta_df], axis=1)
+# ------------------- Aggregation -------------------
+def aggregate_hierarchical(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Two-stage:
+      A) seed-level means (avg across init_seed) per (model, base_key, seed)
+      B) across seeds: mean ± 95% CI per (model, base_key)
+    """
+    if df.empty:
+        return df
 
-    # require valid tier / rand_init
-    df = df[
-        df["tier"].isin(["low", "medium", "high"]) &
-        df["rand_init"].isin([0, 1])
-    ].copy()
-
-    # non-finite cleanup
-    df = df.replace([np.inf, -np.inf], np.nan)
-    df = df.dropna(subset=["smape_loss", "se_ctx_mean", "seed", "init_seed"], how="any")
-
-    # optional: capture run_id from URL if present in file text (best-effort)
-    # (we didn't keep full text; okay—use log_path as identity)
-    df["identity"] = df["log_path"]
-
-    # robust de-duplication: keep newest mtime per (tier, rand_init, seed, init_seed, identity)
-    df["dedup_key"] = list(zip(
-        df["tier"], df["rand_init"], df["seed"], df["init_seed"], df["identity"]
-    ))
-    df = df.sort_values("mtime").drop_duplicates(subset=["dedup_key"], keep="last")
-    df = df.drop_duplicates(subset=["log_path"])  # belt + suspenders
-
-    # save tidy
-    df.to_csv(OUT_CSV, index=False)
-    print(f"Saved {OUT_CSV} with {len(df)} rows.")
-
-    # aggregate across BOTH seed and init_seed → one row per (tier, rand_init)
-    agg = df.groupby(["tier", "rand_init"], as_index=False).agg(
-        smape_mean=("smape_loss", "mean"),
-        smape_std=("smape_loss", "std"),
-        se_mean=("se_ctx_mean", "mean"),
-        se_std=("se_ctx_mean", "std"),
-        n=("smape_loss", "count"),
+    # A) per-seed means (handle missing seed by treating each as its own)
+    df_seed = df.copy()
+    df_seed["seed_filled"] = df_seed["seed"].fillna(-1).astype(int)
+    seed_means = df_seed.groupby(["model","base_key","seed_filled"], as_index=False).agg(
+        se_mean_seed=("se","mean"),
+        smape_mean_seed=("smape","mean"),
+        n_inits=("se","count"),
     )
-    for c in ["smape_std", "se_std"]:
-        agg[c] = agg[c].fillna(0.0)
 
-    # sanity: ensure at most one row per (tier, rand_init)
-    dups = agg.groupby(["tier", "rand_init"]).size()
-    bad = dups[dups > 1]
-    if not bad.empty:
-        print("[WARN] duplicate groups in agg; collapsing again.\n", bad)
-        agg = agg.groupby(["tier", "rand_init"], as_index=False).agg({
-            "smape_mean": "mean",
-            "smape_std": "mean",
-            "se_mean": "mean",
-            "se_std": "mean",
-            "n": "sum"
-        })
+    # B) across seeds
+    agg = seed_means.groupby(["model","base_key"], as_index=False).agg(
+        se_mean=("se_mean_seed","mean"),
+        se_std=("se_mean_seed","std"),
+        smape_mean=("smape_mean_seed","mean"),
+        smape_std=("smape_mean_seed","std"),
+        n_seeds=("se_mean_seed","count"),
+        n_runs_total=("n_inits","sum"),
+    )
+    # CI halfwidths across seeds
+    agg["se_ci"] = [ci_halfwidth(s, int(n)) for s, n in zip(agg["se_std"], agg["n_seeds"])]
+    agg["smape_ci"] = [ci_halfwidth(s, int(n)) for s, n in zip(agg["smape_std"], agg["n_seeds"])]
+    agg[["se_std","smape_std","se_ci","smape_ci"]] = agg[["se_std","smape_std","se_ci","smape_ci"]].fillna(0.0)
+    return agg, seed_means
 
-    # stable order
-    tier_order = {"low": 0, "medium": 1, "high": 2}
-    agg["__ord"] = agg["tier"].map(tier_order)
-    agg = agg.sort_values(["__ord", "rand_init"]).drop(columns="__ord")
+# ------------------- Plotting -------------------
+def plot_domain(df_raw: pd.DataFrame, agg: pd.DataFrame, title: str, out_png: str) -> None:
+    plt.figure(figsize=(9, 6))
 
-    agg.to_csv(OUT_AGG, index=False)
-    print(f"Saved {OUT_AGG} with {len(agg)} rows.")
+    # raw points (semi-transparent)
+    if not df_raw.empty:
+        for model, g in df_raw.groupby("model"):
+            plt.scatter(
+                g["se"], g["smape"],
+                marker=MARKER, s=32, alpha=ALPHA_RAW, edgecolors="none",
+                c=MODEL_COLOR.get(model, "tab:gray"), label="_nolegend_"
+            )
 
-    # ---------------- plot ----------------
-    plt.figure(figsize=(7, 5))
-
-    # raw runs (faint)
-    for ri, g in df.groupby("rand_init"):
-        if g.empty:
-            continue
-        plt.scatter(
-            g["se_ctx_mean"], g["smape_loss"],
-            marker=MARKER, s=35, alpha=0.25, edgecolors="none",
-            c=COLOR_MAP.get(int(ri), "tab:blue"),
-            label="_nolegend_"
-        )
-
-    # means ± std (exactly two points per tier if both r0/r1 exist)
+    # per-setting means ± 95% CI (one marker per model×base_key)
+    used = set()
     for _, row in agg.iterrows():
-        tier, ri = row["tier"], int(row["rand_init"])
-        color = COLOR_MAP.get(ri, "tab:blue")
-        label = f"{tier} | rand_init={ri} (n={int(row['n'])})"
+        model = row["model"]
+        color = MODEL_COLOR.get(model, "tab:gray")
+        label = f"{model}" if model not in used else "_nolegend_"
+        used.add(model)
+        caption = f"{model} • {row['base_key']} (seeds={int(row['n_seeds'])}, runs={int(row['n_runs_total'])})"
+        # draw errorbar
         plt.errorbar(
             row["se_mean"], row["smape_mean"],
-            xerr=row["se_std"], yerr=row["smape_std"],
-            fmt=MARKER, linestyle="none", capsize=3, alpha=0.95, markersize=8,
-            markeredgewidth=0.9, markeredgecolor="black", color=color, label=label
+            xerr=row["se_ci"], yerr=row["smape_ci"],
+            fmt=MARKER, linestyle="none", capsize=3, alpha=0.95, markersize=9,
+            markeredgewidth=1.0, markeredgecolor="black", color=color, label=label,
         )
+        # optional annotate lightly (comment out if too busy)
+        # plt.annotate(caption, (row["se_mean"], row["smape_mean"]), fontsize=7, alpha=0.7)
 
-    plt.xlabel("se_ctx_mean")
-    plt.ylabel("smape_loss")
-    plt.title("PEMS: sMAPE vs SE (mean ± std over seeds & init_seeds)")
-    plt.legend(title="Condition", fontsize=8)
+    plt.xlabel("SE")
+    plt.ylabel("sMAPE")
+    plt.title(title)
+    if used:
+        plt.legend(title="Model", fontsize=9)
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
-    plt.savefig(OUT_PNG, dpi=300)
+    plt.savefig(out_png, dpi=300)
     plt.close()
-    print(f"Saved {OUT_PNG}")
+    print(f"Saved {out_png}")
+
+# ------------------- Main -------------------
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--log-dirs", type=str, default=",".join(DEFAULT_LOG_DIRS),
+                    help="Comma-separated domain directories (recursive scan for *.txt).")
+    ap.add_argument("--out-dir", type=str, default=DEFAULT_OUT_DIR,
+                    help="Directory to write CSVs/PNGs.")
+    args = ap.parse_args()
+
+    log_dirs = [d.strip() for d in args.log_dirs.split(",") if d.strip()]
+    out_dir = args.out_dir
+    os.makedirs(out_dir, exist_ok=True)
+
+    all_raw_frames, all_agg_frames = [], []
+
+    for d in log_dirs:
+        domain = domain_name_from_dir(d)
+        df_raw = load_domain(d)
+        raw_csv = os.path.join(out_dir, f"{domain}_raw.csv")
+        df_raw.to_csv(raw_csv, index=False)
+        print(f"Saved {raw_csv} with {len(df_raw)} rows.")
+
+        agg, seed_means = aggregate_hierarchical(df_raw)
+        agg_csv = os.path.join(out_dir, f"{domain}_agg_by_setting.csv")
+        agg.to_csv(agg_csv, index=False)
+        seed_csv = os.path.join(out_dir, f"{domain}_per_seed_means.csv")
+        seed_means.to_csv(seed_csv, index=False)
+        print(f"Saved {agg_csv} with {len(agg)} rows. Also {seed_csv}.")
+
+        png = os.path.join(out_dir, f"{domain}_sMAPE_vs_SE_mean_CI_by_setting.png")
+        plot_domain(df_raw, agg, f"sMAPE vs SE — {domain}", png)
+
+        if not df_raw.empty:
+            df_tmp = df_raw.copy()
+            df_tmp["domain"] = domain
+            all_raw_frames.append(df_tmp)
+        if not agg.empty:
+            agg_tmp = agg.copy()
+            agg_tmp["domain"] = domain
+            all_agg_frames.append(agg_tmp)
+
+    # Combined (ALL domains)
+    all_raw = pd.concat(all_raw_frames, ignore_index=True) if all_raw_frames else pd.DataFrame(
+        columns=["log_path","model","base_key","seed","init_seed","se","smape","domain"]
+    )
+    all_agg = pd.concat(all_agg_frames, ignore_index=True) if all_agg_frames else pd.DataFrame(
+        columns=["model","base_key","se_mean","se_std","smape_mean","smape_std","n_seeds","n_runs_total","se_ci","smape_ci","domain"]
+    )
+
+    all_raw_csv = os.path.join(out_dir, "ALL_raw.csv")
+    all_raw.to_csv(all_raw_csv, index=False)
+    print(f"Saved {all_raw_csv} with {len(all_raw)} rows.")
+
+    all_agg_csv = os.path.join(out_dir, "ALL_agg_by_setting.csv")
+    all_agg.to_csv(all_agg_csv, index=False)
+    print(f"Saved {all_agg_csv} with {len(all_agg)} rows.")
+
+    # combined plot: all settings across domains
+    if not all_agg.empty:
+        plt.figure(figsize=(9.5, 6.5))
+        # raw points faint (colored by model)
+        if not all_raw.empty:
+            for model, g in all_raw.groupby("model"):
+                plt.scatter(
+                    g["se"], g["smape"],
+                    marker=MARKER, s=26, alpha=ALPHA_RAW, edgecolors="none",
+                    c=MODEL_COLOR.get(model, "tab:gray"), label="_nolegend_"
+                )
+        used = set()
+        for _, row in all_agg.iterrows():
+            model = row["model"]
+            color = MODEL_COLOR.get(model, "tab:gray")
+            label = f"{model}" if model not in used else "_nolegend_"
+            used.add(model)
+            plt.errorbar(
+                row["se_mean"], row["smape_mean"],
+                xerr=row["se_ci"], yerr=row["smape_ci"],
+                fmt=MARKER, linestyle="none", capsize=3, alpha=0.95, markersize=9,
+                markeredgewidth=1.0, markeredgecolor="black", color=color, label=label
+            )
+        plt.xlabel("SE")
+        plt.ylabel("sMAPE")
+        plt.title("sMAPE vs SE — ALL Domains (per-setting means ± 95% CI)")
+        if used:
+            plt.legend(title="Model", fontsize=9)
+        plt.grid(True, linestyle="--", alpha=0.3)
+        plt.tight_layout()
+        out_png_all = os.path.join(out_dir, "ALL_sMAPE_vs_SE_mean_CI_by_setting.png")
+        plt.savefig(out_png_all, dpi=300)
+        plt.close()
+        print(f"Saved {out_png_all}")
 
 if __name__ == "__main__":
     main()

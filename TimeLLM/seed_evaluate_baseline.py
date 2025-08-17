@@ -48,63 +48,101 @@ def _forward_model(args, model, batch_x, batch_x_mark, batch_y, batch_y_mark):
     return outputs, gt
 
 def train_quick_baseline(args, accelerator, model, train_loader, val_loader):
-    """Fast supervised fit: few epochs + patience on MSE."""
+    """Fast supervised fit for DLinear in bf16."""
     criterion = nn.MSELoss()
-    opt = optim.Adam(model.parameters(), lr=args.baseline_lr, weight_decay=args.baseline_weight_decay)
-    scheduler = lr_scheduler.ReduceLROnPlateau(opt, mode='min', factor=0.5, patience=max(1, args.baseline_patience//2), verbose=False)
+    opt = optim.Adam(model.parameters(),
+                     lr=args.baseline_lr,
+                     weight_decay=getattr(args, "baseline_weight_decay", 0.0))
 
-    train_loader, val_loader, model, opt = accelerator.prepare(train_loader, val_loader, model, opt)
+    # IMPORTANT: let Accelerate/DS control dtype casting
+    train_loader, val_loader, model, opt = accelerator.prepare(
+        train_loader, val_loader, model, opt
+    )
 
-    best_val = float('inf')
-    best_state = None
-    patience_left = args.baseline_patience
+    use_bf16 = (getattr(accelerator, "mixed_precision", None) == "bf16")
+    best_val = float('inf'); best_state = None
+    patience_left = int(getattr(args, "baseline_patience", 2))
+    epochs = int(getattr(args, "baseline_epochs", 5))
 
-    for epoch in range(args.baseline_epochs):
+    for epoch in range(epochs):
         model.train()
         epoch_loss = 0.0
+
         for batch_x, batch_y, batch_x_mark, batch_y_mark in train_loader:
-            batch_x = batch_x.float(); batch_y = batch_y.float()
-            batch_x_mark = batch_x_mark.float(); batch_y_mark = batch_y_mark.float()
+            # move to device; DO NOT force dtype here
+            batch_x      = batch_x.to(accelerator.device, non_blocking=True)
+            batch_y      = batch_y.to(accelerator.device, non_blocking=True)
+            batch_x_mark = batch_x_mark.to(accelerator.device, non_blocking=True)
+            batch_y_mark = batch_y_mark.to(accelerator.device, non_blocking=True)
 
             opt.zero_grad(set_to_none=True)
-            outputs, gt = _forward_model(args, model, batch_x, batch_x_mark, batch_y, batch_y_mark)
-            loss = criterion(outputs, gt)
+
+            # bf16 autocast for forward+loss
+            with accelerator.autocast():
+                outputs, gt = _forward_model(args, model, batch_x, batch_x_mark, batch_y, batch_y_mark)
+                loss = criterion(outputs, gt)
+
+            # make loss bf16 for DS when requested
+            if use_bf16:
+                loss = loss.to(torch.bfloat16)
+
             accelerator.backward(loss)
             opt.step()
-            epoch_loss += loss.item()
 
-        # validation
+            epoch_loss += float(loss.detach().to(torch.float32).item())
+
+        # ---- validation (no backward) ----
         model.eval()
         val_losses = []
         with torch.no_grad():
             for batch_x, batch_y, batch_x_mark, batch_y_mark in val_loader:
-                batch_x = batch_x.float(); batch_y = batch_y.float()
-                batch_x_mark = batch_x_mark.float(); batch_y_mark = batch_y_mark.float()
-                outputs, gt = _forward_model(args, model, batch_x, batch_x_mark, batch_y, batch_y_mark)
-                val_losses.append(criterion(outputs, gt).item())
+                batch_x      = batch_x.to(accelerator.device, non_blocking=True)
+                batch_y      = batch_y.to(accelerator.device, non_blocking=True)
+                batch_x_mark = batch_x_mark.to(accelerator.device, non_blocking=True)
+                batch_y_mark = batch_y_mark.to(accelerator.device, non_blocking=True)
+
+                with accelerator.autocast():
+                    outputs, gt = _forward_model(args, model, batch_x, batch_x_mark, batch_y, batch_y_mark)
+                    vloss = criterion(outputs, gt)
+
+                val_losses.append(float(vloss.detach().to(torch.float32).item()))
 
         val_mse = float(np.mean(val_losses)) if val_losses else float('inf')
-        scheduler.step(val_mse)
 
-        if accelerator.is_local_main_process and args.use_wandb:
-            wandb.log({"baseline_train_mse": epoch_loss / max(1, len(train_loader)),
-                       "baseline_val_mse": val_mse,
-                       "baseline_epoch": epoch})
+        if accelerator.is_local_main_process and getattr(args, "use_wandb", 0):
+            wandb.log({
+                "baseline_train_mse": epoch_loss / max(1, len(train_loader)),
+                "baseline_val_mse": val_mse,
+                "baseline_epoch": epoch,
+            })
 
-        improved = val_mse < best_val - 1e-8
-        if improved:
+        # Early stopping
+        if val_mse < best_val - 1e-8:
             best_val = val_mse
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
-            patience_left = args.baseline_patience
+            patience_left = int(getattr(args, "baseline_patience", 2))
         else:
             patience_left -= 1
             if patience_left <= 0:
                 break
 
-    # restore best weights if we have them
     if best_state is not None:
         model.load_state_dict(best_state)
+
     return model
+
+
+class TorchRidge(nn.Module):
+    def __init__(self, in_dim, out_dim, alpha=1.0):
+        super().__init__()
+        self.linear = nn.Linear(in_dim, out_dim)
+        self.alpha = alpha
+    def forward(self, x):
+        return self.linear(x)
+    def ridge_loss(self, pred, target):
+        mse = F.mse_loss(pred, target)
+        l2 = self.alpha * torch.sum(self.linear.weight ** 2)
+        return mse + l2
 
 class TorchRidge(nn.Module):
     def __init__(self, in_dim, out_dim, alpha=1.0):
@@ -119,43 +157,54 @@ class TorchRidge(nn.Module):
         return mse + l2
 
 def fit_ridge_on_windows(args, accelerator, train_loader, val_loader):
-    """Flatten [B,L,D] -> [B,L*D], target [B,H,D] -> [B,H*D]."""
     in_dim  = args.seq_len * args.enc_in
     out_dim = args.pred_len * args.dec_in
-    model = TorchRidge(in_dim, out_dim, alpha=1.0).to(accelerator.device)
+    model = TorchRidge(in_dim, out_dim, alpha=1.0)
 
-    train_loader, val_loader, model = accelerator.prepare(train_loader, val_loader, model)
-    opt = torch.optim.Adam(model.parameters(), lr=args.baseline_lr, weight_decay=args.baseline_weight_decay)
+    opt = torch.optim.Adam(model.parameters(),
+                           lr=args.baseline_lr,
+                           weight_decay=getattr(args, "baseline_weight_decay", 0.0))
+    # Prepare after creating model/opt
+    train_loader, val_loader, model, opt = accelerator.prepare(train_loader, val_loader, model, opt)
 
-    best_val = float('inf')
-    best_state = None
-    patience_left = args.baseline_patience
+    use_bf16 = (getattr(accelerator, "mixed_precision", None) == "bf16")
+    best_val = float('inf'); best_state = None
+    patience_left = int(getattr(args, "baseline_patience", 2))
+    epochs = int(getattr(args, "baseline_epochs", 5))
 
-    for epoch in range(args.baseline_epochs):
+    for epoch in range(epochs):
         model.train()
         tr_losses = []
         for batch_x, batch_y, _, _ in train_loader:
-            X = batch_x.view(batch_x.size(0), -1)
-            Y = batch_y[:, -args.pred_len:, :].reshape(batch_y.size(0), -1)
+            X = batch_x.view(batch_x.size(0), -1).to(accelerator.device, non_blocking=True)
+            Y = batch_y[:, -args.pred_len:, :].reshape(batch_y.size(0), -1).to(accelerator.device, non_blocking=True)
+
             opt.zero_grad(set_to_none=True)
-            pred = model(X)
-            loss = model.ridge_loss(pred, Y)
+            with accelerator.autocast():
+                pred = model(X)
+                loss = model.ridge_loss(pred, Y)
+
+            if use_bf16:
+                loss = loss.to(torch.bfloat16)
+
             accelerator.backward(loss)
             opt.step()
-            tr_losses.append(loss.item())
+            tr_losses.append(float(loss.detach().to(torch.float32).item()))
 
         # val
         model.eval()
         val_losses = []
         with torch.no_grad():
             for batch_x, batch_y, _, _ in val_loader:
-                X = batch_x.view(batch_x.size(0), -1)
-                Y = batch_y[:, -args.pred_len:, :].reshape(batch_y.size(0), -1)
-                pred = model(X)
-                val_losses.append(F.mse_loss(pred, Y).item())
+                X = batch_x.view(batch_x.size(0), -1).to(accelerator.device, non_blocking=True)
+                Y = batch_y[:, -args.pred_len:, :].reshape(batch_y.size(0), -1).to(accelerator.device, non_blocking=True)
+                with accelerator.autocast():
+                    pred = model(X)
+                    vloss = F.mse_loss(pred, Y)
+                val_losses.append(float(vloss.detach().to(torch.float32).item()))
 
         val_mse = float(np.mean(val_losses)) if val_losses else float('inf')
-        if accelerator.is_local_main_process and args.use_wandb:
+        if accelerator.is_local_main_process and getattr(args, "use_wandb", 0):
             wandb.log({"ridge_train_loss": np.mean(tr_losses) if tr_losses else np.nan,
                        "ridge_val_mse": val_mse,
                        "ridge_epoch": epoch})
@@ -163,7 +212,7 @@ def fit_ridge_on_windows(args, accelerator, train_loader, val_loader):
         if val_mse < best_val - 1e-8:
             best_val = val_mse
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
-            patience_left = args.baseline_patience
+            patience_left = int(getattr(args, "baseline_patience", 2))
         else:
             patience_left -= 1
             if patience_left <= 0:

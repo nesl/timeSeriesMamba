@@ -1,0 +1,21 @@
+model,base_key,se_mean,se_std,smape_mean,smape_std,n_seeds,n_runs_total,se_ci,smape_ci
+Language Pretrained,spectralUniTest_CISO_solar_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.30375,0.0,0.7932800000000001,0.11183497172172935,3,3,0.0,0.2778134707569275
+Language Pretrained,spectralUniTest_FR_wind_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.45675,0.0,1.11338,0.010933265751823707,3,3,0.0,0.02715973776771501
+Language Pretrained,spectralUniTest_PJM_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.46377,0.0,0.9064200000000001,0.018050836545711702,3,3,0.0,0.04484076379352986
+Language Pretrained,spectralUniTest_PJM_oil_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.66366,0.0,0.9576433333333334,0.049194317083717486,3,3,0.0,0.12220545827606198
+Language Pretrained,spectralUniTest_SWPP_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.45953,0.0,1.0131433333333333,0.011078846209481113,3,3,0.0,0.027521379672689247
+Random Init,spectralUniTest_CISO_solar_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.30375,0.0,0.7050866666666668,0.12374726273066948,3,3,0.0,0.30740524208669295
+Random Init,spectralUniTest_CISO_solar_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed12,0.30375,0.0,0.73016,0.0792983934263488,3,3,0.0,0.1969881295990158
+Random Init,spectralUniTest_CISO_solar_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed13,0.30375,0.0,0.7993366666666667,0.10279062035678808,3,3,0.0,0.2553460564521114
+Random Init,spectralUniTest_FR_wind_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.45675,0.0,1.10806,0.017272298631045138,3,3,0.0,0.04290676839960646
+Random Init,spectralUniTest_FR_wind_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed12,0.45675,0.0,1.12731,0.0319144653723041,3,3,0.0,0.07927992698467219
+Random Init,spectralUniTest_FR_wind_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed13,0.45675,0.0,1.1407933333333333,0.017969644774823254,3,3,0.0,0.04463907225357448
+Random Init,spectralUniTest_PJM_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.46377,0.0,0.8963199999999999,0.018580653917448668,3,3,0.0,0.046156903107051596
+Random Init,spectralUniTest_PJM_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed12,0.46377,0.0,0.88834,0.005260769905631687,3,3,0.0,0.013068476915912374
+Random Init,spectralUniTest_PJM_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed13,0.46377,0.0,0.8929300000000001,0.0073815513274649155,3,3,0.0,0.01833679002446591
+Random Init,spectralUniTest_PJM_oil_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.66366,0.0,1.0239033333333334,0.036500844282472834,3,3,0.0,0.09067312379622719
+Random Init,spectralUniTest_PJM_oil_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed12,0.66366,0.0,1.0495966666666667,0.04100692908928116,3,3,0.0,0.10186685899758592
+Random Init,spectralUniTest_PJM_oil_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed13,0.66366,0.0,1.087,0.03986842861212373,3,3,0.0,0.09903866702732704
+Random Init,spectralUniTest_SWPP_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed11,0.45953,0.0,0.9971566666666667,0.020858152682664298,3,3,0.0,0.051814523678401316
+Random Init,spectralUniTest_SWPP_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed12,0.45953,0.0,1.0022233333333335,0.016051496295776745,3,3,0.0,0.03987412727985932
+Random Init,spectralUniTest_SWPP_nat_gas_heldout_l0_d32_e10_mLLAMA3.2_n1b_f1_t100_c100_seq512_pred96_initseed13,0.45953,0.0,1.0168433333333333,0.009244335202346,3,3,0.0,0.02296420169707245
