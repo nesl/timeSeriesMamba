@@ -1,8 +1,9 @@
-#!/bin/bash
-# run_pems_eval.sh — evaluate heldout (low|medium|high) on PeMS spectral-entropy outputs
+#!/usr/bin/env bash
+# run_pems_eval.sh — TimeLLM eval vs DLinear train, on PeMS spectral-entropy outputs
 
 set -euo pipefail
 
+# ---------------- defaults ----------------
 model_name="TimeLLM"
 
 train_epochs=10
@@ -13,16 +14,17 @@ num_params='2.8b'
 d_model=32
 d_ff=32
 num_process=1
+batch_size=16
 
-# Defaults
-master_port_base=01180
+# Master port base (string concat with gpu_id)
+master_port_base=1180
 downsampling_factor=1
 
 # Required
 heldout=""
-source_type="PEMS"   # keep to match your training tag (e.g., PEMS)
+source_type="PEMS"   # train/eval tag lineage
 
-# Default seed ranges
+# Seeds
 seed_ranges="1-3"
 init_seed_ranges="11-13"
 
@@ -60,8 +62,8 @@ if [ "$llm_model" == "ARIMA" ]; then
   model_name="ARIMA"
 elif [ "$llm_model" == "DLinear" ]; then
   model_name="DLinear"
-elif [ "$llm_model" == "Ridge" ]; then
-  model_name="Ridge"
+else
+  model_name="TimeLLM"
 fi
 
 # Master port
@@ -70,7 +72,7 @@ if [ -z "${master_port:-}" ]; then
 fi
 export CUDA_VISIBLE_DEVICES=$((gpu_id % 4))
 
-echo "Using model: $llm_model"
+echo "Using model: $llm_model  (dispatch: $model_name)"
 echo "Heldout: $heldout"
 echo "Source type: $source_type"
 echo "Num params: $num_params"
@@ -98,19 +100,34 @@ pred_len=$((96 / downsampling_factor))
 # Paths
 ROOT="dataset/traffic/outputs_pems_hourly"
 TRAIN_CSV="${ROOT}/train_univariate.csv"
+BOUNDARY_JSON="${ROOT}/train_univariate_boundary.json"
 TEST_CSV="${ROOT}/test_${heldout}.csv"
 
-for f in "$TRAIN_CSV" "$TEST_CSV"; do
-  if [ ! -f "$f" ]; then echo "Missing $f"; exit 1; fi
-done
+# Existence checks (TRAIN/BOUNDARY needed only for DLinear; TEST always needed)
+if [ "$model_name,${model_name}" == "DLinear,DLinear" ]; then
+  for f in "$TRAIN_CSV" "$BOUNDARY_JSON" "$TEST_CSV"; do
+    if [ ! -f "$f" ]; then echo "Missing $f"; exit 1; fi
+  done
+else
+  if [ ! -f "$TEST_CSV" ]; then echo "Missing $TEST_CSV"; exit 1; fi
+fi
 
-# Univariate files from our pipeline
+# Channel inference (for DLinear training)
 enc_in=1; dec_in=1; c_out=1
+if [ "$model_name" == "DLinear" ]; then
+  # Count non-index columns assuming first column is time/index
+  # NF-1: exclude index; this matches your earlier script
+  col_count=$(head -n 1 "$TRAIN_CSV" | awk -F',' '{print NF-1}')
+  if ! [[ "$col_count" =~ ^[0-9]+$ ]] || [ "$col_count" -le 0 ]; then
+    echo "Failed to infer channels from $TRAIN_CSV header"; exit 1
+  fi
+  enc_in=$col_count; dec_in=$col_count; c_out=$col_count
+fi
 
 # Base tag
 og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t100_c100_r${rand_init}"
-if [ "$model_name" == "DLinear" ] || [ "$model_name" == "Ridge" ]; then
-  og_tag="${model_name}_d${d_model}_e${train_epochs}_f${downsampling_factor}_r${rand_init}"
+if [ "$model_name" == "DLinear" ]; then
+  og_tag="DLinear_d${d_model}_e${train_epochs}_f${downsampling_factor}_t100_c100_r${rand_init}"
 fi
 
 # Parse "a-b[,c-d,...]" into discrete seeds
@@ -120,7 +137,7 @@ parse_seed_ranges() {
   IFS=',' read -ra range_array <<< "$ranges"
   for range in "${range_array[@]}"; do
     if [[ $range =~ ^([0-9]+)-([0-9]+)$ ]]; then
-      start=${BASH_REMATCH[1]}; end=${BASH_REMATCH[2]}
+      local start=${BASH_REMATCH[1]}; local end=${BASH_REMATCH[2]}
       for ((i=start; i<=end; i++)); do seed_list+=("$i"); done
     else
       echo "Invalid range format: $range. Expected start-end."; exit 1
@@ -132,70 +149,124 @@ parse_seed_ranges() {
 seed_array=($(parse_seed_ranges "$seed_ranges"))
 init_seed_array=($(parse_seed_ranges "$init_seed_ranges"))
 
-# Results / checkpoints dirs
-mkdir -p results/pems_eval checkpoints
+mkdir -p results/pems_eval results/pems checkpoints
 
 for pl in $pred_len; do
   for seed in "${seed_array[@]}"; do
     for init_seed in "${init_seed_array[@]}"; do
-      # checkpoint tag (for non-classical models)
+
+      # checkpoint tag for eval models
       checkpoint_tag="pems_${source_type}_${heldout}_${og_tag}_seq${seq_len}_pred${pl}_seed${seed}_init${init_seed}"
       CKPT_PATH="checkpoints/${checkpoint_tag}/checkpoint"
 
-      tag="pems_testing_${heldout}_${og_tag}_seq${seq_len}_pred${pl}_seed${seed}_init${init_seed}"
-      log_file="results/pems_eval/${tag}.txt"
-      mkdir -p "$(dirname "$log_file")"
-      echo "Logging to $log_file"
-      exec > "$log_file" 2>&1
-
-      # Common args
-      COMMON_ARGS=(
-        --task_name long_term_forecast
-        --model_id spectralTraffic_${heldout}_heldout_${seq_len}_${pl}
-        --model "$model_name"
-        --data Traffic
-        --root_path "$ROOT"
-        --data_path "$(basename "$TRAIN_CSV")"
-        --data_path_test "$(basename "$TEST_CSV")"
-        --features M
-        --seq_len $seq_len
-        --label_len 48
-        --pred_len $pl
-        --factor 3
-        --enc_in $enc_in
-        --dec_in $dec_in
-        --c_out $c_out
-        --d_model $d_model
-        --d_ff 32
-        --llm_layers $llm_layers
-        --llm_model "${llm_model:-NA}"
-        --llm_dim $llm_dim
-        --num_params $num_params
-        --rand_init $rand_init
-        --seed $seed
-        --init_seed $init_seed
-        --use_wandb 1
-        --visualize
-      )
-
-      # Classical baselines: train quickly, never use checkpoints
-      EXTRA_ARGS=()
-      if [ "$model_name" == "DLinear" ] || [ "$model_name" == "Ridge" ]; then
-        EXTRA_ARGS+=( --train_baseline 1 )
+      # per-run labels + logs
+      if [ "$model_name" == "DLinear" ]; then
+        tag="pems_${source_type}_${heldout}_${og_tag}_seq${seq_len}_pred${pl}_seed${seed}_init${init_seed}"
+        log_file="results/pems_eval/${tag}.txt"
       else
-        # Non-classical: pass checkpoint only if it exists
-        if [ -f "$CKPT_PATH" ]; then
-          EXTRA_ARGS+=( --checkpoint_path "$CKPT_PATH" )
-        else
-          echo "[INFO] No checkpoint at $CKPT_PATH; evaluating without loading weights."
+        tag="pems_testing_${heldout}_${og_tag}_seq${seq_len}_pred${pl}_seed${seed}_init${init_seed}"
+        log_file="results/pems_eval/${tag}.txt"
+      fi
+      mkdir -p "$(dirname "$log_file")"
+
+      # ---- dispatch ----
+      if [ "$model_name" == "DLinear" ]; then
+        # Quick train DLinear on TRAIN_CSV then (internally) eval on TEST_CSV via seed_process.py
+        {
+          echo "[Run] DLinear train+eval"
+          echo "Logging to $log_file"
+
+          accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_process.py \
+            --task_name long_term_forecast \
+            --is_training 1 \
+            --root_path "$ROOT" \
+            --data_path "$(basename "$TRAIN_CSV")" \
+            --data_path_test "$(basename "$TEST_CSV")" \
+            --model_id "spectralTraffic_${heldout}_heldout" \
+            --model "$model_name" \
+            --data Traffic \
+            --data_pretrain Traffic \
+            --pretrain 1 \
+            --features M \
+            --seq_len $seq_len \
+            --label_len 48 \
+            --factor 3 \
+            --enc_in $enc_in \
+            --dec_in $dec_in \
+            --c_out $c_out \
+            --pred_len $pl \
+            --dsampfactor $downsampling_factor \
+            --percent 100 \
+            --col_percent 100 \
+            --des 'Exp' \
+            --itr 1 \
+            --d_model $d_model \
+            --d_ff $d_ff \
+            --batch_size $batch_size \
+            --learning_rate $learning_rate \
+            --llm_layers $llm_layers \
+            --train_epochs $train_epochs \
+            --model_comment "checkpoints/${tag}" \
+            --llm_model $llm_model \
+            --llm_dim $llm_dim \
+            --num_params $num_params \
+            --boundary_file "$BOUNDARY_JSON" \
+            --rand_init $rand_init \
+            --seed $seed \
+            --init_seed $init_seed \
+            --save_checkpoints 1 \
+            --source $source_type
+        } > "$log_file" 2>&1
+
+        echo "DLinear ${heldout} (${source_type}) seed $seed init_seed $init_seed -> checkpoints/${tag}"
+
+      else
+        # Eval-only for TimeLLM (and others) via seed_evaluate.py, requires checkpoint
+        if [ ! -f "$CKPT_PATH" ]; then
+          echo "[ERROR] Missing checkpoint for eval: $CKPT_PATH"
+          exit 1
         fi
+
+        {
+          echo "[Run] Eval-only ($model_name) with checkpoint $CKPT_PATH"
+          echo "Logging to $log_file"
+
+          accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port seed_evaluate.py \
+            --task_name long_term_forecast \
+            --model_id "spectralTraffic_${heldout}_heldout_${seq_len}_${pl}" \
+            --model "$model_name" \
+            --data Traffic \
+            --root_path "$ROOT" \
+            --data_path_test "$(basename "$TEST_CSV")" \
+            --features M \
+            --seq_len $seq_len \
+            --label_len 48 \
+            --pred_len $pl \
+            --factor 3 \
+            --enc_in 1 \
+            --dec_in 1 \
+            --c_out 1 \
+            --d_model $d_model \
+            --d_ff 32 \
+            --llm_layers $llm_layers \
+            --llm_model "${llm_model:-NA}" \
+            --llm_dim $llm_dim \
+            --num_params $num_params \
+            --rand_init $rand_init \
+            --checkpoint_path "$CKPT_PATH" \
+            --seed $seed \
+            --init_seed $init_seed \
+            --use_wandb 1 \
+            --visualize \
+            --source $source_type \
+            --heldout $heldout
+        } > "$log_file" 2>&1
+
+        echo "Eval ${model_name} ${heldout} seed $seed init_seed $init_seed completed"
+
       fi
 
-      
-      accelerate launch --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port \
-        seed_evaluate_baseline.py "${COMMON_ARGS[@]}" "${EXTRA_ARGS[@]}"
-
-      echo "Evaluation for ${heldout} with init_seed $init_seed and seed $seed completed"
+      # If weights are fixed and not randomly re-initialized, break inner loop
       if [[ "$rand_init" -eq 0 ]]; then
         break
       fi
