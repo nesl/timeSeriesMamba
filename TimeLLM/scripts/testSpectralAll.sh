@@ -368,7 +368,8 @@ run_carboncast() {
 
       if [[ "$stage" != "train" ]]; then
         if [[ "$model_name" == "DLinear" ]]; then
-          local ckpt_path="${ckpt_dir}/checkpoint"
+          local base_ckpt="checkpoints/carbon_TRAINCISO_solar_dlin_e10_f1_r0_seq${seq_len}_pred${pred_len}_s${seed}_i${init_seed}/checkpoint"
+
           run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
             --task_name long_term_forecast --root_path \"$ROOT/\" \
             --data_path_test \"$data_path_eval\" \
@@ -378,7 +379,7 @@ run_carboncast() {
             --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
             --pred_len ${pred_len} --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
             --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
-            --rand_init ${rand_init} --checkpoint_path \"$ckpt_path\" \
+            --rand_init ${rand_init} --checkpoint_path \"$base_ckpt\" \
             --seed ${seed} --init_seed ${init_seed} --visualize --source \"$source_type\" --use_wandb 1 --heldout \"$heldout\" \
             > \"results/carbon_eval/${tag/_TRAIN${T_H}_/}_EVAL${heldout}.txt\" 2>&1"
         else
