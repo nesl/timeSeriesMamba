@@ -1,168 +1,110 @@
 #!/usr/bin/env bash
-# run_all_eval.sh — unified driver for spectralTraffic (PeMS), uniSynth, CarbonCast, Fitbit
-# DLinear => seed_process.py (train+eval); others => seed_evaluate.py (eval-only, fixed checkpoint paths)
+# run_all_eval.sh — unified runner (pems|unisynth|carboncast|fitbit)
+# Checkpoints for DLinear encode the *training* heldout (train-heldout),
+# while eval can target any heldout.
 
 set -euo pipefail
 
-# ---------------- defaults (shared) ----------------
-suite=""                   # one of: pems | unisynth | carboncast | fitbit (REQUIRED)
-model_name="TimeLLM"       # dispatch alias; do not pass directly, use -m
-llm_model=""               # e.g. TimeLLM, DLinear, ARIMA (REQUIRED)
-gpu_id=""                  # REQUIRED
-
+########################################
+# Global defaults
+########################################
+model_name="TimeLLM"
 train_epochs=10
 learning_rate=0.01
+batch_size=16
 llm_layers=0
 rand_init=0
 num_params='2.8b'
 d_model=32
 d_ff=32
 num_process=1
-batch_size=16
 
 master_port_base=1180
+mixed_precision="bf16"
+
 downsampling_factor=1
 percent=100
 col_percent=100
 save_checkpoints=1
-mixed_precision="bf16"
 
 # seeds
 seed_ranges="1-3"
 init_seed_ranges="11-13"
 
-# dry-run
-dry_run=0
+# selection
+suite=""                 # pems|unisynth|carboncast|fitbit
+heldout=""               # EVAL heldout (varies by suite)
+source_type=""           # domain/source tag
+data_name=""
 
-# per-suite knobs (override via flags where applicable)
-# -- pems
-pems_source_type="PEMS"
-pems_heldout=""             # low|medium|high (REQUIRED for pems)
-# -- unisynth
-unisynth_source_type="uniSynth"
-unisynth_heldouts_default="200 300 400 500 600 700 800"
-unisynth_one_heldout=""     # if set, only run that heldout (e.g., -H 500)
-# -- carboncast
-carbon_source_type=""       # e.g., CISO_solar_p05 (REQUIRED for carboncast)
-carbon_heldout=""           # REQUIRED (filename stem)
-# -- fitbit
-fitbit_dataset_dir="dataset/fitbit/fitbit_ds_v2"       # REQUIRED (path with train.csv, boundaries.json, test_*.csv)
-fitbit_heldout=""           # REQUIRED (e.g., low)
-fitbit_source="hr"          # passed through --source
+# DLinear TRAIN heldout (controls ckpt path + train TEST file)
+train_heldout=""         # default per suite if not provided
+
+# Fitbit dir fixed
+fitbit_dataset_dir="dataset/fitbit/fitbit_ds_v2"  # REQUIRED (train.csv, boundaries.json, test_*.csv)
+
+stage="both"             # train|eval|both
+dry_run=0
+force_mp="--mixed_precision bf16"
 
 usage() {
   cat <<USAGE
 Usage:
-  $0 -u <suite:{pems|unisynth|carboncast|fitbit}> -m <llm_model> -g <gpu_id> [common opts] [suite opts]
+  $0 -u <suite:{pems|unisynth|carboncast|fitbit}> -m <model> -g <gpu_id>
+     [-h <heldout(EVAL)>] [-s <source_type>] [-n <num_params>] [-p <master_port>]
+     [-r <rand_init>] [-z <seed_range>] [-i <init_seed_range>]
+     [--train-heldout <value>] [--stage train|eval|both] [--dry-run] [-x <no>]
 
-Common opts:
-  -n <num_params>        (default: 2.8b)
-  -p <master_port>       (default: base ${master_port_base} + gpu_id)
-  -r <rand_init>         (default: 0)
-  -z <seed_ranges>       (default: 1-3)  e.g. "1-2,5-6"
-  -i <init_seed_ranges>  (default: 11-13)
-  -x <mixed_precision>   (default: bf16) pass "no" to disable
-  -y                     dry-run (print commands only)
-  --dry-run              same as -y
-
-Suite-specific:
-  pems:
-    -h <heldout:{low|medium|high}>   (REQUIRED)
-    -s <source_type>                 (default: ${pems_source_type})
-
-  unisynth:
-    -H <one_heldout>   (optional; run just one of: 200 300 400 500 600 700 800)
-    -s <source_type>   (tag only; default: ${unisynth_source_type})
-
-  carboncast:
-    -h <heldout>             (REQUIRED, filename stem)
-    -s <source_type>         (REQUIRED, e.g., CISO_solar_p05)
-
-  fitbit:
-    -d <dataset_dir>         (REQUIRED; has train.csv, boundaries.json, test_*.csv)
-    -h <heldout_alias>       (REQUIRED; e.g., U001)
-
-Examples:
-  PEMS TimeLLM eval:  $0 -u pems -m LLAMA3.2 -g 0 -h low -s PEMS
-  PEMS DLinear train: $0 -u pems -m DLinear -g 0 -h low -s PEMS
-  uniSynth all:       $0 -u unisynth -m LLAMA3.2 -g 0
-  uniSynth one:       $0 -u unisynth -m DLinear -g 0 -H 500
-  CarbonCast eval:    $0 -u carboncast -m LLAMA3.2 -g 0 -h 2020 -s CISO_solar_p05
-  Fitbit eval:        $0 -u fitbit -m LLAMA3.2 -g 0 -d dataset/fitbit/fitbit_ds_v2 -h low
+Notes:
+- DLinear: trains with seed_process.py using --train-heldout ONLY,
+           saves ckpts/logs with *train-heldout* in path,
+           eval can target any --heldout using the same ckpt.
+- TimeLLM/others: eval-only with your fixed checkpoint paths.
+- Fitbit dir fixed: ${fitbit_dataset_dir}
+- Precision: pass -x no to force fp32 (default bf16).
 USAGE
   exit 1
 }
 
-# ---------------- parse args (short flags) ----------------
-while getopts "u:m:g:n:p:r:z:i:x:h:H:s:d:y" opt; do
-  case $opt in
-    u) suite=$OPTARG ;;
-    m) llm_model=$OPTARG ;;
-    g) gpu_id=$OPTARG ;;
-    n) num_params=$OPTARG ;;
-    p) master_port=$OPTARG ;;
-    r) rand_init=$OPTARG ;;
-    z) seed_ranges=$OPTARG ;;
-    i) init_seed_ranges=$OPTARG ;;
-    x) mixed_precision=$OPTARG ;;
-    y) dry_run=1 ;;
-    h) # overloaded: pems/carbon/fitbit heldout
-       if [[ "${suite}" == "pems" ]]; then pems_heldout=$OPTARG
-       elif [[ "${suite}" == "carboncast" ]]; then carbon_heldout=$OPTARG
-       elif [[ "${suite}" == "fitbit" ]]; then fitbit_heldout=$OPTARG
-       else echo "Flag -h not applicable to suite=${suite}"; usage; fi ;;
-    H) unisynth_one_heldout=$OPTARG ;;
-    s) # source type: used by pems (tag), unisynth (tag), carboncast (file)
-       if [[ "${suite}" == "pems" ]]; then pems_source_type=$OPTARG
-       elif [[ "${suite}" == "unisynth" ]]; then unisynth_source_type=$OPTARG
-       elif [[ "${suite}" == "carboncast" ]]; then carbon_source_type=$OPTARG
-       else echo "Flag -s not applicable to suite=${suite}"; usage; fi ;;
-    d) fitbit_dataset_dir=$OPTARG ;;
+########################################
+# Args
+########################################
+master_port=""
+gpu_id=""
+llm_model=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -u) suite="$2"; shift 2 ;;
+    -m) llm_model="$2"; shift 2 ;;
+    -g) gpu_id="$2"; shift 2 ;;
+    -h) heldout="$2"; shift 2 ;;           # EVAL heldout
+    -s) source_type="$2"; shift 2 ;;
+    -n) num_params="$2"; shift 2 ;;
+    -p) master_port="$2"; shift 2 ;;
+    -r) rand_init="$2"; shift 2 ;;
+    -z) seed_ranges="$2"; shift 2 ;;
+    -i) init_seed_ranges="$2"; shift 2 ;;
+    --train-heldout) train_heldout="$2"; shift 2 ;;   # TRAIN heldout (for ckpt + train-time test)
+    --stage) stage="$2"; shift 2 ;;
+    --dry-run) dry_run=1; shift 1 ;;
+    -x) [[ "${2:-}" == "no" ]] && force_mp="--mixed_precision no"; shift 2 ;;
     *) usage ;;
   esac
 done
 
-# accept --dry-run long flag
-for arg in "$@"; do
-  [[ "$arg" == "--dry-run" ]] && dry_run=1
-done
-
-# ---------------- required checks ----------------
 [[ -z "${suite}" || -z "${llm_model}" || -z "${gpu_id}" ]] && usage
-case "${suite}" in
-  pems)
-    [[ -z "${pems_heldout}" ]] && usage
-    [[ "${pems_heldout}" =~ ^(low|medium|high)$ ]] || { echo "PEMS heldout must be low|medium|high"; exit 2; }
-    ;;
-  unisynth)
-    : ;;
-  carboncast)
-    [[ -z "${carbon_heldout}" || -z "${carbon_source_type}" ]] && usage
-    ;;
-  fitbit)
-    [[ -z "${fitbit_dataset_dir}" || -z "${fitbit_heldout}" ]] && usage
-    if (( ! dry_run )); then
-      [[ -f "${fitbit_dataset_dir}/train.csv" ]] || { echo "ERROR: ${fitbit_dataset_dir}/train.csv not found"; exit 2; }
-      [[ -f "${fitbit_dataset_dir}/boundaries.json" ]] || { echo "ERROR: ${fitbit_dataset_dir}/boundaries.json not found"; exit 2; }
-    fi
-    ;;
-  *) usage ;;
+master_port="${master_port:-${master_port_base}${gpu_id}}"
+export CUDA_VISIBLE_DEVICES="${gpu_id}"
+
+# Model dispatch
+case "$llm_model" in
+  DLinear) model_name="DLinear" ;;
+  ARIMA)   model_name="ARIMA" ;;
+  *)       model_name="TimeLLM" ;;
 esac
 
-# ---------------- model alias ----------------
-if [[ "${llm_model}" == "ARIMA" ]]; then
-  model_name="ARIMA"
-elif [[ "${llm_model}" == "DLinear" ]]; then
-  model_name="DLinear"
-else
-  model_name="TimeLLM"
-fi
-
-# master port
-master_port="${master_port:-${master_port_base}${gpu_id}}"
-export CUDA_VISIBLE_DEVICES=$((gpu_id % 4))
-
-# ---------------- derived dims ----------------
+# LLM dim hint
 llm_dim=10
 case "$num_params" in
   130m) llm_dim=768 ;;
@@ -172,161 +114,129 @@ case "$num_params" in
 esac
 
 seq_len=$((512 / downsampling_factor))
-pred_base=$((96 / downsampling_factor))
+pred_len=$((96 / downsampling_factor))
 
-# seed parsing
 parse_seed_ranges() {
-  local ranges=$1; local seed_list=()
+  local ranges=$1; local out=()
   IFS=',' read -ra arr <<< "$ranges"
-  for range in "${arr[@]}"; do
-    if [[ $range =~ ^([0-9]+)-([0-9]+)$ ]]; then
-      local start=${BASH_REMATCH[1]}; local end=${BASH_REMATCH[2]}
-      for ((i=start; i<=end; i++)); do seed_list+=("$i"); done
+  for r in "${arr[@]}"; do
+    if [[ $r =~ ^([0-9]+)-([0-9]+)$ ]]; then
+      local a=${BASH_REMATCH[1]} b=${BASH_REMATCH[2]}
+      for ((i=a;i<=b;i++)); do out+=("$i"); done
     else
-      echo "Invalid range: $range (expected start-end)"; exit 3
+      echo "Bad range: $r (expect start-end)"; exit 2
     fi
   done
-  echo "${seed_list[@]}"
+  echo "${out[@]}"
 }
 seed_array=($(parse_seed_ranges "$seed_ranges"))
 init_seed_array=($(parse_seed_ranges "$init_seed_ranges"))
 
-echo "Suite: ${suite} | Model: ${llm_model} (dispatch: ${model_name}) | GPU: ${gpu_id}"
-echo "Seeds: ${seed_ranges} | InitSeeds: ${init_seed_ranges} | Port: ${master_port} | MP: ${mixed_precision}"
-(( dry_run )) && echo "[DRY-RUN] enabled — will not execute commands or check files."
+echo "Suite       : $suite"
+echo "Model       : $llm_model (dispatch=$model_name)"
+echo "GPU         : $gpu_id (CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES)"
+echo "Heldout(E)  : ${heldout:-<none>}"
+echo "Train-heldout(T): ${train_heldout:-<auto>}"
+echo "Source type : ${source_type:-<none>}"
+echo "Stage       : $stage"
+echo "Seeds       : $seed_ranges ; init=$init_seed_ranges"
+echo "Port        : $master_port"
+echo "Precision   : ${force_mp#*= }"
 
-# helpers
-enc_dec_from_csv_header() {
-  local csv=$1
-  local c
-  c=$(head -n 1 "$csv" | awk -F',' '{print NF-1}')
-  if ! [[ "$c" =~ ^[0-9]+$ ]] || [ "$c" -le 0 ]; then
-    echo "1 1 1"; return 0
-  fi
-  echo "$c $c $c"
-}
+run_or_echo() { [[ $dry_run -eq 1 ]] && echo "DRY-RUN >> $*" || eval "$@"; }
 
-run_cmd() {
-  local log="$1"; shift
-  if (( dry_run )); then
-    echo "[DRY-RUN] would log to: $log"
-    echo "[DRY-RUN] $*"
-  else
-    mkdir -p "$(dirname "$log")"
-    "$@" > "$log" 2>&1
-  fi
-}
+########################################
+# Suites
+########################################
 
-# ---------------- per-suite runners ----------------
 run_pems() {
   local ROOT="dataset/traffic/outputs_pems_hourly"
   local TRAIN_CSV="${ROOT}/train_univariate.csv"
   local BOUNDARY_JSON="${ROOT}/train_univariate_boundary.json"
-  local TEST_CSV="${ROOT}/test_${pems_heldout}.csv"
 
-  if (( ! dry_run )) && [[ "${model_name}" == "DLinear" ]]; then
-    [[ -f "$TRAIN_CSV" && -f "$BOUNDARY_JSON" && -f "$TEST_CSV" ]] || { echo "PEMS missing train/boundary/test"; exit 4; }
-  fi
-  if (( ! dry_run )) && [[ "${model_name}" != "DLinear" ]]; then
-    [[ -f "$TEST_CSV" ]] || { echo "PEMS missing $TEST_CSV"; exit 4; }
-  fi
+  # default TRAIN heldout if not provided
+  local T_H="${train_heldout:-high}"
+  local E_H="${heldout:?need -h <low|medium|high> for eval}"
 
-  local enc_in=1 dec_in=1 c_out=1
-  if [[ "${model_name}" == "DLinear" ]] && (( ! dry_run )); then
-    read enc_in dec_in c_out < <(enc_dec_from_csv_header "$TRAIN_CSV")
-  fi
+  local TEST_TRAIN="${ROOT}/test_${T_H}.csv"   # used only during TRAIN (for DLinear)
+  local TEST_EVAL="${ROOT}/test_${E_H}.csv"    # used during EVAL
 
-  local og_tag
-  if [[ "${model_name}" == "DLinear" ]]; then
-    og_tag="DLinear_d${d_model}_e${train_epochs}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
-  else
-    og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+  [[ "$model_name" == "DLinear" ]] && [[ ! -f "$TRAIN_CSV" || ! -f "$BOUNDARY_JSON" || ! -f "$TEST_TRAIN" ]] && { echo "Missing PeMS train assets"; exit 2; }
+  [[ ! -f "$TEST_EVAL" ]] && { echo "Missing PeMS eval file: $TEST_EVAL"; exit 2; }
+
+  local features="M"; local enc_in=1; local dec_in=1; local c_out=1
+  if [[ "$model_name" == "DLinear" ]]; then
+    local col_count; col_count=$(head -n 1 "$TRAIN_CSV" | awk -F',' '{print NF-1}')
+    [[ "$col_count" =~ ^[0-9]+$ && "$col_count" -gt 0 ]] || { echo "Channel infer failed"; exit 2; }
+    enc_in=$col_count; dec_in=$col_count; c_out=$col_count
   fi
 
-  mkdir -p results/pems_eval results/pems checkpoints
+  for seed in "${seed_array[@]}"; do
+    for init_seed in "${init_seed_array[@]}"; do
+      # tag encodes TRAIN heldout (T_H), NOT EVAL heldout
+      local tag="pems_${source_type}_TRAIN${T_H}_dlin_e${train_epochs}_f${downsampling_factor}_r${rand_init}_seq${seq_len}_pred${pred_len}_s${seed}_i${init_seed}"
+      local ckpt_dir="checkpoints/${tag}"
+      mkdir -p results/pems_train results/pems_eval checkpoints
 
-  for pred_len in ${pred_base}; do
-    for seed in "${seed_array[@]}"; do
-      for init_seed in "${init_seed_array[@]}"; do
-        local checkpoint_tag="pems_${pems_source_type}_${pems_heldout}_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}"
-        if [[ "${model_name}" == "DLinear" ]]; then
-          local tag="${checkpoint_tag}"
-          local log_file="results/pems_eval/${tag}.txt"
-          run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
+      if [[ "$model_name" == "DLinear" && "$stage" != "eval" ]]; then
+        run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
+          --task_name long_term_forecast --is_training 1 \
+          --root_path \"$ROOT\" \
+          --data_path \"$(basename "$TRAIN_CSV")\" \
+          --data_path_test \"$(basename "$TEST_TRAIN")\" \
+          --model_id \"spectralTraffic_${T_H}_trainheldout\" \
+          --model \"$model_name\" --data Traffic --data_pretrain Traffic --pretrain 1 \
+          --features \"$features\" --seq_len ${seq_len} --label_len 48 --factor 3 \
+          --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+          --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+          --percent ${percent} --col_percent ${col_percent} \
+          --des 'Exp' --itr 1 --d_model ${d_model} --d_ff ${d_ff} \
+          --batch_size ${batch_size} --learning_rate ${learning_rate} \
+          --llm_layers ${llm_layers} --train_epochs ${train_epochs} \
+          --model_comment \"$ckpt_dir\" --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+          --boundary_file \"$BOUNDARY_JSON\" --rand_init ${rand_init} --seed ${seed} --init_seed ${init_seed} \
+          --save_checkpoints ${save_checkpoints} --source \"$source_type\" \
+          > \"results/pems_train/${tag}.txt\" 2>&1"
+      fi
+
+      if [[ "$stage" != "train" ]]; then
+        if [[ "$model_name" == "DLinear" ]]; then
+          local ckpt_path="${ckpt_dir}/checkpoint"
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
             --task_name long_term_forecast \
-            --is_training 1 \
-            --root_path "${ROOT}" \
-            --data_path "$(basename "$TRAIN_CSV")" \
-            --data_path_test "$(basename "$TEST_CSV")" \
-            --model_id "spectralTraffic_${pems_heldout}_heldout" \
-            --model "${model_name}" \
-            --data Traffic \
-            --data_pretrain Traffic \
-            --pretrain 1 \
-            --features M \
-            --seq_len ${seq_len} \
-            --label_len 48 \
-            --factor 3 \
-            --enc_in ${enc_in} \
-            --dec_in ${dec_in} \
-            --c_out ${c_out} \
-            --pred_len ${pred_len} \
-            --dsampfactor ${downsampling_factor} \
-            --percent ${percent} \
-            --col_percent ${col_percent} \
-            --des 'Exp' \
-            --itr 1 \
-            --d_model ${d_model} \
-            --d_ff ${d_ff} \
-            --batch_size ${batch_size} \
-            --learning_rate ${learning_rate} \
-            --llm_layers ${llm_layers} \
-            --train_epochs ${train_epochs} \
-            --model_comment "checkpoints/${tag}" \
-            --llm_model "${llm_model}" \
-            --llm_dim ${llm_dim} \
-            --num_params "${num_params}" \
-            --boundary_file "${BOUNDARY_JSON}" \
-            --rand_init ${rand_init} \
-            --seed ${seed} \
-            --init_seed ${init_seed} \
-            --save_checkpoints ${save_checkpoints} \
-            --source "${pems_source_type}"
+            --model_id \"spectralTraffic_${E_H}_eval_${seq_len}_${pred_len}\" \
+            --model \"$model_name\" --data Traffic \
+            --root_path \"$ROOT\" --data_path_test \"$(basename "$TEST_EVAL")\" \
+            --features \"$features\" --seq_len ${seq_len} --label_len 48 --pred_len ${pred_len} --factor 3 \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
+            --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"$ckpt_path\" \
+            --seed ${seed} --init_seed ${init_seed} --use_wandb 1 --visualize \
+            --source \"$source_type\" --heldout \"$E_H\" \
+            > \"results/pems_eval/${tag/_TRAIN${T_H}_/}_EVAL${E_H}.txt\" 2>&1"
         else
-          local CKPT="checkpoints/${checkpoint_tag}/checkpoint"   # fixed path (as provided)
-          if (( ! dry_run )) && [[ ! -f "$CKPT" ]]; then echo "[ERROR] Missing checkpoint: $CKPT"; exit 5; fi
-          local tag="pems_testing_${pems_heldout}_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}"
-          local log_file="results/pems_eval/${tag}.txt"
-          run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+          # TimeLLM fixed ckpt path (training heldout baked in your scheme)
+          local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t100_c100_r${rand_init}"
+          local ckpt_path="checkpoints/pems_PEMS_high_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}/checkpoint"
+          [[ -f "$ckpt_path" || $dry_run -eq 1 ]] || { echo "[ERROR] $ckpt_path missing"; exit 2; }
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
             --task_name long_term_forecast \
-            --model_id "spectralTraffic_${pems_heldout}_heldout_${seq_len}_${pred_len}" \
-            --model "${model_name}" \
-            --data Traffic \
-            --root_path "${ROOT}" \
-            --data_path_test "$(basename "$TEST_CSV")" \
-            --features M \
-            --seq_len ${seq_len} \
-            --label_len 48 \
-            --pred_len ${pred_len} \
-            --factor 3 \
+            --model_id \"spectralTraffic_${E_H}_eval_${seq_len}_${pred_len}\" \
+            --model \"$model_name\" --data Traffic \
+            --root_path \"$ROOT\" --data_path_test \"$(basename "$TEST_EVAL")\" \
+            --features M --seq_len ${seq_len} --label_len 48 --pred_len ${pred_len} --factor 3 \
             --enc_in 1 --dec_in 1 --c_out 1 \
-            --d_model ${d_model} \
-            --d_ff 32 \
-            --llm_layers ${llm_layers} \
-            --llm_model "${llm_model}" \
-            --llm_dim ${llm_dim} \
-            --num_params "${num_params}" \
-            --rand_init ${rand_init} \
-            --checkpoint_path "${CKPT}" \
-            --seed ${seed} \
-            --init_seed ${init_seed} \
-            --use_wandb 1 \
-            --visualize \
-            --source "${pems_source_type}" \
-            --heldout "${pems_heldout}"
+            --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
+            --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"$ckpt_path\" \
+            --seed ${seed} --init_seed ${init_seed} --use_wandb 1 --visualize \
+            --source \"$source_type\" --heldout \"$E_H\" \
+            > \"results/pems_eval/pems_testing_${E_H}_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}.txt\" 2>&1"
         fi
-        [[ "${rand_init}" -eq 0 ]] && break
-      done
+      fi
+
+      [[ "$rand_init" -eq 0 ]] && break
     done
   done
 }
@@ -334,207 +244,164 @@ run_pems() {
 run_unisynth() {
   local ROOT="dataset/synthetic_data/psd_synth"
   local TRAIN_CSV="${ROOT}/train.csv"
-  if (( ! dry_run )); then [[ -f "$TRAIN_CSV" ]] || { echo "uniSynth missing $TRAIN_CSV"; exit 6; }; fi
 
-  local heldouts
-  if [[ -n "${unisynth_one_heldout}" ]]; then
-    heldouts="${unisynth_one_heldout}"
-  else
-    heldouts="${unisynth_heldouts_default}"
-  fi
+  local T_H="${train_heldout:-200}"           # TRAIN heldout for ckpt
+  local E_list=()                             # EVAL heldouts
+  if [[ -n "$heldout" ]]; then E_list=("$heldout"); else E_list=(200 300 400 500 600 700 800); fi
 
-  local og_tag
-  if [[ "${model_name}" == "DLinear" ]]; then
-    og_tag="DLinear_d${d_model}_e${train_epochs}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
-  else
-    og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
-  fi
+  local TEST_TRAIN="${ROOT}/region_test_om0p${T_H}.csv"
+  [[ "$model_name" != "DLinear" || -f "$TEST_TRAIN" ]] || { echo "Missing uniSynth train test=${TEST_TRAIN}"; exit 2; }
 
-  mkdir -p results/uniSynthPSD_eval checkpoints
+  for seed in "${seed_array[@]}"; do
+    for init_seed in "${init_seed_array[@]}"; do
+      local tag="unisynth_TRAIN${T_H}_dlin_e${train_epochs}_f${downsampling_factor}_r${rand_init}_seq${seq_len}_pred${pred_len}_s${seed}_i${init_seed}"
+      local ckpt_dir="checkpoints/${tag}"
+      mkdir -p results/uniSynth_train results/uniSynth_eval checkpoints
 
-  local enc_in=1 dec_in=1 c_out=1
-  if [[ "${model_name}" == "DLinear" ]] && (( ! dry_run )); then
-    read enc_in dec_in c_out < <(enc_dec_from_csv_header "$TRAIN_CSV")
-  fi
+      if [[ "$model_name" == "DLinear" && "$stage" != "eval" ]]; then
+        run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
+          --task_name long_term_forecast --is_training 1 \
+          --root_path \"$ROOT/\" \
+          --data_path \"$(basename "$TRAIN_CSV")\" \
+          --data_path_test \"$(basename "$TEST_TRAIN")\" \
+          --model_id \"${T_H}_trainheldout\" \
+          --model \"$model_name\" --data Synthetic --data_pretrain Synthetic --pretrain 1 \
+          --features M --seq_len ${seq_len} --label_len 48 --factor 3 \
+          --enc_in 1 --dec_in 1 --c_out 1 \
+          --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+          --percent ${percent} --col_percent ${col_percent} \
+          --des 'Exp' --itr 1 --d_model ${d_model} --d_ff ${d_ff} \
+          --batch_size ${batch_size} --learning_rate ${learning_rate} \
+          --llm_layers ${llm_layers} --train_epochs ${train_epochs} \
+          --model_comment \"$ckpt_dir\" --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+          --rand_init ${rand_init} --seed ${seed} --init_seed ${init_seed} \
+          --save_checkpoints ${save_checkpoints} --source \"uniSynth\" \
+          > \"results/uniSynth_train/${tag}.txt\" 2>&1"
+      fi
 
-  for heldout in ${heldouts}; do
-    local TEST_CSV="${ROOT}/region_test_om0p${heldout}.csv"
-    if (( ! dry_run )); then [[ -f "$TEST_CSV" ]] || { echo "uniSynth missing $TEST_CSV"; exit 6; }; fi
+      if [[ "$stage" != "train" ]]; then
+        if [[ "$model_name" == "DLinear" ]]; then
+          local ckpt_path="${ckpt_dir}/checkpoint"
+          for E_H in "${E_list[@]}"; do
+            local TEST_EVAL="${ROOT}/region_test_om0p${E_H}.csv"
+            [[ -f "$TEST_EVAL" ]] || { echo "Missing eval file: $TEST_EVAL"; exit 2; }
+            run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+              --task_name long_term_forecast --root_path \"$ROOT/\" \
+              --data_path_test \"$(basename "$TEST_EVAL")\" \
+              --model_id \"${E_H}_eval_${seq_len}_${pred_len}\" \
+              --model \"$model_name\" --data Synthetic --features M \
+              --seq_len ${seq_len} --label_len 48 --factor 3 \
+              --enc_in 1 --dec_in 1 --c_out 1 --pred_len ${pred_len} \
+              --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
+              --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+              --rand_init ${rand_init} --checkpoint_path \"$ckpt_path\" \
+              --seed ${seed} --init_seed ${init_seed} --visualize \
+              --source \"uniSynth\" --use_wandb 1 --heldout \"$E_H\" \
+              > \"results/uniSynth_eval/${tag/_TRAIN${T_H}_/}_EVAL${E_H}.txt\" 2>&1"
+          done
+        else
+          # TimeLLM fixed ckpt path (trained at h200)
+          local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+          local base_ckpt="checkpoints/uniSynthPSD_${og}_h200_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}/checkpoint"
+          [[ -f "$base_ckpt" || $dry_run -eq 1 ]] || { echo "[ERROR] $base_ckpt missing"; exit 2; }
+          for E_H in "${E_list[@]}"; do
+            run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+              --task_name long_term_forecast --root_path \"$ROOT/\" \
+              --data_path_test \"region_test_om0p${E_H}.csv\" \
+              --model_id \"${E_H}_eval_${seq_len}_${pred_len}\" \
+              --model \"$model_name\" --data Synthetic --features M \
+              --seq_len ${seq_len} --label_len 48 --factor 3 \
+              --enc_in 1 --dec_in 1 --c_out 1 --pred_len ${pred_len} \
+              --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
+              --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+              --rand_init ${rand_init} --checkpoint_path \"$base_ckpt\" \
+              --seed ${seed} --init_seed ${init_seed} --visualize \
+              --source \"uniSynth\" --use_wandb 1 --heldout \"$E_H\" \
+              > \"results/uniSynth_eval/testing_uniSynthPSD_${og}_h${E_H}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}.txt\" 2>&1"
+          done
+        fi
+      fi
 
-    for pred_len in ${pred_base}; do
-      for seed in "${seed_array[@]}"; do
-        for init_seed in "${init_seed_array[@]}"; do
-          local tag="testing_uniSynthPSD_${og_tag}_h${heldout}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-          local log_file="results/uniSynthPSD_eval/${tag}.txt"
-
-          if [[ "${model_name}" == "DLinear" ]]; then
-            run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
-              --task_name long_term_forecast \
-              --is_training 1 \
-              --root_path "${ROOT}/" \
-              --data_path "$(basename "$TRAIN_CSV")" \
-              --data_path_test "$(basename "$TEST_CSV")" \
-              --model_id "${heldout}_heldout_${seq_len}_${pred_len}" \
-              --model "${model_name}" \
-              --data Synthetic \
-              --features M \
-              --seq_len ${seq_len} \
-              --label_len 48 \
-              --factor 3 \
-              --enc_in ${enc_in} \
-              --dec_in ${dec_in} \
-              --c_out ${c_out} \
-              --pred_len ${pred_len} \
-              --d_model ${d_model} \
-              --d_ff ${d_ff} \
-              --batch_size ${batch_size} \
-              --learning_rate ${learning_rate} \
-              --llm_layers ${llm_layers} \
-              --train_epochs ${train_epochs} \
-              --model_comment "checkpoints/${tag}" \
-              --llm_model "${llm_model}" \
-              --llm_dim ${llm_dim} \
-              --num_params "${num_params}" \
-              --rand_init ${rand_init} \
-              --seed ${seed} \
-              --init_seed ${init_seed} \
-              --source "${unisynth_source_type}" \
-              --save_checkpoints ${save_checkpoints}
-          else
-            # fixed checkpoint pattern (as provided)
-            local checkpoint_tag="uniSynthPSD_${og_tag}_h200_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-            local CKPT="checkpoints/${checkpoint_tag}/checkpoint"
-            if (( ! dry_run )) && [[ ! -f "$CKPT" ]]; then echo "[ERROR] Missing checkpoint: $CKPT"; exit 5; fi
-            run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
-              --task_name long_term_forecast \
-              --root_path "${ROOT}/" \
-              --data_path "$(basename "$TRAIN_CSV")" \
-              --data_path_test "$(basename "$TEST_CSV")" \
-              --model_id "${heldout}_heldout_${seq_len}_${pred_len}" \
-              --model "${model_name}" \
-              --data Synthetic \
-              --features M \
-              --seq_len ${seq_len} \
-              --label_len 48 \
-              --factor 3 \
-              --enc_in 1 --dec_in 1 --c_out 1 \
-              --pred_len ${pred_len} \
-              --d_model ${d_model} \
-              --d_ff 32 \
-              --llm_layers ${llm_layers} \
-              --llm_model "${llm_model}" \
-              --llm_dim ${llm_dim} \
-              --num_params "${num_params}" \
-              --rand_init ${rand_init} \
-              --checkpoint_path "${CKPT}" \
-              --seed ${seed} \
-              --init_seed ${init_seed} \
-              --visualize \
-              --source "${unisynth_source_type}" \
-              --use_wandb 1 \
-              --heldout ${heldout}
-          fi
-          [[ "${rand_init}" -eq 0 ]] && break
-        done
-      done
+      [[ "$rand_init" -eq 0 ]] && break
     done
   done
 }
 
 run_carboncast() {
   local ROOT="dataset/CarbonCast"
-  local TRAIN_CSV="${ROOT}/spectral/heldout/${carbon_heldout}_${carbon_source_type}.csv"
-  local TEST_CSV="${ROOT}/spectral/heldout/${carbon_heldout}_${carbon_source_type}.csv"
+  local data_name="CarbonCast"
+  local features="M"; local enc_in=1; local dec_in=1; local c_out=1
 
-  if (( ! dry_run )); then
-    [[ -f "$TRAIN_CSV" && -f "$TEST_CSV" ]] || { echo "CarbonCast missing ${TRAIN_CSV} or ${TEST_CSV}"; exit 7; }
-  fi
+  local T_H="${train_heldout:-high}"                   # training heldout for ckpt
+  local data_path_train="spectral/heldout/${T_H}_${source_type}.csv"
+  local data_path_eval="spectral/heldout/${heldout}_${source_type}.csv"  # eval heldout file
 
-  local og_tag
-  if [[ "${model_name}" == "DLinear" ]]; then
-    og_tag="DLinear_l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_r${rand_init}"
-  else
-    og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
-  fi
+  [[ "$model_name" != "DLinear" || -f "$ROOT/$data_path_train" ]] || { echo "Missing CarbonCast TRAIN file: $ROOT/$data_path_train"; exit 2; }
+  [[ -f "$ROOT/$data_path_eval" ]] || { echo "Missing CarbonCast EVAL file: $ROOT/$data_path_eval"; exit 2; }
 
-  local enc_in=1 dec_in=1 c_out=1
-  if [[ "${model_name}" == "DLinear" ]] && (( ! dry_run )); then
-    read enc_in dec_in c_out < <(enc_dec_from_csv_header "$TRAIN_CSV")
-  fi
+  for seed in "${seed_array[@]}"; do
+    for init_seed in "${init_seed_array[@]}"; do
+      local tag="carbon_TRAIN${T_H}_${source_type}_dlin_e${train_epochs}_f${downsampling_factor}_r${rand_init}_seq${seq_len}_pred${pred_len}_s${seed}_i${init_seed}"
+      local ckpt_dir="checkpoints/${tag}"
+      mkdir -p results/carbon_train results/carbon_eval checkpoints
 
-  mkdir -p results/spectralUniTest checkpoints
+      if [[ "$model_name" == "DLinear" && "$stage" != "eval" ]]; then
+        run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
+          --task_name long_term_forecast --is_training 1 \
+          --root_path \"$ROOT/\" \
+          --data_path \"$data_path_train\" \
+          --data_path_test \"$data_path_train\" \
+          --model_id \"${T_H}_${source_type}_trainheldout\" \
+          --model \"$model_name\" --data \"$data_name\" --data_pretrain \"$data_name\" --pretrain 1 \
+          --features \"$features\" --seq_len ${seq_len} --label_len 48 --factor 3 \
+          --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+          --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+          --percent ${percent} --col_percent ${col_percent} \
+          --des 'Exp' --itr 1 --d_model ${d_model} --d_ff ${d_ff} \
+          --batch_size ${batch_size} --learning_rate ${learning_rate} \
+          --llm_layers ${llm_layers} --train_epochs ${train_epochs} \
+          --model_comment \"$ckpt_dir\" --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+          --rand_init ${rand_init} --seed ${seed} --init_seed ${init_seed} \
+          --save_checkpoints ${save_checkpoints} --source \"$source_type\" \
+          > \"results/carbon_train/${tag}.txt\" 2>&1"
+      fi
 
-  for pred_len in ${pred_base}; do
-    for seed in "${seed_array[@]}"; do
-      for init_seed in "${init_seed_array[@]}"; do
-        local tag="spectralUniTest_${carbon_heldout}_${carbon_source_type}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-        local log_file="results/spectralUniTest/${tag}.txt"
-
-        if [[ "${model_name}" == "DLinear" ]]; then
-          run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
-            --task_name long_term_forecast \
-            --is_training 1 \
-            --root_path "${ROOT}/" \
-            --data_path "spectral/heldout/${carbon_heldout}_${carbon_source_type}.csv" \
-            --data_path_test "spectral/heldout/${carbon_heldout}_${carbon_source_type}.csv" \
-            --model_id "${carbon_heldout}_heldout_${seq_len}_${pred_len}" \
-            --model "${model_name}" \
-            --data CarbonCast \
-            --features M \
-            --seq_len ${seq_len} \
-            --label_len 48 \
-            --factor 3 \
-            --enc_in ${enc_in} \
-            --dec_in ${dec_in} \
-            --c_out ${c_out} \
-            --pred_len ${pred_len} \
-            --d_model ${d_model} \
-            --d_ff ${d_ff} \
-            --batch_size ${batch_size} \
-            --learning_rate ${learning_rate} \
-            --llm_layers ${llm_layers} \
-            --train_epochs ${train_epochs} \
-            --model_comment "checkpoints/${tag}" \
-            --llm_model "${llm_model}" \
-            --llm_dim ${llm_dim} \
-            --num_params "${num_params}" \
-            --rand_init ${rand_init} \
-            --seed ${seed} \
-            --init_seed ${init_seed} \
-            --save_checkpoints ${save_checkpoints}
+      if [[ "$stage" != "train" ]]; then
+        if [[ "$model_name" == "DLinear" ]]; then
+          local ckpt_path="${ckpt_dir}/checkpoint"
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast --root_path \"$ROOT/\" \
+            --data_path_test \"$data_path_eval\" \
+            --model_id \"${heldout}_${source_type}_eval_${seq_len}_${pred_len}\" \
+            --model \"$model_name\" --data \"$data_name\" --features \"$features\" \
+            --seq_len ${seq_len} --label_len 48 --factor 3 \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --pred_len ${pred_len} --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
+            --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"$ckpt_path\" \
+            --seed ${seed} --init_seed ${init_seed} --visualize --source \"$source_type\" --use_wandb 1 --heldout \"$heldout\" \
+            > \"results/carbon_eval/${tag/_TRAIN${T_H}_/}_EVAL${heldout}.txt\" 2>&1"
         else
-          # fixed checkpoint pattern (as provided)
-          local checkpoint_tag="spectralUni_CISO_solar_p05_${og_tag}_seq${seq_len}_pred${pred_len}/s${seed}_i${init_seed}"
-          local CKPT="checkpoints/${checkpoint_tag}/checkpoint"
-          if (( ! dry_run )) && [[ ! -f "$CKPT" ]]; then echo "[ERROR] Missing checkpoint: $CKPT"; exit 5; fi
-          run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
-            --task_name long_term_forecast \
-            --root_path "${ROOT}/" \
-            --data_path "spectral/heldout/${carbon_heldout}_${carbon_source_type}.csv" \
-            --data_path_test "spectral/heldout/${carbon_heldout}_${carbon_source_type}.csv" \
-            --model_id "${carbon_heldout}_heldout_${seq_len}_${pred_len}" \
-            --model "${model_name}" \
-            --data CarbonCast \
-            --features M \
-            --seq_len ${seq_len} \
-            --label_len 48 \
-            --factor 3 \
-            --enc_in 1 --dec_in 1 --c_out 1 \
-            --pred_len ${pred_len} \
-            --d_model ${d_model} \
-            --d_ff 32 \
-            --llm_layers ${llm_layers} \
-            --llm_model "${llm_model}" \
-            --llm_dim ${llm_dim} \
-            --num_params "${num_params}" \
-            --rand_init ${rand_init} \
-            --checkpoint_path "${CKPT}" \
-            --seed ${seed} \
-            --init_seed ${init_seed} \
-            --visualize
+          # TimeLLM fixed path per your scheme
+          local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+          local ckpt_path="checkpoints/spectralUni_CISO_solar_p05_${og}_seq${seq_len}_pred${pred_len}/s${seed}_i${init_seed}/checkpoint"
+          [[ -f "$ckpt_path" || $dry_run -eq 1 ]] || { echo "[ERROR] $ckpt_path missing"; exit 2; }
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast --root_path \"$ROOT/\" \
+            --data_path_test \"$data_path_eval\" \
+            --model_id \"${heldout}_${source_type}_eval_${seq_len}_${pred_len}\" \
+            --model \"$model_name\" --data \"$data_name\" --features \"$features\" \
+            --seq_len ${seq_len} --label_len 48 --factor 3 \
+            --enc_in 1 --dec_in 1 --c_out 1 --pred_len ${pred_len} \
+            --d_model ${d_model} --d_ff 32 --llm_layers ${llm_layers} \
+            --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"$ckpt_path\" \
+            --seed ${seed} --init_seed ${init_seed} --visualize --source \"$source_type\" \
+            > \"results/spectralUniTest/spectralUniTest_${heldout}_${source_type}_heldout_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}.txt\" 2>&1"
         fi
-        [[ "${rand_init}" -eq 0 ]] && break
-      done
+      fi
+
+      [[ "$rand_init" -eq 0 ]] && break
     done
   done
 }
@@ -543,117 +410,92 @@ run_fitbit() {
   local ROOT="${fitbit_dataset_dir}"
   local TRAIN_CSV="${ROOT}/train.csv"
   local BOUNDARY_JSON="${ROOT}/boundaries.json"
-  local TEST_CSV="${ROOT}/test_${fitbit_heldout}.csv"
-  if (( ! dry_run )); then
-    [[ -f "$TRAIN_CSV" && -f "$BOUNDARY_JSON" && -f "$TEST_CSV" ]] || { echo "Fitbit missing train/boundaries/test"; exit 8; }
-  fi
+  local T_H="${train_heldout:-high}"
+  local E_H="${heldout:?need -h <UXXX> for eval}"
+  local TEST_TRAIN="${ROOT}/test_${T_H}.csv"
+  local TEST_EVAL="${ROOT}/test_${E_H}.csv"
+  local data_name="Fitbit"
+  local features="M"; local enc_in=1; local dec_in=1; local c_out=1
+  local source="hr"
 
-  local og_tag
-  if [[ "${model_name}" == "DLinear" ]]; then
-    og_tag="DLinear_l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_r${rand_init}"
-  else
-    og_tag="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
-  fi
+  [[ -f "$TRAIN_CSV" && -f "$BOUNDARY_JSON" && -f "$TEST_TRAIN" && -f "$TEST_EVAL" ]] || { echo "Fitbit files missing"; exit 2; }
 
-  local enc_in=1 dec_in=1 c_out=1
-  if [[ "${model_name}" == "DLinear" ]] && (( ! dry_run )); then
-    read enc_in dec_in c_out < <(enc_dec_from_csv_header "$TRAIN_CSV")
-  fi
+  for seed in "${seed_array[@]}"; do
+    for init_seed in "${init_seed_array[@]}"; do
+      local tag="fitbit_${source}_TRAIN${T_H}_dlin_e${train_epochs}_f${downsampling_factor}_r${rand_init}_seq${seq_len}_pred${pred_len}_s${seed}_i${init_seed}"
+      local ckpt_dir="checkpoints/${tag}"
+      mkdir -p results/fitbit_train results/fitbit_eval checkpoints
 
-  mkdir -p results/fitbit_eval checkpoints
+      if [[ "$model_name" == "DLinear" && "$stage" != "eval" ]]; then
+        run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
+          --task_name long_term_forecast --is_training 1 \
+          --root_path \"${ROOT}/\" \
+          --data_path \"$(basename "$TRAIN_CSV")\" \
+          --data_path_test \"$(basename "$TEST_TRAIN")\" \
+          --model_id \"fitbit_${source}_${T_H}_trainheldout\" \
+          --model \"$model_name\" --data \"$data_name\" --data_pretrain \"$data_name\" --pretrain 1 \
+          --features \"$features\" --seq_len ${seq_len} --label_len 48 --factor 3 --freq t \
+          --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+          --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+          --percent ${percent} --col_percent ${col_percent} \
+          --d_model ${d_model} --d_ff ${d_ff} --batch_size ${batch_size} --learning_rate ${learning_rate} \
+          --llm_layers ${llm_layers} --train_epochs ${train_epochs} \
+          --model_comment \"$ckpt_dir\" --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+          --boundary_file \"$BOUNDARY_JSON\" --rand_init ${rand_init} --seed ${seed} --init_seed ${init_seed} \
+          --save_checkpoints ${save_checkpoints} --source \"$source\" \
+          > \"results/fitbit_train/${tag}.txt\" 2>&1"
+      fi
 
-  for pred_len in ${pred_base}; do
-    for seed in "${seed_array[@]}"; do
-      for init_seed in "${init_seed_array[@]}"; do
-        local tag="test_fitbit_${fitbit_source}_${fitbit_heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-        local log_file="results/fitbit_eval/${tag}.txt"
-
-        if [[ "${model_name}" == "DLinear" ]]; then
-          run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_process.py \
-            --task_name long_term_forecast \
-            --is_training 1 \
-            --root_path "${ROOT}/" \
-            --data_path "train.csv" \
-            --data_path_test "test_${fitbit_heldout}.csv" \
-            --model_id "fitbit_${fitbit_source}_${fitbit_heldout}_heldout" \
-            --model "${model_name}" \
-            --data Fitbit \
-            --features M \
-            --seq_len ${seq_len} \
-            --label_len 48 \
-            --factor 3 \
-            --freq t \
-            --enc_in ${enc_in} \
-            --dec_in ${dec_in} \
-            --c_out ${c_out} \
-            --pred_len ${pred_len} \
-            --dsampfactor ${downsampling_factor} \
-            --percent ${percent} \
-            --col_percent ${col_percent} \
-            --d_model ${d_model} \
-            --d_ff ${d_ff} \
-            --batch_size ${batch_size} \
-            --learning_rate ${learning_rate} \
-            --llm_layers ${llm_layers} \
-            --train_epochs ${train_epochs} \
-            --model_comment "checkpoints/${tag}" \
-            --llm_model "${llm_model}" \
-            --llm_dim ${llm_dim} \
-            --num_params "${num_params}" \
-            --boundary_file "${BOUNDARY_JSON}" \
-            --rand_init ${rand_init} \
-            --seed ${seed} \
-            --init_seed ${init_seed} \
-            --source "${fitbit_source}" \
-            --save_checkpoints ${save_checkpoints}
+      if [[ "$stage" != "train" ]]; then
+        if [[ "$model_name" == "DLinear" ]]; then
+          local ckpt_path="${ckpt_dir}/checkpoint"
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast --root_path \"${ROOT}/\" \
+            --data_path_test \"$(basename "$TEST_EVAL")\" \
+            --model_id \"fitbit_${source}_${E_H}_eval\" \
+            --model \"$model_name\" --data \"$data_name\" --features \"$features\" \
+            --seq_len ${seq_len} --label_len 48 --factor 3 --freq t \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+            --percent ${percent} --col_percent ${col_percent} \
+            --d_model ${d_model} --d_ff ${d_ff} --batch_size ${batch_size} \
+            --llm_layers ${llm_layers} --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --checkpoint_path \"$ckpt_path\" --rand_init ${rand_init} \
+            --seed ${seed} --init_seed ${init_seed} --source \"$source\" --use_wandb 1 --visualize \
+            > \"results/fitbit_eval/${tag/_TRAIN${T_H}_/}_EVAL${E_H}.txt\" 2>&1"
         else
-          # fixed checkpoint pattern (as provided)
-          local checkpoint_tag="fitbit_${fitbit_source}_high_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
-          local CKPT="checkpoints/${checkpoint_tag}/checkpoint"
-          if (( ! dry_run )) && [[ ! -f "$CKPT" ]]; then echo "[ERROR] Missing checkpoint: $CKPT"; exit 5; fi
-          run_cmd "$log_file" accelerate launch --mixed_precision "${mixed_precision}" --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
-            --task_name long_term_forecast \
-            --root_path "${ROOT}/" \
-            --data_path_test "test_${fitbit_heldout}.csv" \
-            --model_id "fitbit_${fitbit_source}_${fitbit_heldout}_heldout" \
-            --model "${model_name}" \
-            --data Fitbit \
-            --features M \
-            --seq_len ${seq_len} \
-            --label_len 48 \
-            --factor 3 \
-            --freq t \
-            --enc_in 1 --dec_in 1 --c_out 1 \
-            --pred_len ${pred_len} \
-            --dsampfactor ${downsampling_factor} \
-            --percent ${percent} \
-            --col_percent ${col_percent} \
-            --d_model ${d_model} \
-            --d_ff ${d_ff} \
-            --batch_size ${batch_size} \
-            --llm_layers ${llm_layers} \
-            --llm_model "${llm_model}" \
-            --llm_dim ${llm_dim} \
-            --num_params "${num_params}" \
-            --checkpoint_path "${CKPT}" \
-            --rand_init ${rand_init} \
-            --seed ${seed} \
-            --init_seed ${init_seed} \
-            --source "${fitbit_source}" \
-            --use_wandb 1 \
-            --visualize
+          local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
+          local ckpt_path="checkpoints/fitbit_${source}_high_heldout_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}/checkpoint"
+          [[ -f "$ckpt_path" || $dry_run -eq 1 ]] || { echo "[ERROR] $ckpt_path missing"; exit 2; }
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast --root_path \"${ROOT}/\" \
+            --data_path_test \"$(basename "$TEST_EVAL")\" \
+            --model_id \"fitbit_${source}_${E_H}_eval\" \
+            --model \"$model_name\" --data \"$data_name\" --features \"$features\" \
+            --seq_len ${seq_len} --label_len 48 --factor 3 --freq t \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+            --percent ${percent} --col_percent ${col_percent} \
+            --d_model ${d_model} --d_ff ${d_ff} --batch_size ${batch_size} \
+            --llm_layers ${llm_layers} --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --checkpoint_path \"$ckpt_path\" --rand_init ${rand_init} \
+            --seed ${seed} --init_seed ${init_seed} --source \"$source\" --use_wandb 1 --visualize \
+            > \"results/fitbit_eval/test_fitbit_${source}_${E_H}_heldout_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}.txt\" 2>&1"
         fi
-        [[ "${rand_init}" -eq 0 ]] && break
-      done
+      fi
+
+      [[ "$rand_init" -eq 0 ]] && break
     done
   done
 }
 
-# ---------------- dispatch ----------------
-case "${suite}" in
-  pems)       run_pems ;;
+########################################
+# Dispatch
+########################################
+case "$suite" in
+  pems)       [[ -z "$heldout" ]] && { echo "pems requires -h <low|medium|high> for eval"; exit 2; }; run_pems ;;
   unisynth)   run_unisynth ;;
-  carboncast) run_carboncast ;;
-  fitbit)     run_fitbit ;;
+  carboncast) [[ -z "$heldout" || -z "$source_type" ]] && { echo "carboncast requires -h <heldout> -s <source_type>"; exit 2; }; run_carboncast ;;
+  fitbit)     [[ -z "$heldout" ]] && { echo "fitbit requires -h <UXXX>"; exit 2; }; run_fitbit ;;
   *) usage ;;
 esac
