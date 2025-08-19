@@ -1,0 +1,2 @@
+domain,comp,x_metric,n,spearman_rho,theilsen_slope,slope_ci_lo,slope_ci_hi,omega_star,omega_star_lo,omega_star_hi
+UniSynth,RandInit_minus_DLinear,LLE,7,0.5714285714285714,0.7328057107386734,-2.436424495664285,4.093750479197777,-0.1805472677989067,-0.53400054266715,1.9195091365170414

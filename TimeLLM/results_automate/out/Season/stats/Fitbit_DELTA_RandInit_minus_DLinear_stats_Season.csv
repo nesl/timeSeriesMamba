@@ -1,0 +1,2 @@
+domain,comp,x_metric,n,spearman_rho,theilsen_slope,slope_ci_lo,slope_ci_hi,omega_star,omega_star_lo,omega_star_hi
+Fitbit,RandInit_minus_DLinear,Season,3,-0.4999999999999999,-0.49343832020997336,,,0.5130666134751776,,

@@ -34,7 +34,7 @@ USAGE
   exit 1
 }
 
-llm_model=""; gpu_id=""; master_port=""; test_csv="dataset/CarbonCast/spectral/heldout/CISO__solar__p05.csv"
+llm_model=""; gpu_id=""; master_port=""; test_csv="dataset/CarbonCast/spectral/heldout/CISO_solar.csv"
 while getopts "m:g:t:n:p:r:" opt; do
   case $opt in
     m) llm_model=$OPTARG ;;
@@ -64,17 +64,9 @@ fi
 
 export CUDA_VISIBLE_DEVICES=$((gpu_id % 4))
 
-# Parse heldout info from filename: <REGION>__<SOURCE>__pXX.csv
-test_base="$(basename "$test_csv")"
-if [[ "$test_base" =~ ^([^_]+)__([^_]+)__p([0-9]+)\.csv$ ]]; then
-  heldout_region="${BASH_REMATCH[1]}"
-  source_type="${BASH_REMATCH[2]}"
-  percentile="${BASH_REMATCH[3]}"
-else
-  echo "ERROR: test_csv filename must look like <REGION>__<SOURCE>__pXX.csv"
-  echo "Got: $test_base"
-  exit 2
-fi
+heldout_region="CISO"
+source_type="solar"
+percentile="05"
 
 # LLM hidden size from param class
 llm_dim=10

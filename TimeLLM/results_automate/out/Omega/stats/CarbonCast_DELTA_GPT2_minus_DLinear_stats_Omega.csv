@@ -1,0 +1,2 @@
+domain,comp,x_metric,n,spearman_rho,theilsen_slope,slope_ci_lo,slope_ci_hi,omega_star,omega_star_lo,omega_star_hi
+CarbonCast,GPT2_minus_DLinear,Omega,3,0.9999999999999998,1.2806863417982148,,,0.3163670643172057,,
