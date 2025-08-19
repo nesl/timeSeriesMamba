@@ -63,10 +63,10 @@ DOMAIN_NAME_FIX = {
     "carbon_eval": "CarbonCast",
     "pems_eval": "PEMS",
     "fitbit_eval": "Fitbit",
-    "uniSynth_eval": "UniSynth",
+    "uniSynth_eval": "Synthetic",
 }
 
-DOMAINS_CANON = ("CarbonCast", "PEMS", "Fitbit", "UniSynth")
+DOMAINS_CANON = ("CarbonCast", "PEMS", "Fitbit", "Synthetic")
 
 # ------------------- Plot styling -------------------
 MODEL_COLOR = {
@@ -173,7 +173,7 @@ def make_base_key(path: str) -> str:
 def infer_domain_from_text(text: str) -> Optional[str]:
     t = text.lower()
     if "unisynth" in t:
-        return "UniSynth"
+        return "Synthetic"
     if "carbon" in t or "spectralunitest" in t:
         return "CarbonCast"
     if "fitbit" in t:
