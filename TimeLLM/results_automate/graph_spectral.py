@@ -387,8 +387,8 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
     ax.set_xlabel(x_metric_label, labelpad=2)
     ax.set_ylabel(y_label, labelpad=2)
     ax.set_title(title, pad=2)
-    if used:
-        ax.legend(title="Model", fontsize=legend_font, title_fontsize=legend_font, loc="best", frameon=True, facecolor="#F0F0F0")
+    #if used:
+        #ax.legend(title="Model", fontsize=legend_font, title_fontsize=legend_font, loc="best", frameon=True, facecolor="#F0F0F0")
 
     # tighter limits & margins to reduce whitespace
     if x_vals.size:
@@ -909,7 +909,7 @@ def main():
     ap.add_argument("--dpi", type=int, default=800, help="Figure DPI.")
     ap.add_argument("--font", type=int, default=14, help="Base font size.")
     ap.add_argument("--tick-font", type=int, default=13, help="Tick label font size.")
-    ap.add_argument("--legend-font", type=int, default=8, help="Legend font size.")
+    ap.add_argument("--legend-font", type=int, default=12, help="Legend font size.")
     ap.add_argument("--x-margin", type=float, default=0.06, help="Fractional x padding of data span.")
     ap.add_argument("--y-margin", type=float, default=0.06, help="Fractional y padding of data span.")
     ap.add_argument("--tight-bbox", action="store_true",
