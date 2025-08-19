@@ -1,0 +1,3 @@
+domain,x_metric,n,spearman_rho,theilsen_slope,slope_ci_lo,slope_ci_hi
+Fitbit,Omega,3,0.4999999999999999,11.754234955979129,,
+PEMS,Omega,3,-0.4999999999999999,-49.03866186460245,,
