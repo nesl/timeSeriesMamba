@@ -31,6 +31,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 
 # Optional deps (used if present)
 try:
@@ -708,12 +709,19 @@ def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
         print(f"[info] No matched x-bins for {title}")
         return
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi, layout="constrained")
-    ax.scatter(df_pairs["omega"], df_pairs["rel_gain_pct"], s=30, alpha=0.8, edgecolors="none")
+    ax.scatter(df_pairs["omega"], df_pairs["rel_gain_pct"], s=100, alpha=0.8, edgecolors="none")
     ax.axhline(0.0, color="black", linewidth=1.0, linestyle="--", alpha=0.6, label="No gain")
     ax.set_xlabel(xlabel, labelpad=2)
     ax.set_ylabel(ylabel, labelpad=2)
     ax.set_title(title, pad=2)
     ax.legend(loc="best")
+
+     # --- make the axes less granular ---
+    ax.minorticks_off()                            # kill minor ticks entirely
+    ax.grid(False, which="minor")
+    
+    ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5))   # ~5 x ticks
+    ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))   # ~5 y ticks
 
     # tight limits to reduce whitespace
     xv = df_pairs["omega"].to_numpy(float); yv = df_pairs["rel_gain_pct"].to_numpy(float)
@@ -970,7 +978,7 @@ def main():
 
         # ---------- per-domain relative-gain plots + CSVs ----------
         pairs = [
-            ("DLinear", "Language Pretrained"),
+            ("Language Pretrained","DLinear"),
             ("Language Pretrained", "Random Init"),
             ("Random Init", "DLinear"),
             ("GPT2", "DLinear"),  # NEW: show GPT2 vs DLinear
@@ -989,9 +997,9 @@ def main():
                         f"{domain}_RELGAIN_{A.replace(' ','')}_to_{B.replace(' ','')}_vs_{xm}_{ylab}.png")
                     _plot_rel_gain_vs_x(
                         P,
-                        title=f"{ylab} relative gain: {A} → {B} vs {x_label} — {domain}",
+                        title=f"{ylab} relative gain: {A} → {B} — {domain}",
                         out_png=png, xlabel=x_label,
-                        ylabel=f"Relative gain (%): {A} → {B}",
+                        ylabel=f"Error increase (%)",
                         fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                         x_margin=args.x_margin, y_margin=args.y_margin,
                         tick_font=args.tick_font, tight_bbox=args.tight_bbox
