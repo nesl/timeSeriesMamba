@@ -106,7 +106,7 @@ dec_in=1
 c_out=1
 
 for pred_len in ${pred_base}; do
-  for seed in {1..3}; do
+  for seed in {1..1}; do
     for init_seed in {11..13}; do
       tag="test_fitbit_${source}_${heldout}_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"
       checkpoint_tag="fitbit_${source}_high_heldout_${og_tag}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}"

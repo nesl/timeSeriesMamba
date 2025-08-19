@@ -388,7 +388,7 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
     ax.set_ylabel(y_label, labelpad=2)
     ax.set_title(title, pad=2)
     if used:
-        ax.legend(title="Model", fontsize=legend_font, title_fontsize=legend_font, loc="best")
+        ax.legend(title="Model", fontsize=legend_font, title_fontsize=legend_font, loc="best", frameon=True, facecolor="#F0F0F0")
 
     # tighter limits & margins to reduce whitespace
     if x_vals.size:
@@ -709,12 +709,12 @@ def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
         print(f"[info] No matched x-bins for {title}")
         return
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi, layout="constrained")
-    ax.scatter(df_pairs["omega"], df_pairs["rel_gain_pct"], s=100, alpha=0.8, edgecolors="none")
+    ax.scatter(df_pairs["omega"], df_pairs["rel_gain_pct"], s=300, alpha=0.8, edgecolors="none")
     ax.axhline(0.0, color="black", linewidth=1.0, linestyle="--", alpha=0.6, label="No gain")
     ax.set_xlabel(xlabel, labelpad=2)
     ax.set_ylabel(ylabel, labelpad=2)
     ax.set_title(title, pad=2)
-    ax.legend(loc="best")
+    #ax.legend(loc="best", frameon=True, edgecolor="black")
 
      # --- make the axes less granular ---
     ax.minorticks_off()                            # kill minor ticks entirely
@@ -904,12 +904,12 @@ def main():
     ap.add_argument("--omega-label", type=str, default="both",
                     choices=["greek", "text", "both"],
                     help="Use 'Ω', 'Spectral predictability', or both in x label.")
-    ap.add_argument("--fig-w", type=float, default=6.2, help="Figure width in inches.")
-    ap.add_argument("--fig-h", type=float, default=4.0, help="Figure height in inches.")
-    ap.add_argument("--dpi", type=int, default=600, help="Figure DPI.")
-    ap.add_argument("--font", type=int, default=11, help="Base font size.")
-    ap.add_argument("--tick-font", type=int, default=10, help="Tick label font size.")
-    ap.add_argument("--legend-font", type=int, default=10, help="Legend font size.")
+    ap.add_argument("--fig-w", type=float, default=5.0, help="Figure width in inches.")
+    ap.add_argument("--fig-h", type=float, default=3.5, help="Figure height in inches.")
+    ap.add_argument("--dpi", type=int, default=800, help="Figure DPI.")
+    ap.add_argument("--font", type=int, default=14, help="Base font size.")
+    ap.add_argument("--tick-font", type=int, default=13, help="Tick label font size.")
+    ap.add_argument("--legend-font", type=int, default=8, help="Legend font size.")
     ap.add_argument("--x-margin", type=float, default=0.06, help="Fractional x padding of data span.")
     ap.add_argument("--y-margin", type=float, default=0.06, help="Fractional y padding of data span.")
     ap.add_argument("--tight-bbox", action="store_true",
@@ -968,7 +968,7 @@ def main():
                 png = os.path.join(OUT["base_mse"], f"{domain}_MSE_vs_Omega_by_model.png")
                 plot_by_model_metric(
                     df_dom, agg_mse, x_label, "MSE",
-                    title=f"MSE vs {x_label} — {domain}",
+                    title=f"MSE Error: {domain}",
                     out_png=png, jitter_x_frac=args.jitter_x_frac,
                     fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                     x_margin=args.x_margin, y_margin=args.y_margin,
@@ -980,8 +980,7 @@ def main():
         pairs = [
             ("Language Pretrained","DLinear"),
             ("Language Pretrained", "Random Init"),
-            ("Random Init", "DLinear"),
-            ("GPT2", "DLinear"),  # NEW: show GPT2 vs DLinear
+            ("Language Pretrained", "GPT2"),
         ]
         metrics = [("smape", "sMAPE"), ("mse", "MSE")]
         for domain, df_dom in df_all.groupby("domain", sort=False):
@@ -997,15 +996,16 @@ def main():
                         f"{domain}_RELGAIN_{A.replace(' ','')}_to_{B.replace(' ','')}_vs_{xm}_{ylab}.png")
                     _plot_rel_gain_vs_x(
                         P,
-                        title=f"{ylab} relative gain: {A} → {B} — {domain}",
+                        title=f"Error Increase: {domain}",
                         out_png=png, xlabel=x_label,
-                        ylabel=f"Error increase (%)",
+                        ylabel=f"{ylab} Error Increase (%)",
                         fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                         x_margin=args.x_margin, y_margin=args.y_margin,
                         tick_font=args.tick_font, tight_bbox=args.tight_bbox
                     )
 
         # ---------- Δ(Ω) plots + robust stats ----------
+        '''
         delta_specs = [
             ("Language Pretrained", "DLinear", "LLM_minus_DLinear"),
             ("Random Init", "DLinear", "RandInit_minus_DLinear"),
@@ -1045,7 +1045,7 @@ def main():
             if mix:
                 pd.DataFrame([dict(x_metric=xm, **mix)]).to_csv(
                     os.path.join(OUT["stats"], f"MIXEDEFFECTS_DELTA_{xm}.csv"), index=False)
-
+        '''
         # ---------- Aggregate summaries ----------
         aggregate_summary_across_domains(df_all, xm, out_dir=OUT["stats"])
 
