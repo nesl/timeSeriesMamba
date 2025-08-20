@@ -630,7 +630,135 @@ class TorchRidge(nn.Module):
         mse = F.mse_loss(pred, target)
         l2 = self.alpha * torch.sum(self.linear.weight ** 2)
         return mse + l2
-        
+
+# --------- Simple ARIMA baseline (pmdarima) ---------
+def _infer_sp_from_freq(freq: str) -> int:
+    """Crude seasonality guess from args.freq."""
+    if not isinstance(freq, str):
+        return 1
+    f = freq.lower()
+    if f in ('h', 'hour', 'hourly'):     # hourly → daily cycle
+        return 24
+    if f in ('t', 'min', 'minutely'):    # minutely → hour cycle (keeps it feasible with short contexts)
+        return 60
+    if f in ('d', 'day', 'daily'):       # daily → weekly cycle
+        return 7
+    return 1
+
+def _prep_univariate(y: np.ndarray) -> np.ndarray:
+    """Make ARIMA-friendly: flatten, interpolate NaNs, handle degenerate."""
+    y = np.asarray(y, dtype=np.float64).reshape(-1)
+    if np.isnan(y).any():
+        s = pd.Series(y)
+        y = s.ffill().bfill().fillna(0.0).to_numpy()
+    return y
+
+def _auto_arima_forecast(y_ctx: np.ndarray, H: int, sp: int) -> np.ndarray:
+    """
+    Fit Auto-ARIMA on context y_ctx and forecast H steps.
+    Keeps search tight for speed; falls back to last-value if fitting fails.
+    """
+    y = _prep_univariate(y_ctx)
+    # Degenerate: constant series or near-constant variance
+    if y.size == 0:
+        return np.zeros(H, dtype=np.float64)
+    if np.allclose(y, y[-1]) or np.nanstd(y) < 1e-8:
+        last = y[-1] if np.isfinite(y[-1]) else 0.0
+        return np.full(H, last, dtype=np.float64)
+
+    seasonal = (sp is not None and sp > 1 and len(y) >= 2 * sp)
+    try:
+        model = pm.auto_arima(
+            y,
+            seasonal=seasonal,
+            m=(sp if seasonal else 1),
+            start_p=0, start_q=0, max_p=3, max_q=3,
+            start_P=0, start_Q=0, max_P=1, max_Q=1,
+            max_d=2, max_D=1,
+            stepwise=True,
+            information_criterion="aic",
+            error_action="ignore",
+            suppress_warnings=True,
+            trace=False,
+            n_jobs=1,
+        )
+        fc = model.predict(n_periods=H)
+        return np.asarray(fc, dtype=np.float64)
+    except Exception:
+        last = y[-1] if len(y) else 0.0
+        return np.full(H, last, dtype=np.float64)
+
+from tqdm import tqdm
+
+def arima_eval_cpu(args, test_loader):
+    total_mse, total_mae, total_mase, total_smape = [], [], [], []
+
+    mase_m = 24 if args.freq in ['h', 'H'] else 1
+    sp = _infer_sp_from_freq(args.freq)
+
+    n_fits = 0
+    for batch in tqdm(test_loader, desc="[ARIMA] batches"):
+        batch_x, batch_y, _, _ = batch
+        f_dim = -1 if args.features == 'MS' else 0
+
+        # all CPU tensors here
+        ctx = batch_x[:, :args.seq_len, f_dim:].cpu().float()   # [B,L,D]
+        fut = batch_y[:, -args.pred_len:, f_dim:].cpu().float() # [B,H,D]
+
+        ctx_np = to_np_f32(ctx)
+        fut_np = to_np_f32(fut)
+        B, H, D = fut_np.shape
+
+        preds = np.zeros((B, H, D), dtype=np.float64)
+        for b in range(B):
+            for d in range(D):
+                preds[b, :, d] = _auto_arima_forecast(ctx_np[b, :, d], H, sp)
+        n_fits += (B * D)
+
+        # metrics
+        mse   = float(np.nanmean((preds - fut_np) ** 2))
+        mae   = float(np.nanmean(np.abs(preds - fut_np)))
+        mase  = MASE_batched(preds, fut_np, insample=ctx_np, seasonality=mase_m)
+        smape = sMAPE_batched(preds, fut_np)
+
+        total_mse.append(mse); total_mae.append(mae)
+        total_mase.append(mase); total_smape.append(smape)
+
+    print(f"[ARIMA] total per-series fits: {n_fits}")
+    return (float(np.mean(total_mse)),
+            float(np.mean(total_mae)),
+            float(np.mean(total_mase)),
+            float(np.mean(total_smape)))
+
+def _auto_arima_forecast(y_ctx: np.ndarray, H: int, sp: int) -> np.ndarray:
+    y = _prep_univariate(y_ctx)
+    if y.size == 0:
+        return np.zeros(H, dtype=np.float64)
+    if np.allclose(y, y[-1]) or np.nanstd(y) < 1e-8:
+        last = y[-1] if np.isfinite(y[-1]) else 0.0
+        return np.full(H, last, dtype=np.float64)
+
+    seasonal = (sp and sp > 1 and len(y) >= 2 * sp)
+    try:
+        model = pm.auto_arima(
+            y,
+            seasonal=seasonal,
+            m=(sp if seasonal else 1),
+            start_p=0, start_q=0, max_p=2, max_q=2,   # tighter
+            start_P=0, start_Q=0, max_P=1, max_Q=1,
+            max_d=1, max_D=1,                         # tighter
+            stepwise=True,
+            information_criterion="aic",
+            error_action="ignore",
+            suppress_warnings=True,
+            n_jobs=1,                                  # avoid thread storms
+            trace=False,
+        )
+        return np.asarray(model.predict(n_periods=H), dtype=np.float64)
+    except Exception:
+        last = y[-1] if len(y) else 0.0
+        return np.full(H, last, dtype=np.float64)
+
 def visualize_example(args, accelerator, model, test_loader):
     if not accelerator.is_local_main_process:
         return
@@ -801,6 +929,60 @@ if __name__ == '__main__':
     parser.add_argument('--use_classical_model', action='store_true', help='Use classical model like AutoARIMA/VAR')
 
     args = parser.parse_args()
+
+
+    # Fast ARIMA path: no Accelerate/DeepSpeed, run on CPU
+    if args.model.upper() == "ARIMA":
+        try:
+            repo = git.Repo(search_parent_directories=True)
+            commit_hash = repo.head.object.hexsha
+
+            wandb.init(project = 'TimeMamba')
+            #wandb.config.update(args)
+            wandb.config.update({
+            'git_commit': commit_hash,
+            'layer count': args.llm_layers,
+            'd_model': args.d_model,
+            'train epochs': args.train_epochs,
+            'model id': args.model_id,
+            'model' : args.model,
+            'LLM used': args.llm_model+"_LLM",
+            'dsampfactor': args.dsampfactor,
+            'percent': args.percent,
+            'col_percent': args.col_percent,
+            'train_percent': args.train_percent,
+            'rand_init': args.rand_init,
+            'seed': args.seed,
+            'init_seed': args.init_seed,
+            'pred_len': args.pred_len,
+            'seq_len': args.seq_len, 
+            'pretrain': args.pretrain,
+            'finetune_llm': args.finetune_llm,
+            'split_type': args.split_type,
+            'source': args.source,
+            'heldout': args.heldout
+        })
+        except Exception as e:
+            print(f"Failed to initialize wandb: {e}")
+            args.use_wandb = 0
+        # keep dataloader simple to avoid worker/fork overhead
+        args.num_workers = 0
+        # small batch is fine; we iterate anyway
+        args.eval_batch_size = max(1, min(8, args.eval_batch_size))
+
+        # Load test data
+        test_data, test_loader = data_provider(args, 'test')
+
+        # ---- ARIMA eval (CPU) ----
+        mse, mae, mase, smape = arima_eval_cpu(args, test_loader)
+        print(f"[ARIMA] MSE: {mse}")
+        print(f"[ARIMA] MAE: {mae}")
+        print(f"[ARIMA] MASE: {mase}")
+        print(f"[ARIMA] sMAPE: {smape}")
+        if args.use_wandb:
+            wandb.log({"MSE loss": mse, "MAE loss": mae, "MASE loss": mase, "sMAPE": smape})
+            wandb.finish()
+        sys.exit(0)
 
     ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
     

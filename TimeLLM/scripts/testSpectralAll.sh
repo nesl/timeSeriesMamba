@@ -215,8 +215,21 @@ run_pems() {
             --seed ${seed} --init_seed ${init_seed} --use_wandb 1 --visualize \
             --source \"$source_type\" --heldout \"$E_H\" \
             > \"results/pems_eval/${tag/_TRAIN${T_H}_/}_EVAL${E_H}.txt\" 2>&1"
+        elif [[ "$model_name" == "ARIMA" ]]; then
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast \
+            --model_id \"pems_arima_${E_H}_eval_${seq_len}_${pred_len}\" \
+            --model \"ARIMA\" --data Traffic \
+            --root_path \"$ROOT\" --data_path_test \"$(basename "$TEST_EVAL")\" \
+            --features \"$features\" --seq_len ${seq_len} --label_len 48 --pred_len ${pred_len} --factor 3 \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --d_model ${d_model} --d_ff 32 --llm_layers 0 \
+            --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"ARIMA\" \
+            --seed ${seed} --init_seed ${init_seed} --use_wandb 1 --visualize \
+            --source \"$source_type\" --heldout \"$E_H\" \
+            > \"results/pems_eval/pems_ARIMA_${E_H}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}.txt\" 2>&1"
         else
-          # TimeLLM fixed ckpt path (training heldout baked in your scheme)
           local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t100_c100_r${rand_init}"
           local ckpt_path="checkpoints/pems_PEMS_high_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}/checkpoint"
           [[ -f "$ckpt_path" || $dry_run -eq 1 ]] || { echo "[ERROR] $ckpt_path missing"; exit 2; }
@@ -299,8 +312,25 @@ run_unisynth() {
               --source \"uniSynth\" --use_wandb 1 --heldout \"$E_H\" \
               > \"results/uniSynth_eval/${tag/_TRAIN${T_H}_/}_EVAL${E_H}.txt\" 2>&1"
           done
+        elif [[ "$model_name" == "ARIMA" ]]; then
+          for E_H in "${E_list[@]}"; do
+            local TEST_EVAL="${ROOT}/region_test_om0p${E_H}.csv"
+            [[ -f "$TEST_EVAL" ]] || { echo "Missing eval file: $TEST_EVAL"; exit 2; }
+            run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+              --task_name long_term_forecast --root_path \"$ROOT/\" \
+              --data_path_test \"$(basename "$TEST_EVAL")\" \
+              --model_id \"unisynth_arima_${E_H}_eval_${seq_len}_${pred_len}\" \
+              --model \"ARIMA\" --data Synthetic --features M \
+              --seq_len ${seq_len} --label_len 48 --factor 3 \
+              --enc_in 1 --dec_in 1 --c_out 1 --pred_len ${pred_len} \
+              --d_model ${d_model} --d_ff 32 --llm_layers 0 \
+              --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+              --rand_init ${rand_init} --checkpoint_path \"ARIMA\" \
+              --seed ${seed} --init_seed ${init_seed} --visualize \
+              --source \"uniSynth\" --use_wandb 1 --heldout \"$E_H\" \
+              > \"results/uniSynth_eval/unisynth_ARIMA_${E_H}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}.txt\" 2>&1"
+          done
         else
-          # TimeLLM fixed ckpt path (trained at h200)
           local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
           local base_ckpt="checkpoints/uniSynthPSD_${og}_h200_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}/checkpoint"
           [[ -f "$base_ckpt" || $dry_run -eq 1 ]] || { echo "[ERROR] $base_ckpt missing"; exit 2; }
@@ -321,6 +351,7 @@ run_unisynth() {
           done
         fi
       fi
+
 
       [[ "$rand_init" -eq 0 ]] && break
     done
@@ -369,7 +400,6 @@ run_carboncast() {
       if [[ "$stage" != "train" ]]; then
         if [[ "$model_name" == "DLinear" ]]; then
           local base_ckpt="checkpoints/carbon_TRAINCISO_solar_dlin_e10_f1_r0_seq${seq_len}_pred${pred_len}_s${seed}_i${init_seed}/checkpoint"
-
           run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
             --task_name long_term_forecast --root_path \"$ROOT/\" \
             --data_path_test \"$data_path_eval\" \
@@ -382,8 +412,20 @@ run_carboncast() {
             --rand_init ${rand_init} --checkpoint_path \"$base_ckpt\" \
             --seed ${seed} --init_seed ${init_seed} --visualize --source \"$source_type\" --use_wandb 1 --heldout \"$heldout\" \
             > \"results/carbon_eval/${tag/_TRAIN${T_H}_/}_EVAL${heldout}.txt\" 2>&1"
+        elif [[ "$model_name" == "ARIMA" ]]; then
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast --root_path \"$ROOT/\" \
+            --data_path_test \"$data_path_eval\" \
+            --model_id \"carbon_arima_${heldout}_${source_type}_eval_${seq_len}_${pred_len}\" \
+            --model \"ARIMA\" --data \"$data_name\" --features \"$features\" \
+            --seq_len ${seq_len} --label_len 48 --factor 3 \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --pred_len ${pred_len} --d_model ${d_model} --d_ff 32 --llm_layers 0 \
+            --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"ARIMA\" \
+            --seed ${seed} --init_seed ${init_seed} --visualize --source \"$source_type\" --use_wandb 1 --heldout \"$heldout\" \
+            > \"results/carbon_eval/carbon_ARIMA_${heldout}_${source_type}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}.txt\" 2>&1"
         else
-          # TimeLLM fixed path per your scheme
           local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
           local ckpt_path="checkpoints/spectralUni_CISO_solar_p05_${og}_seq${seq_len}_pred${pred_len}/s${seed}_i${init_seed}/checkpoint"
           [[ -f "$ckpt_path" || $dry_run -eq 1 ]] || { echo "[ERROR] $ckpt_path missing"; exit 2; }
@@ -401,6 +443,7 @@ run_carboncast() {
             > \"results/spectralUniTest/spectralUniTest_${heldout}_${source_type}_heldout_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}.txt\" 2>&1"
         fi
       fi
+
 
       [[ "$rand_init" -eq 0 ]] && break
     done
@@ -459,11 +502,26 @@ run_fitbit() {
             --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
             --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
             --percent ${percent} --col_percent ${col_percent} \
-            --d_model ${d_model} --d_ff ${d_ff} --batch_size ${batch_size} \
+            --d_model ${d_model} --d_ff 32 --batch_size ${batch_size} \
             --llm_layers ${llm_layers} --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
             --checkpoint_path \"$ckpt_path\" --rand_init ${rand_init} \
             --seed ${seed} --init_seed ${init_seed} --source \"$source\" --use_wandb 1 --visualize \
             > \"results/fitbit_eval/${tag/_TRAIN${T_H}_/}_EVAL${E_H}.txt\" 2>&1"
+        elif [[ "$model_name" == "ARIMA" ]]; then
+          run_or_echo "accelerate launch $force_mp --num_processes ${num_process} --main_process_port ${master_port} seed_evaluate.py \
+            --task_name long_term_forecast --root_path \"${ROOT}/\" \
+            --data_path_test \"$(basename "$TEST_EVAL")\" \
+            --model_id \"fitbit_arima_${source}_${E_H}_eval\" \
+            --model \"ARIMA\" --data \"$data_name\" --features \"$features\" \
+            --seq_len ${seq_len} --label_len 48 --factor 3 --freq t \
+            --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
+            --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
+            --percent ${percent} --col_percent ${col_percent} \
+            --d_model ${d_model} --d_ff 32 --batch_size ${batch_size} \
+            --llm_layers 0 --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
+            --rand_init ${rand_init} --checkpoint_path \"ARIMA\" \
+            --seed ${seed} --init_seed ${init_seed} --source \"$source\" --use_wandb 1 --visualize \
+            > \"results/fitbit_eval/fitbit_ARIMA_${source}_${E_H}_seq${seq_len}_pred${pred_len}_seed${seed}_init${init_seed}.txt\" 2>&1"
         else
           local og="l${llm_layers}_d${d_model}_e${train_epochs}_m${llm_model}_n${num_params}_f${downsampling_factor}_t${percent}_c${col_percent}_r${rand_init}"
           local ckpt_path="checkpoints/fitbit_${source}_high_heldout_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}/checkpoint"
@@ -477,13 +535,14 @@ run_fitbit() {
             --enc_in ${enc_in} --dec_in ${dec_in} --c_out ${c_out} \
             --pred_len ${pred_len} --dsampfactor ${downsampling_factor} \
             --percent ${percent} --col_percent ${col_percent} \
-            --d_model ${d_model} --d_ff ${d_ff} --batch_size ${batch_size} \
+            --d_model ${d_model} --d_ff 32 --batch_size ${batch_size} \
             --llm_layers ${llm_layers} --llm_model \"$llm_model\" --llm_dim ${llm_dim} --num_params \"$num_params\" \
             --checkpoint_path \"$ckpt_path\" --rand_init ${rand_init} \
             --seed ${seed} --init_seed ${init_seed} --source \"$source\" --use_wandb 1 --visualize \
             > \"results/fitbit_eval/test_fitbit_${source}_${E_H}_heldout_${og}_seq${seq_len}_pred${pred_len}_seed${seed}_initseed${init_seed}.txt\" 2>&1"
         fi
       fi
+
 
       [[ "$rand_init" -eq 0 ]] && break
     done

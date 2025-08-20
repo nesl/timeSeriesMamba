@@ -949,7 +949,7 @@ def main():
             png = os.path.join(OUT["base"], f"{domain}_sMAPE_vs_{xm}_by_model.png")
             plot_by_model_metric(
                 df_dom, agg, x_label, "sMAPE",
-                title=f"sMAPE vs {x_label} — {domain}",
+                title=f"sMAPE: {domain}",
                 out_png=png, jitter_x_frac=args.jitter_x_frac,
                 fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                 x_margin=args.x_margin, y_margin=args.y_margin,
