@@ -742,7 +742,6 @@ def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
     plt.close(fig)
     print(f"Saved {out_png}")
 
-# ---------- NEW: output layout helpers ----------
 def make_out_dirs(base_dir: str, xm: str) -> Dict[str, str]:
     root = os.path.join(base_dir, xm)
     sub = {
@@ -751,10 +750,12 @@ def make_out_dirs(base_dir: str, xm: str) -> Dict[str, str]:
         "rel": os.path.join(root, "rel"),
         "delta": os.path.join(root, "delta"),
         "stats": os.path.join(root, "stats"),
+        "tables": os.path.join(root, "tables"),   # NEW
     }
     for p in sub.values():
         os.makedirs(p, exist_ok=True)
     return sub
+
 
 # ---------- NEW: compute Δ vs x per domain ----------
 def _delta_pairs_unbinned(df_dom: pd.DataFrame,
@@ -881,6 +882,152 @@ def mixed_effects_delta(df_all_deltas: pd.DataFrame) -> Dict[str, float]:
         print(f"[warn] MixedLM failed: {e}")
         return {}
 
+def _sen_and_ranks(x: np.ndarray, y: np.ndarray) -> Tuple[float, float, float, int]:
+    """Returns (theilsen_slope, spearman_rho, pearson_r, n)."""
+    x = np.asarray(x, float); y = np.asarray(y, float)
+    m = np.isfinite(x) & np.isfinite(y)
+    x, y = x[m], y[m]
+    n = int(x.size)
+    if n < 3:
+        return (np.nan, np.nan, np.nan, n)
+    slope, _ = _theilsen(x, y)
+    rho = _spearman(x, y)
+    r = _pearson_r(x, y)
+    return (slope, rho, r, n)
+
+def _mixed_effects_slope(df: pd.DataFrame, xcol: str, ycol: str, groupcol: str = "domain") -> Dict[str, float]:
+    """Mixed effects slope (if statsmodels present), else {}."""
+    if sm is None or df.empty: return {}
+    D = df.copy()
+    D = D[np.isfinite(D[xcol]) & np.isfinite(D[ycol])]
+    if D.empty: return {}
+    try:
+        X = sm.add_constant(D[xcol])
+        model = sm.MixedLM(D[ycol], X, groups=D[groupcol])
+        res = model.fit(reml=True, method="lbfgs", disp=False)
+        slope = float(res.params.get(xcol, np.nan))
+        se    = float(res.bse.get(xcol, np.nan))
+        z = slope / se if (np.isfinite(slope) and se and np.isfinite(se)) else np.nan
+        p = float(2.0*sm.stats.norm.sf(np.abs(z))) if np.isfinite(z) else np.nan
+        return {"slope": slope, "se": se, "p": p}
+    except Exception as e:
+        print(f"[warn] MixedLM (tables) failed: {e}")
+        return {}
+
+def build_table_mse_vs_omega(df_all: pd.DataFrame, out_dir: str) -> None:
+    # Per-domain, per-model stats
+    rows = []
+    for (dom, model), g in df_all.groupby(["domain", "model"], sort=False):
+        x = g["metric"].to_numpy(float)   # Omega on x
+        y = g["mse"].to_numpy(float)
+        slope, rho, r, n = _sen_and_ranks(x, y)
+        rows.append(dict(domain=dom, model=model, n=n,
+                         theilsen_slope=slope, spearman_rho=rho, pearson_r=r))
+    df_dom = pd.DataFrame(rows).sort_values(["model", "domain"])
+
+    # Across-domain summaries per model
+    agg_rows = []
+    for model, gm in df_dom.groupby("model", sort=False):
+        valid = gm[np.isfinite(gm["theilsen_slope"]) & (gm["n"] >= 3)]
+        n_dom = int(valid.shape[0])
+        median_slope = float(np.nanmedian(valid["theilsen_slope"])) if n_dom else np.nan
+        # weight by #points contributing per-domain
+        w = valid["n"].to_numpy(int) if n_dom else np.array([], int)
+        w = np.maximum(w, 1)
+        wmean_slope = float(np.nansum(valid["theilsen_slope"].to_numpy(float) * w) / np.nansum(w)) if n_dom else np.nan
+
+        # Mixed effects slope on raw rows (model-specific)
+        D = df_all[df_all["model"] == model][["domain", "metric", "mse"]].rename(columns={"metric":"omega"})
+        mix = _mixed_effects_slope(D, "omega", "mse", "domain")
+        agg_rows.append(dict(
+            model=model, n_domains=n_dom,
+            median_slope=median_slope, weighted_mean_slope=wmean_slope,
+            mixed_slope=mix.get("slope", np.nan),
+            mixed_se=mix.get("se", np.nan),
+            mixed_p=mix.get("p", np.nan)
+        ))
+    df_agg = pd.DataFrame(agg_rows).sort_values("model")
+
+    # Save CSVs (and optional Markdown mirrors)
+    csv1 = os.path.join(out_dir, "Tables_MSE_vs_Omega_by_model_per_domain.csv")
+    csv2 = os.path.join(out_dir, "Tables_MSE_vs_Omega_by_model.csv")
+    df_dom.to_csv(csv1, index=False)
+    df_agg.to_csv(csv2, index=False)
+    print(f"[tables] wrote {csv1}")
+    print(f"[tables] wrote {csv2}")
+
+    # (Optional) pretty markdown for appendix
+    try:
+        with open(os.path.join(out_dir, "Tables_MSE_vs_Omega_by_model.md"), "w") as f:
+            f.write("## MSE vs Ω — Across Domains (per model)\n\n")
+            f.write(df_agg.to_markdown(index=False))
+            f.write("\n\n## MSE vs Ω — Per Domain (per model)\n\n")
+            f.write(df_dom.to_markdown(index=False))
+    except Exception:
+        pass
+
+def build_table_error_increase_vs_omega(df_all: pd.DataFrame,
+                                        pairs: List[Tuple[str,str]],
+                                        ykey: str,
+                                        out_dir: str,
+                                        round_digits: int = 3) -> None:
+    """
+    For each (A,B) pair, compute rel_gain_pct = 100*(ErrA-ErrB)/ErrA per Ω-bin,
+    then report slope( rel_gain_pct ~ Ω ) per-domain + across-domain mixed effect.
+    """
+    for A, B in pairs:
+        # Collect per-domain per-bin pairs
+        per_dom = []
+        for domain, df_dom in df_all.groupby("domain", sort=False):
+            # build A/B aggregated by Ω-bin
+            P = _relative_gain_by_xbin(df_dom, A, B, ykey=ykey, round_digits=round_digits)
+            if P.empty:
+                continue
+            x = P["omega"].to_numpy(float)
+            y = P["rel_gain_pct"].to_numpy(float)
+            slope, rho, r, n = _sen_and_ranks(x, y)
+            per_dom.append(dict(domain=domain, pair=f"{A}→{B}", n=n,
+                                theilsen_slope=slope, spearman_rho=rho, pearson_r=r))
+
+        df_dom = pd.DataFrame(per_dom).sort_values("domain")
+        # Across-domain: mixed effects on the concatenated per-bin points
+        rows_all = []
+        for domain, df_dom2 in df_all.groupby("domain", sort=False):
+            P = _relative_gain_by_xbin(df_dom2, A, B, ykey=ykey, round_digits=round_digits)
+            if not P.empty:
+                rows_all.append(P.assign(pair=f"{A}→{B}"))
+        DF = pd.concat(rows_all, ignore_index=True) if rows_all else pd.DataFrame(columns=["domain","omega","rel_gain_pct"])
+        mix = _mixed_effects_slope(DF.rename(columns={"rel_gain_pct":"gain"}), "omega", "gain", "domain") if not DF.empty else {}
+
+        # Macro summaries
+        n_dom = int(np.sum(np.isfinite(df_dom["theilsen_slope"])))
+        med_slope = float(np.nanmedian(df_dom["theilsen_slope"])) if n_dom else np.nan
+        mean_slope = float(np.nanmean(df_dom["theilsen_slope"])) if n_dom else np.nan
+
+        # Save CSVs
+        safe_pair = f"{A.replace(' ','')}_to_{B.replace(' ','')}"
+        csv1 = os.path.join(out_dir, f"Tables_ErrorIncrease_vs_Omega_{safe_pair}_per_domain.csv")
+        csv2 = os.path.join(out_dir, f"Tables_ErrorIncrease_vs_Omega_{safe_pair}_aggregate.csv")
+        df_dom.to_csv(csv1, index=False)
+        pd.DataFrame([dict(pair=f"{A}→{B}", n_domains=n_dom,
+                           median_slope=med_slope, mean_slope=mean_slope,
+                           mixed_slope=mix.get("slope", np.nan),
+                           mixed_se=mix.get("se", np.nan),
+                           mixed_p=mix.get("p", np.nan))]).to_csv(csv2, index=False)
+        print(f"[tables] wrote {csv1}")
+        print(f"[tables] wrote {csv2}")
+
+        # Optional Markdown
+        try:
+            with open(os.path.join(out_dir, f"Tables_ErrorIncrease_vs_Omega_{safe_pair}.md"), "w") as f:
+                f.write(f"## Error Increase (%), Ω slope — {A} → {B}\n\n")
+                f.write("### Across domains\n\n")
+                f.write(pd.read_csv(csv2).to_markdown(index=False))
+                f.write("\n\n### Per domain\n\n")
+                f.write(pd.read_csv(csv1).to_markdown(index=False))
+        except Exception:
+            pass
+
 # ------------------- Main -------------------
 def main():
     ap = argparse.ArgumentParser()
@@ -976,6 +1123,19 @@ def main():
                     tight_bbox=args.tight_bbox
                 )
 
+        if xm.lower() == "omega":
+            # 1) MSE vs Ω table (per model)
+            build_table_mse_vs_omega(df_all, OUT["tables"])
+
+            # 2) Error-increase vs Ω tables for requested pairs (using MSE)
+            pair_list = [
+                ("Language Pretrained", "DLinear"),
+                ("Language Pretrained", "Random Init"),
+                ("Language Pretrained", "GPT2"),
+            ]
+            build_table_error_increase_vs_omega(df_all, pairs=pair_list, ykey="mse",
+                                                out_dir=OUT["tables"], round_digits=args.round)
+                                                
         # ---------- per-domain relative-gain plots + CSVs ----------
         pairs = [
             ("Language Pretrained","DLinear"),

@@ -1,0 +1,5 @@
+model,n_domains,median_slope,weighted_mean_slope,mixed_slope,mixed_se,mixed_p
+DLinear,4,-0.9681892131525948,-1.064023008632747,,,
+GPT2,4,-1.0846233822110616,-0.9762432058319573,,,
+Language Pretrained,4,-1.169707525589767,-0.9868501624163608,,,
+Random Init,4,-1.0895963868025036,-1.1085757963466103,,,

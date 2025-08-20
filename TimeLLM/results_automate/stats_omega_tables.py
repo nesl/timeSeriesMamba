@@ -36,7 +36,6 @@ DEFAULT_LOG_DIRS = [
     "../results/spectralUniTest/",
     "../results/uniSynth_eval/",
 ]
-
 DEFAULT_OUT_DIR = "./out"
 
 DOMAIN_NAME_FIX = {
@@ -178,10 +177,10 @@ def _first_crossing_x(xs, ys):
     return np.nan
 
 # ------------------- Load & normalize -------------------
-def find_csvs_from_defaults() -> List[str]:
+def find_txts_from_defaults() -> List[str]:
     files = []
     for d in DEFAULT_LOG_DIRS:
-        files.extend(glob.glob(os.path.join(d, "**", "*.csv"), recursive=True))
+        files.extend(glob.glob(os.path.join(d, "**", "*.txt"), recursive=True))
     return sorted(set(files))
 
 def detect_col(df: pd.DataFrame, pats: List[re.Pattern]) -> Optional[str]:
@@ -205,9 +204,9 @@ def add_domain_model(df: pd.DataFrame, src_path: str) -> pd.DataFrame:
     return df
 
 def load_all() -> pd.DataFrame:
-    files = find_csvs_from_defaults()
+    files = find_txts_from_defaults()
     if not files:
-        raise FileNotFoundError("No CSVs found under DEFAULT_LOG_DIRS.")
+        raise FileNotFoundError("No txt found under DEFAULT_LOG_DIRS.")
     frames = []
     for f in files:
         try:
@@ -217,7 +216,7 @@ def load_all() -> pd.DataFrame:
         df = add_domain_model(df, f)
         frames.append(df)
     if not frames:
-        raise RuntimeError("No readable CSVs.")
+        raise RuntimeError("No readable txt.")
     df = pd.concat(frames, ignore_index=True)
 
     # Detect columns
