@@ -1053,7 +1053,7 @@ def main():
                     help="Use 'Ω', 'Spectral predictability', or both in x label.")
     ap.add_argument("--fig-w", type=float, default=5.0, help="Figure width in inches.")
     ap.add_argument("--fig-h", type=float, default=3.5, help="Figure height in inches.")
-    ap.add_argument("--dpi", type=int, default=800, help="Figure DPI.")
+    ap.add_argument("--dpi", type=int, default=600, help="Figure DPI.")
     ap.add_argument("--font", type=int, default=14, help="Base font size.")
     ap.add_argument("--tick-font", type=int, default=13, help="Tick label font size.")
     ap.add_argument("--legend-font", type=int, default=12, help="Legend font size.")
@@ -1156,9 +1156,9 @@ def main():
                         f"{domain}_RELGAIN_{A.replace(' ','')}_to_{B.replace(' ','')}_vs_{xm}_{ylab}.png")
                     _plot_rel_gain_vs_x(
                         P,
-                        title=f"Error Increase: {domain}",
+                        title=f"Error Increase ∆: {domain}",
                         out_png=png, xlabel=x_label,
-                        ylabel=f"{ylab} Error Increase (%)",
+                        ylabel=f"{ylab} Error Increase ∆ (%)",
                         fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                         x_margin=args.x_margin, y_margin=args.y_margin,
                         tick_font=args.tick_font, tight_bbox=args.tight_bbox
