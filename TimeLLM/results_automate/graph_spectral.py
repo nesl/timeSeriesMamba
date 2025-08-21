@@ -1054,8 +1054,8 @@ def main():
     ap.add_argument("--fig-w", type=float, default=5.0, help="Figure width in inches.")
     ap.add_argument("--fig-h", type=float, default=3.5, help="Figure height in inches.")
     ap.add_argument("--dpi", type=int, default=600, help="Figure DPI.")
-    ap.add_argument("--font", type=int, default=14, help="Base font size.")
-    ap.add_argument("--tick-font", type=int, default=13, help="Tick label font size.")
+    ap.add_argument("--font", type=int, default=19, help="Base font size.")
+    ap.add_argument("--tick-font", type=int, default=17, help="Tick label font size.")
     ap.add_argument("--legend-font", type=int, default=12, help="Legend font size.")
     ap.add_argument("--x-margin", type=float, default=0.06, help="Fractional x padding of data span.")
     ap.add_argument("--y-margin", type=float, default=0.06, help="Fractional y padding of data span.")
@@ -1158,7 +1158,7 @@ def main():
                         P,
                         title=f"Error Increase ∆: {domain}",
                         out_png=png, xlabel=x_label,
-                        ylabel=f"{ylab} Error Increase ∆ (%)",
+                        ylabel=f"Error Increase ∆ (%)",
                         fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                         x_margin=args.x_margin, y_margin=args.y_margin,
                         tick_font=args.tick_font, tight_bbox=args.tight_bbox
