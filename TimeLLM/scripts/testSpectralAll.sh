@@ -51,14 +51,14 @@ usage() {
   cat <<USAGE
 Usage:
   $0 -u <suite:{pems|unisynth|carboncast|fitbit}> -m <model> -g <gpu_id>
-     [-h <heldout(EVAL)>] [-s <source_type>] [-n <num_params>] [-p <master_port>]
+     [-h <heldout EVAL: name or path>] [-s <source_type>] [-n <num_params>] [-p <master_port>]
      [-r <rand_init>] [-z <seed_range>] [-i <init_seed_range>]
      [--train-heldout <value>] [--stage train|eval|both] [--dry-run] [-x <no>]
 
 Notes:
 - DLinear: trains with seed_process.py using --train-heldout ONLY,
            saves ckpts/logs with *train-heldout* in path,
-           eval can target any --heldout using the same ckpt.
+           eval can target any --heldout (e.g., 651 -> test_651.csv or a direct CSV path).
 - TimeLLM/others: eval-only with your fixed checkpoint paths.
 - Fitbit dir fixed: ${fitbit_dataset_dir}
 - Precision: pass -x no to force fp32 (default bf16).
@@ -553,9 +553,10 @@ run_fitbit() {
 # Dispatch
 ########################################
 case "$suite" in
-  pems)       [[ -z "$heldout" ]] && { echo "pems requires -h <low|medium|high> for eval"; exit 2; }; run_pems ;;
+  pems)       run_pems ;;
   unisynth)   run_unisynth ;;
-  carboncast) [[ -z "$heldout" || -z "$source_type" ]] && { echo "carboncast requires -h <heldout> -s <source_type>"; exit 2; }; run_carboncast ;;
-  fitbit)     [[ -z "$heldout" ]] && { echo "fitbit requires -h <UXXX>"; exit 2; }; run_fitbit ;;
+  carboncast) run_carboncast ;;
+  fitbit)     run_fitbit ;;
   *) usage ;;
 esac
+

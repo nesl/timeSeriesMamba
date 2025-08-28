@@ -41,6 +41,41 @@
       "se": 0.7189278121238717,
       "rows": 43895,
       "csv": "heldout/PJM__oil__p95.csv"
+    },
+    {
+      "percentile": 5,
+      "region": "TVA::nuclear",
+      "se": 0.25498746641651604,
+      "rows": 43896,
+      "csv": "heldout/TVA__nuclear__p05_extra.csv"
+    },
+    {
+      "percentile": 30,
+      "region": "FR::nuclear",
+      "se": 0.3924430998556531,
+      "rows": 52680,
+      "csv": "heldout/FR__nuclear__p30_extra.csv"
+    },
+    {
+      "percentile": 55,
+      "region": "PJM::other",
+      "se": 0.4743927096514003,
+      "rows": 43895,
+      "csv": "heldout/PJM__other__p55_extra.csv"
+    },
+    {
+      "percentile": 75,
+      "region": "PJM::hydro",
+      "se": 0.5291572938210014,
+      "rows": 43895,
+      "csv": "heldout/PJM__hydro__p75_extra.csv"
+    },
+    {
+      "percentile": 100,
+      "region": "FR::oil",
+      "se": 0.7881512138655343,
+      "rows": 52680,
+      "csv": "heldout/FR__oil__p100_extra.csv"
     }
   ]
 }
