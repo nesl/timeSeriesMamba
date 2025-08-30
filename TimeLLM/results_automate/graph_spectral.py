@@ -106,6 +106,25 @@ X_METRIC_PATS = {
 }
 
 # ------------------- Helpers -------------------
+def _save_multi(fig, out_path_png: str, tight_bbox: bool, extra_exts=("pdf", "svg")):
+    """Save the figure as the given PNG path and also vector formats (pdf/svg)."""
+    base, _ = os.path.splitext(out_path_png)
+
+    # PNG (optional: keep if you still want rasters)
+    if tight_bbox:
+        fig.savefig(out_path_png, bbox_inches="tight", dpi=plt.rcParams.get("savefig.dpi", 600))
+    else:
+        fig.savefig(out_path_png, dpi=plt.rcParams.get("savefig.dpi", 600))
+
+    # Vectors
+    for ext in extra_exts:
+        out_vec = f"{base}.{ext}"
+        if tight_bbox:
+            fig.savefig(out_vec, bbox_inches="tight")
+        else:
+            fig.savefig(out_vec)
+    print(f"Saved {out_path_png} and {[f'{base}.{e}' for e in extra_exts]}")
+
 def norm_key(s: str) -> str:
     return re.sub(r"\s+", "_", s.strip().lower())
 
@@ -202,6 +221,9 @@ def apply_rc(font=11, tick_font=10, legend_font=10):
         "grid.alpha": 0.30,
         "legend.frameon": False,
         "figure.autolayout": False,  # we use constrained layout per-figure
+        "pdf.fonttype": 42,   # TrueType in PDF (editable)
+        "ps.fonttype": 42,
+        "svg.fonttype": "none",
     })
 
 def label_for_omega(mode: str) -> str:
@@ -406,12 +428,9 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
     ax.tick_params(axis="both", which="major", labelsize=tick_font)
     ax.margins(x=0, y=0)
 
-    if tight_bbox:
-        fig.savefig(out_png, bbox_inches="tight", dpi=dpi)
-    else:
-        fig.savefig(out_png, dpi=dpi)
+    _save_multi(fig, out_png, tight_bbox, extra_exts=("pdf", "svg"))
     plt.close(fig)
-    print(f"Saved {out_png}")
+
 
 # ------------------- Stats (per-domain) -------------------
 def _pearson_r(x, y):
@@ -735,12 +754,8 @@ def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
         ax.set_ylim(ylo, yhi)
 
     ax.tick_params(axis="both", which="major", labelsize=tick_font)
-    if tight_bbox:
-        fig.savefig(out_png, bbox_inches="tight", dpi=dpi)
-    else:
-        fig.savefig(out_png, dpi=dpi)
+    _save_multi(fig, out_png, tight_bbox, extra_exts=("pdf", "svg"))
     plt.close(fig)
-    print(f"Saved {out_png}")
 
 def make_out_dirs(base_dir: str, xm: str) -> Dict[str, str]:
     root = os.path.join(base_dir, xm)
@@ -851,12 +866,9 @@ def plot_delta_vs_x(df_delta: pd.DataFrame,
     ax.set_ylim(ylo, yhi)
 
     ax.tick_params(axis="both", which="major", labelsize=tick_font)
-    if tight_bbox:
-        fig.savefig(out_png, bbox_inches="tight", dpi=dpi)
-    else:
-        fig.savefig(out_png, dpi=dpi)
+    _save_multi(fig, out_png, tight_bbox, extra_exts=("pdf", "svg"))
     plt.close(fig)
-    print(f"Saved {out_png}")
+
 
     fit["spearman_rho"] = rho
     return fit
