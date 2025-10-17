@@ -21,6 +21,7 @@ TimeLLM/dataset/**
 !TimeLLM/dataset/CarbonCast/**
 !TimeLLM/dataset/synthetic_data/**
 !TimeLLM/dataset/synthetic_data/
+!gift_eval/git_repo/results/
 Mamba4Cast/
 Time-Series-Library/
 uni2ts/

@@ -16,6 +16,7 @@ from statsforecast.models import AutoARIMA
 from statsforecast.arima import arima_string
 
 from models import Autoformer, DLinear, TimeMamba, TimeLLM
+from models import PatchTST 
 
 from data_provider.data_factory import data_provider
 import time
@@ -1044,6 +1045,8 @@ if __name__ == '__main__':
         model = Autoformer.Model(args).float()
     elif args.model == 'DLinear':
         model = DLinear.Model(args).float()
+     elif args.model == 'PatchTST':  # NEW
+        model = PatchTST.Model(args).float()
     elif args.model == 'Ridge':
         model = DLinear.Model(args).float() #but realy we're going to overwrite this
     else:
@@ -1067,12 +1070,12 @@ if __name__ == '__main__':
                                             epochs=args.train_epochs,
                                             max_lr=args.learning_rate)
 
-    if not args.llm_model == "Ridge":
-        # Load model weights from checkpoint
+    if args.model not in ['PatchTST', 'Ridge']: 
+            # Load model weights from checkpoint
         model.load_state_dict(torch.load(args.checkpoint_path,  map_location=lambda storage, loc: storage))
         
     test_loader,model,model_optim = accelerator.prepare(test_loader,model,model_optim)
-
+   
     if args.llm_model == "Ridge":
         in_dim = args.seq_len * args.enc_in
         out_dim = args.pred_len * args.dec_in

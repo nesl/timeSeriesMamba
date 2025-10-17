@@ -16,6 +16,7 @@ from statsforecast.models import AutoARIMA
 from statsforecast.arima import arima_string
 
 from models import Autoformer, DLinear, TimeMamba, TimeLLM
+from models import PatchTST  
 
 from data_provider.data_factory import data_provider
 import time
@@ -299,6 +300,8 @@ if __name__ == '__main__':
         model = Autoformer.Model(args).float()
     elif args.model == 'DLinear':
         model = DLinear.Model(args).float()
+    elif args.model == 'PatchTST':  # NEW
+        model = PatchTST.Model(args).float()
     elif args.model == "Mamba4Cast":
         #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         ssm_config = {
