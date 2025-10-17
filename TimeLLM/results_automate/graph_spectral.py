@@ -296,35 +296,122 @@ def load_all_dirs(log_dirs: List[str], x_metric_name: str) -> pd.DataFrame:
     return df
 
 # ------------------- Aggregation (base plots) -------------------
-def aggregate_by_model_metric_y(df_raw: pd.DataFrame, ykey: str, round_digits: int = 3) -> pd.DataFrame:
+def aggregate_by_model_metric_y(df_raw: pd.DataFrame,
+                                ykey: str,
+                                round_digits: int = 3,
+                                ci_type: str = "sem",
+                                ci_level: float = 0.95,
+                                ci_group: str = "base_key",
+                                ci_bootstrap_B: int = 2000,
+                                min_bin_n: int = 2) -> pd.DataFrame:
+    """
+    Aggregate y vs x-bin per model and compute 95% CIs.
+    ci_group controls independence: 'base_key' | 'seed' | 'init' | 'raw'
+    """
     if df_raw.empty or ykey not in df_raw.columns:
         return pd.DataFrame(columns=[
-            "model","metric_bin","n_raw","n_seeds","n_inits","n_base_keys",
-            "metric_mean","y_mean","y_low","y_high"
+            "model","metric_bin","n_raw","n_repl","n_seeds","n_inits","n_base_keys",
+            "metric_mean","y_mean","y_low","y_high","ci_low","ci_high"
         ])
     df = df_raw.copy()
     df = df[np.isfinite(df["metric"]) & np.isfinite(df[ykey])]
     if df.empty:
         return pd.DataFrame(columns=[
-            "model","metric_bin","n_raw","n_seeds","n_inits","n_base_keys",
-            "metric_mean","y_mean","y_low","y_high"
+            "model","metric_bin","n_raw","n_repl","n_seeds","n_inits","n_base_keys",
+            "metric_mean","y_mean","y_low","y_high","ci_low","ci_high"
         ])
+
     df["metric_bin"] = df["metric"].round(round_digits)
+
+    # Choose replicate key
+    if ci_group == "base_key":
+        repl_key = "base_key"
+    elif ci_group == "seed":
+        repl_key = "seed"
+    elif ci_group == "init":
+        repl_key = "init_seed"
+    else:
+        repl_key = None  # 'raw'
+
     rows = []
     for (model, mbin), g in df.groupby(["model","metric_bin"]):
+        # Summary for counts
+        n_raw = int(len(g))
+        n_seeds = int(g["seed"].nunique())
+        n_inits = int(g["init_seed"].nunique())
+        n_bk = int(g["base_key"].nunique())
+        xbar = float(g["metric"].mean())
+
+        # Replicate collapse: mean per replicate within bin
+        if repl_key is None:
+            # raw: every row is a replicate
+            vals = g[ykey].to_numpy(float)
+        else:
+            # group by replicate id inside the bin
+            vals = (g.groupby(repl_key, dropna=False)[ykey]
+                      .mean()
+                      .to_numpy(float))
+        vals = vals[np.isfinite(vals)]
+        n_repl = int(vals.size)
+
+        y_mean = float(np.mean(vals)) if n_repl else np.nan
+        y_low  = float(np.nanmin(vals)) if n_repl else np.nan
+        y_high = float(np.nanmax(vals)) if n_repl else np.nan
+
+        # CI
+        if n_repl >= min_bin_n:
+            if ci_type == "sem":
+                s = float(np.std(vals, ddof=1)) if n_repl >= 2 else np.nan
+                ci_lo, ci_hi = _sem_ci(y_mean, s, n_repl, level=ci_level)
+            elif ci_type == "bootstrap":
+                ci_lo, ci_hi = _bootstrap_ci(vals, level=ci_level, B=ci_bootstrap_B)
+            else:
+                ci_lo, ci_hi = (np.nan, np.nan)
+        else:
+            ci_lo, ci_hi = (np.nan, np.nan)
+
         rows.append({
             "model": model,
             "metric_bin": float(mbin),
-            "n_raw": int(len(g)),
-            "n_seeds": int(g["seed"].nunique()),
-            "n_inits": int(g["init_seed"].nunique()),
-            "n_base_keys": int(g["base_key"].nunique()),
-            "metric_mean": float(g["metric"].mean()),
-            "y_mean": float(g[ykey].mean()),
-            "y_low": float(np.nanmin(g[ykey])),
-            "y_high": float(np.nanmax(g[ykey])),
+            "n_raw": n_raw,
+            "n_repl": n_repl,
+            "n_seeds": n_seeds,
+            "n_inits": n_inits,
+            "n_base_keys": n_bk,
+            "metric_mean": xbar,
+            "y_mean": y_mean,
+            "y_low": y_low,
+            "y_high": y_high,
+            "ci_low": ci_lo,
+            "ci_high": ci_hi,
         })
     return pd.DataFrame(rows).sort_values(["model","metric_bin"])
+
+# ---------- CIs ----------
+def _sem_ci(mean: float, s: float, n: int, level: float = 0.95):
+    """Wald (z) interval on the mean. Falls back to NaNs if n<2."""
+    if n is None or n < 2 or not np.isfinite(s):
+        return (np.nan, np.nan)
+    # z for two-sided level:
+    z = 1.959963984540054 if abs(level - 0.95) < 1e-9 else ss.norm.ppf(0.5 + level/2.0) if ss else 1.96
+    half = z * (s / math.sqrt(n))
+    return (float(mean - half), float(mean + half))
+
+def _bootstrap_ci(vals: np.ndarray, level: float = 0.95, B: int = 2000, rng: Optional[np.random.Generator] = None):
+    """Basic percentile bootstrap CI for the mean."""
+    v = np.asarray(vals, float)
+    v = v[np.isfinite(v)]
+    if v.size < 2:
+        return (np.nan, np.nan)
+    rng = rng or np.random.default_rng(0)
+    idx = np.arange(v.size)
+    boots = []
+    for _ in range(B):
+        b = rng.choice(idx, size=idx.size, replace=True)
+        boots.append(np.mean(v[b]))
+    lo = float(np.nanpercentile(boots, (1.0-level)*50))
+    hi = float(np.nanpercentile(boots, 100 - (1.0-level)*50))
+    return (lo, hi)
 
 # ------------------- Plot (base) -------------------
 def _data_span(a: np.ndarray, pad_frac: float = 0.02) -> Tuple[float, float]:
@@ -353,7 +440,7 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
 
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi, layout="constrained")
 
-    # raw points (semi-transparent)
+    # raw points as before...
     if not df_raw.empty:
         ycol = "mse" if y_label.lower() == "mse" else "smape"
         for model, g in df_raw.groupby("model"):
@@ -368,7 +455,7 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
                 label="_nolegend_", zorder=2,
             )
 
-    # jitter separation based on data span
+    # jitter calc as before...
     x_vals = df_raw["metric"].to_numpy(float)
     x_vals = x_vals[np.isfinite(x_vals)]
     x_span = float(np.nanmax(x_vals) - np.nanmin(x_vals)) if x_vals.size else 0.0
@@ -378,7 +465,6 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
     def model_offset(m: str) -> float:
         if jitter_abs <= 0:
             return 0.0
-        # Spread models slightly so markers don't overlap
         if m == "Language Pretrained": return -jitter_abs
         if m == "Random Init":         return +jitter_abs
         if m == "GPT2":                return +2.0 * jitter_abs
@@ -394,29 +480,36 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
         used.add(model)
         x = r["metric_mean"] + model_offset(model)
 
-        yerr = [[r["y_mean"] - r["y_low"]], [r["y_high"] - r["y_mean"]]]
-        msize = 8 if model == "DLinear" else 10
+        # prefer CI if available, else min/max
+        ymean = r["y_mean"]
+        lo = r.get("ci_low", np.nan)
+        hi = r.get("ci_high", np.nan)
+        if np.isfinite(lo) and np.isfinite(hi):
+            yerr = [[ymean - lo], [hi - ymean]]
+        else:
+            yerr = [[ymean - r["y_low"]], [r["y_high"] - ymean]]
 
+        msize = 8 if model == "DLinear" else 10
         ax.errorbar(
-            x, r["y_mean"], yerr=yerr, xerr=None,
-            fmt=marker, linestyle="none", capsize=2.5,
+            x, ymean, yerr=yerr, xerr=None,
+            fmt=marker, linestyle="none", capsize=2.7,
             markersize=msize, alpha=ALPHA_MARKER,
             color=color, ecolor=color,
             markeredgewidth=0.9, markeredgecolor="black",
-            elinewidth=1.2, zorder=3, label=label
+            elinewidth=1.25, zorder=3, label=label
         )
 
+    # labels/limits as before...
     ax.set_xlabel(x_metric_label, labelpad=2)
     ax.set_ylabel(y_label, labelpad=2)
     ax.set_title(title, pad=2)
-    #if used:
-        #ax.legend(title="Model", fontsize=legend_font, title_fontsize=legend_font, loc="best", frameon=True, facecolor="#F0F0F0")
+    ax.margins(x=0.05, y=0.05)
 
-    # tighter limits & margins to reduce whitespace
+
     if x_vals.size:
         lo, hi = _data_span(x_vals, pad_frac=x_margin)
         if "Ω" in x_metric_label or "Spectral predictability" in x_metric_label:
-            lo = max(0.0, lo)  # Omega shown non-negative
+            lo = max(0.0, lo)
         ax.set_xlim(lo, hi)
     y_vals = df_raw["mse"].to_numpy(float) if y_label.lower() == "mse" else df_raw["smape"].to_numpy(float)
     y_vals = y_vals[np.isfinite(y_vals)]
@@ -1074,6 +1167,18 @@ def main():
     ap.add_argument("--tight-bbox", action="store_true",
                     help="Use bbox_inches='tight' in savefig to shave borders further.")
 
+    ap.add_argument("--ci", type=str, default="sem",
+                    choices=["none", "sem", "bootstrap"],
+                    help="CI type for y: 'sem' (Wald), 'bootstrap', or 'none'.")
+    ap.add_argument("--ci-level", type=float, default=0.95, help="Confidence level.")
+    ap.add_argument("--ci-group", type=str, default="base_key",
+                    choices=["base_key", "seed", "init", "raw"],
+                    help="What counts as an independent replicate within a bin.")
+    ap.add_argument("--ci-bootstrap-B", type=int, default=2000,
+                    help="B bootstrap draws if --ci=bootstrap.")
+    ap.add_argument("--min-bin-n", type=int, default=2,
+                    help="Minimum replicate count to draw a CI bar.")
+
     args = ap.parse_args()
 
     # rc params once
@@ -1104,7 +1209,13 @@ def main():
 
         # ---------- Per-domain sMAPE base plots + stats CSV ----------
         for domain, df_dom in df_all.groupby("domain", sort=False):
-            agg = aggregate_by_model_metric_y(df_dom, ykey="smape", round_digits=args.round)
+            agg = aggregate_by_model_metric_y(
+                df_dom, ykey="smape", round_digits=args.round,
+                ci_type=args.ci, ci_level=args.ci_level,
+                ci_group=args.ci_group, ci_bootstrap_B=args.ci_bootstrap_B,
+                min_bin_n=args.min_bin_n
+            )
+
             png = os.path.join(OUT["base"], f"{domain}_sMAPE_vs_{xm}_by_model.png")
             plot_by_model_metric(
                 df_dom, agg, x_label, "sMAPE",
