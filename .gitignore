@@ -31,3 +31,6 @@ moment/
 mamba_ssm/
 **/archive_results/
 customLLMsForTimeSeries/
+
+# Ignore Arrow columnar files
+*.arrow
