@@ -22,6 +22,7 @@ TimeLLM/dataset/**
 !TimeLLM/dataset/synthetic_data/**
 !TimeLLM/dataset/synthetic_data/
 !gift_eval/git_repo/results/
+gift_eval/series/
 Mamba4Cast/
 Time-Series-Library/
 uni2ts/
