@@ -433,7 +433,8 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
                          x_margin: float, y_margin: float,
                          tick_font: int,
                          legend_font: int,
-                         tight_bbox: bool) -> None:
+                         tight_bbox: bool,
+                         show_legend: bool = False) -> None:
     if agg.empty:
         print(f"[info] No data for {title}")
         return
@@ -504,7 +505,8 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
     ax.set_ylabel(y_label, labelpad=2)
     ax.set_title(title, pad=2)
     ax.margins(x=0.05, y=0.05)
-
+    if show_legend:
+        ax.legend(loc="best")
 
     if x_vals.size:
         lo, hi = _data_span(x_vals, pad_frac=x_margin)
@@ -1224,7 +1226,8 @@ def main():
                 fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                 x_margin=args.x_margin, y_margin=args.y_margin,
                 tick_font=args.tick_font, legend_font=args.legend_font,
-                tight_bbox=args.tight_bbox
+                tight_bbox=args.tight_bbox,
+                show_legend=(domain == "CarbonCast" )
             )
             stats_csv_for_domain(df_dom, xm, out_dir=OUT["stats"])
 
