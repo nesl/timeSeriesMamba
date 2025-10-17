@@ -1,0 +1,59 @@
+{
+  "builder_name": "generator",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "M_DENSE",
+  "dataset_size": 16820720,
+  "description": "",
+  "download_checksums": {},
+  "download_size": 0,
+  "features": {
+    "item_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "start": {
+      "dtype": "timestamp[s]",
+      "_type": "Value"
+    },
+    "freq": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "target": {
+      "feature": {
+        "dtype": "float32",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "past_feat_dynamic_real": {
+      "feature": {
+        "feature": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "_type": "Sequence"
+      },
+      "length": 7,
+      "_type": "Sequence"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 16820720,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 16820720,
+      "num_examples": 30,
+      "dataset_name": "generator"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

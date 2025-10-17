@@ -1,0 +1,63 @@
+{
+  "builder_name": "generator",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "bizitobs_l2c/5T",
+  "dataset_size": 1150905,
+  "description": "",
+  "download_checksums": {},
+  "download_size": 0,
+  "features": {
+    "item_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "start": {
+      "dtype": "timestamp[s]",
+      "_type": "Value"
+    },
+    "target": {
+      "feature": {
+        "feature": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "_type": "Sequence"
+      },
+      "length": 7,
+      "_type": "Sequence"
+    },
+    "past_feat_dynamic_real": {
+      "feature": {
+        "feature": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "_type": "Sequence"
+      },
+      "length": 2,
+      "_type": "Sequence"
+    },
+    "freq": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 1150905,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 1150905,
+      "num_examples": 1,
+      "dataset_name": "generator"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
