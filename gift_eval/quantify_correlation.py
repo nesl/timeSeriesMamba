@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Quantify correlation strength with CIs, robust variants, and outlier sensitivity.
+Also emits both winsorized and non-winsorized scatter plots.
 
 Usage
 -----
@@ -12,19 +13,24 @@ python quantify_correlation.py \
   --label-col dataset_base \
   --domain-col domain \
   --winsor 0.02 \
-  --max-trim 3
+  --max-trim 3 \
+  --figdir corr_out/figures \
+  --raw-figdir corr_out/figures_raw \
+  --fig-w 6.4 --fig-h 4.4 --dpi 300 --x-margin 0.02 --y-margin 0.05 --tight-bbox
 """
 
 from __future__ import annotations
 import argparse, numpy as np, pandas as pd
 from pathlib import Path
 from typing import Tuple, Optional
+import matplotlib.pyplot as plt
 
 try:
     from scipy import stats
 except Exception:
     stats = None  # We'll fall back to simple calcs if SciPy not present
 
+# ---------- math helpers ----------
 def fisher_ci(r: float, n: int, alpha: float = 0.05) -> Tuple[float,float]:
     """95% CI for Pearson using Fisher z-transform (approx, needs n>3)."""
     if not np.isfinite(r) or n <= 3:
@@ -59,17 +65,11 @@ def spearman(x: pd.Series, y: pd.Series):
         rho = float(pd.concat([x[m], y[m]], axis=1).corr(method="spearman").iloc[0,1])
         return rho, np.nan, int(m.sum())
 
-def standardize(s: pd.Series) -> pd.Series:
-    s = pd.to_numeric(s, errors="coerce")
-    return (s - s.mean()) / s.std(ddof=0)
-
 def leverage_and_residuals(x: np.ndarray, y: np.ndarray):
     """Return standardized residuals and leverage to rank influential points."""
     X = np.c_[np.ones_like(x), x]
-    # hat matrix h = diag(X (X'X)^{-1} X')
     XtX_inv = np.linalg.inv(X.T @ X)
-    h = np.einsum("ij,jk,ik->i", X, XtX_inv, X)
-    # residuals
+    h = np.einsum("ij,jk,ik->i", X, XtX_inv, X)  # diagonal of hat matrix
     beta = XtX_inv @ (X.T @ y)
     yhat = X @ beta
     resid = y - yhat
@@ -82,14 +82,12 @@ def trim_topk_by_influence(df: pd.DataFrame, xcol: str, ycol: str, label: Option
     y = pd.to_numeric(df[ycol], errors="coerce")
     m = x.notna() & y.notna() & np.isfinite(x) & np.isfinite(y)
     xv, yv = x[m].values, y[m].values
-    if len(xv) < 5 or k <= 0: 
+    if len(xv) < 5 or k <= 0:
         return df[m], []
     stud, h = leverage_and_residuals(xv, yv)
-    # rank by Cook's distance ~ stud^2 * h / (p * (1-h)), p=2
-    cooks = (stud**2) * h / (2 * (1 - h))
+    cooks = (stud**2) * h / (2 * (1 - h))  # Cook's distance (p=2)
     idx = np.argsort(cooks)[::-1][:min(k, len(cooks))]
-    kept = np.ones_like(cooks, dtype=bool)
-    kept[idx] = False
+    kept = np.ones_like(cooks, dtype=bool); kept[idx] = False
     trimmed = df[m].iloc[kept]
     removed_labels = (label[m].iloc[idx].tolist() if label is not None else [str(i) for i in idx])
     return trimmed, removed_labels
@@ -122,19 +120,67 @@ def permutation_pvalue(x: pd.Series, y: pd.Series, B: int = 5000, seed: int = 0)
         if abs(r_perm) >= abs(r_obs): count += 1
     return (count + 1) / (B + 1)
 
+# ---------- plotting ----------
+def make_scatter(figdir: Path, x, y, xlab: str, ylab: str, title: str, fname: str,
+                 fig_w: float, fig_h: float, dpi: int,
+                 x_margin: float, y_margin: float, tight_bbox: bool):
+    x = pd.to_numeric(x, errors="coerce")
+    y = pd.to_numeric(y, errors="coerce")
+    m = x.notna() & y.notna() & np.isfinite(x) & np.isfinite(y)
+    if m.sum() < 4:
+        return
+    xv, yv = x[m].values, y[m].values
+
+    plt.figure(figsize=(fig_w, fig_h), dpi=dpi)
+    plt.scatter(xv, yv, s=18, alpha=0.75)
+    try:
+        m_, b_ = np.polyfit(xv, yv, 1)
+        xs = np.linspace(xv.min(), xv.max(), 100)
+        plt.plot(xs, m_*xs + b_)
+    except Exception:
+        pass
+
+    plt.xlabel(xlab); plt.ylabel(ylab); plt.title(title)
+    ax = plt.gca()
+    # tighten axis margins (fraction of data range)
+    xr = xv.max() - xv.min(); yr = yv.max() - yv.min()
+    if xr > 0:
+        ax.set_xlim(xv.min() - xr * x_margin, xv.max() + xr * x_margin)
+    if yr > 0:
+        ax.set_ylim(yv.min() - yr * y_margin, yv.max() + yr * y_margin)
+    if tight_bbox:
+        plt.tight_layout()
+        plt.savefig(figdir / fname, bbox_inches="tight")
+    else:
+        plt.tight_layout()
+        plt.savefig(figdir / fname)
+    plt.close()
+
+# ---------- main ----------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--joined", required=False, default="corr_out/joined_dataset_table.csv")
-    ap.add_argument("--x", required=False, default="omega")
-    ap.add_argument("--y", required=False, default="sMAPE[0.5]")
+    ap.add_argument("--joined", default="corr_out/joined_dataset_table.csv")
+    ap.add_argument("--x", default="omega")
+    ap.add_argument("--y", default="sMAPE[0.5]")
     ap.add_argument("--label-col", default="dataset_base")
     ap.add_argument("--domain-col", default="domain")
     ap.add_argument("--winsor", type=float, default=0.02, help="proportion to cap on each tail for winsorized Pearson")
     ap.add_argument("--max-trim", type=int, default=3, help="trim top-k influential points (0..K)")
     ap.add_argument("--out", default="corr_out/quant_summary.csv")
+
+    # NEW: figure controls
+    ap.add_argument("--figdir", default="corr_out/figures", help="winsorized plots")
+    ap.add_argument("--raw-figdir", default="corr_out/figures_raw", help="non-winsorized plots")
+    ap.add_argument("--fig-w", type=float, default=6.4)
+    ap.add_argument("--fig-h", type=float, default=4.4)
+    ap.add_argument("--dpi", type=int, default=300)
+    ap.add_argument("--x-margin", type=float, default=0.02, help="fractional x padding")
+    ap.add_argument("--y-margin", type=float, default=0.05, help="fractional y padding")
+    ap.add_argument("--tight-bbox", action="store_true", help="use bbox_inches='tight' on savefig")
     args = ap.parse_args()
 
     df = pd.read_csv(args.joined)
+
     # base Pearson
     r, n = pearson(df[args.x], df[args.y])
     r_lo, r_hi = fisher_ci(r, n)
@@ -142,8 +188,8 @@ def main():
     rho, p_spear, n_s = spearman(df[args.x], df[args.y])
     # Winsorized Pearson
     xw = winsorize(df[args.x], args.winsor); yw = winsorize(df[args.y], args.winsor)
-    rw, nw = pearson(xw, yw)
-    rw_lo, rw_hi = fisher_ci(rw, nw)
+    rw, nw = pearson(xw, yw); rw_lo, rw_hi = fisher_ci(rw, nw)
+
     # Jackknife (leave-one-out) range
     x = pd.to_numeric(df[args.x], errors="coerce"); y = pd.to_numeric(df[args.y], errors="coerce")
     m = x.notna() & y.notna() & np.isfinite(x) & np.isfinite(y)
@@ -158,7 +204,7 @@ def main():
     # Partial (within-domain)
     r_dom, r_dom_ci, n_dom = partial_corr_within_domain(df, args.x, args.y, args.domain_col)
 
-    # Trimming by influence k=1..max_trim
+    # Summary table
     rows = []
     base = {"variant":"pearson", "r":r, "n":n, "ci_lo":r_lo, "ci_hi":r_hi, "note":"raw"}
     wins = {"variant":"pearson_winsor", "r":rw, "n":nw, "ci_lo":rw_lo, "ci_hi":rw_hi, "note":f"winsor p={args.winsor}"}
@@ -168,7 +214,6 @@ def main():
             "ci_hi":(r_dom_ci[1] if isinstance(r_dom_ci, tuple) else np.nan),
             "note":"residualized by domain"}
     perm = {"variant":"pearson_perm_test_p", "r":r, "n":n, "ci_lo":np.nan, "ci_hi":np.nan, "p_value":p_perm, "note":"two-sided permutation"}
-
     rows.extend([base, wins, spear, domp, perm])
 
     # influence-based trimming
@@ -183,10 +228,35 @@ def main():
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(args.out, index=False)
 
+    # ---------- plots ----------
+    figdir = Path(args.figdir); rawdir = Path(args.raw-figdir if hasattr(args, "raw-figdir") else args.raw_figdir)
+    # compat for "-" vs "_" in argparse dest
+    if isinstance(rawdir, str): rawdir = Path(rawdir)
+    figdir.mkdir(parents=True, exist_ok=True)
+    rawdir.mkdir(parents=True, exist_ok=True)
+
+    # winsorized plot
+    make_scatter(
+        figdir, xw, yw,
+        args.x, args.y,
+        f"{args.y} vs {args.x} (winsor p={args.winsor})",
+        f"scatter_{args.x}_vs_{args.y}_winsor.png",
+        args.fig_w, args.fig_h, args.dpi, args.x_margin, args.y_margin, args.tight_bbox
+    )
+    # raw plot
+    make_scatter(
+        rawdir, df[args.x], df[args.y],
+        args.x, args.y,
+        f"{args.y} vs {args.x} (raw)",
+        f"scatter_{args.x}_vs_{args.y}_raw.png",
+        args.fig_w, args.fig_h, args.dpi, args.x_margin, args.y_margin, args.tight_bbox
+    )
+
     # console summary
     print(f"\n=== {args.x} vs {args.y} ===")
     print(out.to_string(index=False))
     print(f"\nLeave-one-out r range: [{loo_min:.3f}, {loo_max:.3f}] (n={n})")
+    print(f"\n[OK] Plots saved to:\n  winsorized -> {figdir}\n  raw        -> {rawdir}")
 
 if __name__ == "__main__":
     main()

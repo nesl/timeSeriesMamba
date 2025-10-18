@@ -118,7 +118,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--metrics-csv", default="metrics_summary_wide.csv")
     ap.add_argument("--results-csv", default="merged_gift_results.csv")
-    ap.add_argument("--error-metrics", default="sMAPE[0.5],NRMSE[mean],ND[0.5],MASE[0.5]")
+    ap.add_argument("--error-metrics", default="sMAPE[0.5]")
     ap.add_argument("--metrics-cols", default="omega,spectral_entropy,permen,wavelet_entropy,apen,sampen,lle")
     ap.add_argument("--within-domain", action="store_true")
     ap.add_argument("--by-model", action="store_true")
@@ -170,6 +170,40 @@ def main():
         rdf["model_type"] = rdf["model"].map(lambda m: model_types.get(m, "unknown"))
     else:
         rdf["model_type"] = "unknown"
+    
+
+    # ----- report unmapped models (unknown type) -----
+    unk = rdf[rdf["model_type"] == "unknown"].copy()
+    if not unk.empty:
+        # Aggregate useful stats per unmapped model
+        unk_summary = (
+            unk.groupby("model")
+            .agg(
+                n_rows=("model", "size"),
+                n_datasets=("dataset_base", "nunique"),
+                example_datasets=("dataset_base", lambda s: ", ".join(sorted(set(s))[:6]))
+            )
+            .sort_values(["n_rows", "n_datasets"], ascending=False)
+            .reset_index()
+        )
+        unk_csv = Path(args.outdir) / "unmapped_models.csv"
+        unk_summary.to_csv(unk_csv, index=False)
+
+        # JSON skeleton to help you fill in model_types quickly
+        skeleton = {m: "TBD" for m in sorted(unk["model"].unique())}
+        skeleton_json = Path(args.outdir) / "model_types_skeleton.json"
+        with open(skeleton_json, "w", encoding="utf-8") as f:
+            json.dump(skeleton, f, indent=2, ensure_ascii=False)
+
+        print("\n[WARN] Some models have no assigned type (model_type='unknown').")
+        print(f"       -> Summary written to: {unk_csv}")
+        print(f"       -> Fill in types here and merge into your mapping: {skeleton_json}")
+        print("       Top unmapped models:")
+        for _, row in unk_summary.head(10).iterrows():
+            print(f"          - {row['model']}  | rows={row['n_rows']}  "
+                f"| datasets={row['n_datasets']}  | ex: {row['example_datasets']}")
+    else:
+        print("\n[OK] All models had a mapped model_type.")
 
     # ----- correlations overall -----
     agg_strategies = {
@@ -244,8 +278,8 @@ def main():
         if df_ols["omega"].nunique() >= 4 and df_ols["model_type"].nunique() >= 2:
             # treat model_type as categorical with C()
             fit = smf.ols("y ~ omega * C(model_type)", data=df_ols).fit()
-            print("\n=== OLS: y ~ omega * C(model_type) ===")
-            print(fit.summary())
+            #print("\n=== OLS: y ~ omega * C(model_type) ===")
+            #print(fit.summary())
             fit_summary = fit.summary().as_text()
             outpath = Path(args.outdir) / "ols_omega_by_modeltype.txt"
             with open(outpath, "w") as f:

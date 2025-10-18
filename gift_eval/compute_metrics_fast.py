@@ -421,8 +421,8 @@ def main():
     ap.add_argument("--metrics", default="omega,spectral_entropy",
                     help="Comma-separated list. Options: omega,spectral_entropy,permen,wavelet_entropy,apen,sampen,lle")
     ap.add_argument("--max-series", type=int, default=0, help="Limit #series per split (0 = all)")
-    ap.add_argument("--truncate", type=int, default=4096, help="Head truncate each series before metrics")
-    ap.add_argument("--downsample", type=int, default=2, help="Stride for downsampling (1 = none)")
+    ap.add_argument("--truncate", type=int, default=100000, help="Head truncate each series before metrics")
+    ap.add_argument("--downsample", type=int, default=1, help="Stride for downsampling (1 = none)")
     ap.add_argument("--batch-size", type=int, default=128, help="datasets.map batch size")
     ap.add_argument("--num-proc", type=int, default=max((os.cpu_count() or 2) - 1, 1),
                     help="Parallel workers for datasets.map")

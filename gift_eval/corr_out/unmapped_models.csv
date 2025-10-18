@@ -1,0 +1,11 @@
+model,n_rows,n_datasets,example_datasets
+Kairos-1.0,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+Moirai_base,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+Moirai_large,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+Moirai_small,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+Nexus-1.0,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+Seasonal_Naive,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+TSOrchestra,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+TimeCopilot,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+VisionTS,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
+iTransformer,97,28,"bitbrains_fast_storage, bitbrains_rnd, bizitobs_application, bizitobs_l2c, bizitobs_service, car_parts"
