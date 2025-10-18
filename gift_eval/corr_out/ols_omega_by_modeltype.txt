@@ -1,0 +1,33 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.273
+Model:                            OLS   Adj. R-squared:                  0.223
+Method:                 Least Squares   F-statistic:                     5.423
+Date:                Fri, 17 Oct 2025   Prob (F-statistic):           2.64e-06
+Time:                        18:22:32   Log-Likelihood:                -63.959
+No. Observations:                 140   AIC:                             147.9
+Df Residuals:                     130   BIC:                             177.3
+Df Model:                           9                                         
+Covariance Type:            nonrobust                                         
+======================================================================================================
+                                         coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------------------------------
+Intercept                              0.9353      0.147      6.355      0.000       0.644       1.226
+C(model_type)[T.fine-tuned]           -0.0977      0.208     -0.470      0.639      -0.510       0.314
+C(model_type)[T.pretrained]           -0.1045      0.208     -0.502      0.617      -0.516       0.307
+C(model_type)[T.statistical]          -0.1176      0.208     -0.565      0.573      -0.529       0.294
+C(model_type)[T.unknown]              -0.1110      0.208     -0.533      0.595      -0.523       0.301
+omega                                 -1.0779      0.333     -3.240      0.002      -1.736      -0.420
+omega:C(model_type)[T.fine-tuned]      0.0052      0.470      0.011      0.991      -0.925       0.936
+omega:C(model_type)[T.pretrained]      0.0339      0.470      0.072      0.943      -0.897       0.965
+omega:C(model_type)[T.statistical]     0.1663      0.470      0.353      0.724      -0.764       1.097
+omega:C(model_type)[T.unknown]         0.0588      0.470      0.125      0.901      -0.872       0.989
+==============================================================================
+Omnibus:                       44.171   Durbin-Watson:                   0.455
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               75.215
+Skew:                           1.554   Prob(JB):                     4.65e-17
+Kurtosis:                       4.799   Cond. No.                         29.8
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.

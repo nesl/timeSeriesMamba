@@ -1,0 +1,11 @@
+,coef
+Intercept,0.9353205551587931
+C(model_type)[T.fine-tuned],-0.0977456591602416
+C(model_type)[T.pretrained],-0.1044556751201868
+C(model_type)[T.statistical],-0.11755450894567934
+C(model_type)[T.unknown],-0.11096835171125302
+omega,-1.0778853682033065
+omega:C(model_type)[T.fine-tuned],0.005213847658183762
+omega:C(model_type)[T.pretrained],0.03392197913444006
+omega:C(model_type)[T.statistical],0.16626242020151535
+omega:C(model_type)[T.unknown],0.05877520922217128
