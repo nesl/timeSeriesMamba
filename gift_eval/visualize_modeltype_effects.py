@@ -204,6 +204,13 @@ def main():
     ap.add_argument("--bins", type=int, default=6, help="# quantile bins for binned curves")
     ap.add_argument("--bootstrap", type=int, default=2000, help="bootstraps for slope CIs")
     ap.add_argument(
+        "--plot-modeltypes",
+        nargs="+",
+        default=None,
+        help=("Limit the *binned* Ω→sMAPE plot to these model types (case-insensitive). "
+            "Examples: zero-shot pretrained statistical deep-learning")
+    )
+    ap.add_argument(
         "--rel-pairs",
         nargs="+",
         default=[],
@@ -217,6 +224,13 @@ def main():
         help="Number of Ω quantile bins for relative-gain curve."
     )
 
+    ap.add_argument(
+        "--granularity",
+        choices=["base", "label"],
+        default="label",
+        help="Join key for metrics↔results: 'base' collapses variants; 'label' keeps variants like LOOP_SEATTLE/H separate."
+    )
+
     args = ap.parse_args()
 
     outdir = Path(args.outdir); figdir = Path(args.figdir)
@@ -225,8 +239,20 @@ def main():
     aliases = load_json(args.aliases_json)
     model_types = load_json(args.modeltype_json)
 
+    def first_two_parts(s: str) -> str:
+        parts = str(s).split("/")
+        return canon("/".join(parts[:2]))  # base + variant
+
     # ---------- load metrics ----------
     mdf = pd.read_csv(args.metrics_csv)
+     # Canonical full label (e.g., "loop_seattle/h")
+    if "dataset_label" in mdf.columns:
+        mdf["dataset_label_canon"] = mdf["dataset_label"].astype(str).apply(first_two_parts)
+    else:
+        # fallback if your metrics file is older
+        mdf["dataset_label_canon"] = mdf.get("dataset_path", mdf.index.astype(str)).astype(str).apply(first_two_parts)
+
+    # Keep existing base behavior
     if "dataset_base" not in mdf.columns:
         if "dataset_path" in mdf.columns:
             mdf["dataset_base"] = mdf["dataset_path"].astype(str).apply(lambda p: canon(Path(p).parent.name))
@@ -234,26 +260,49 @@ def main():
             mdf["dataset_base"] = mdf["dataset_label"].astype(str).apply(lambda s: canon(s.split("/")[0]))
         else:
             raise ValueError("metrics CSV missing dataset_base and dataset_path/dataset_label to infer it.")
+
     mdf["dataset_base"] = mdf["dataset_base"].apply(lambda x: aliases.get(x, x))
+
+    # Decide which key to use downstream
+    if args.granularity == "label":
+        mdf["dataset_id"] = mdf["dataset_label_canon"]
+    else:
+        mdf["dataset_id"] = mdf["dataset_base"]
+
     if "omega" not in mdf.columns:
         raise ValueError("metrics CSV must include 'omega'")
 
-    met_agg = (mdf.groupby("dataset_base", as_index=False)[["omega"]]
-                 .mean(numeric_only=True))
-    # carry domain if present
+    met_agg = (mdf.groupby("dataset_id", as_index=False)[["omega"]]
+             .mean(numeric_only=True))
+
+    # carry domain if present (first non-null per id)
     if "domain" in mdf.columns:
-        dom_map = (mdf.groupby("dataset_base", as_index=True)["domain"]
-                     .agg(first_nonnull).rename("domain").reset_index())
-        met_agg = met_agg.merge(dom_map, on="dataset_base", how="left")
+        dom_map = (mdf.groupby("dataset_id", as_index=True)["domain"]
+                    .agg(first_nonnull).rename("domain").reset_index())
+        met_agg = met_agg.merge(dom_map, on="dataset_id", how="left")
 
     # ---------- load results ----------
     rdf = pd.read_csv(args.results_csv)
+    
+    # Ensure we have a dataset column
     rdf.columns = [c.replace("eval_metrics/", "") for c in rdf.columns]
     if "dataset" not in rdf.columns:
         cand = [c for c in rdf.columns if "dataset" in c.lower()]
         if not cand: raise ValueError("results CSV missing 'dataset' column.")
         rdf["dataset"] = rdf[cand[0]]
-    rdf["dataset_base"] = rdf["dataset"].astype(str).apply(dataset_base_from_results).apply(lambda x: aliases.get(x, x))
+
+
+    # Two canonical forms:
+    rdf["dataset_full_canon"] = rdf["dataset"].astype(str).apply(first_two_parts)                 # e.g., "loop_seattle/h"
+    rdf["dataset_base"] = rdf["dataset"].astype(str).apply(dataset_base_from_results)   # e.g., "loop_seattle"
+    rdf["dataset_base"] = rdf["dataset_base"].apply(lambda x: aliases.get(x, x))
+
+    # Pick the join key to match metrics
+    if args.granularity == "label":
+        rdf["dataset_id"] = rdf["dataset_full_canon"]
+    else:
+        rdf["dataset_id"] = rdf["dataset_base"]
+
     if "model" not in rdf.columns:
         raise ValueError("results CSV must include 'model' column.")
 
@@ -261,15 +310,31 @@ def main():
     rdf[smape_col] = pd.to_numeric(rdf[smape_col], errors="coerce")
     rdf["model_type"] = rdf["model"].map(lambda m: model_types.get(m, "unknown"))
 
-    # Aggregate error by (dataset_base, model_type)
-    err_agg = (rdf.groupby(["dataset_base", "model_type"], as_index=False)[smape_col]
-                 .mean(numeric_only=True)
-                 .rename(columns={smape_col: "y"}))
+    err_agg = (rdf.groupby(["dataset_id", "model_type"], as_index=False)[smape_col]
+                .mean(numeric_only=True)
+                .rename(columns={smape_col: "y"}))
 
-    # Join with omega
-    joined = met_agg.merge(err_agg, on="dataset_base", how="inner")
-    # Remove rows with missing values
+    joined = met_agg.merge(err_agg, on="dataset_id", how="inner")
     joined = joined[np.isfinite(joined["omega"]) & np.isfinite(joined["y"])]
+
+    # Case-insensitive map of present model types
+    _present_map = {mt.lower(): mt for mt in joined["model_type"].dropna().unique()}
+
+    def _resolve_modeltypes(requested: list[str] | None) -> set[str] | None:
+        """Return canonical names to keep, or None to keep all."""
+        if not requested:
+            return None
+        keep = []
+        for r in requested:
+            key = r.strip().lower()
+            if key in _present_map:
+                keep.append(_present_map[key])
+            else:
+                print(f"[binned] warning: requested model_type '{r}' not found in data; skipping.")
+        return set(keep) if keep else set()
+
+    plot_keep_modeltypes = _resolve_modeltypes(args.plot_modeltypes)
+
 
     if not args.rel_pairs:
         # canonical names you use in model_types.json (case-insensitive match)
@@ -360,43 +425,50 @@ def main():
     # ----------------- 4) Binned curves: quantile-Ω vs mean sMAPE per model_type -----------------
     bins = args.bins
     if bins >= 3:
-        # global quantile bins on omega
         qs = np.linspace(0, 1, bins + 1)
         edges = np.quantile(joined["omega"].dropna(), qs)
-        # guard for duplicate edges (rare but possible)
         edges = np.unique(edges)
         if len(edges) >= 4:
-            bin_labels = [f"Q{i}" for i in range(1, len(edges))]
             binned = []
             for mt, g in joined.groupby("model_type"):
+                # Filter to selected model types for this figure (if provided)
+                if plot_keep_modeltypes is not None and mt not in plot_keep_modeltypes:
+                    continue
                 g = g.copy()
                 g["omega_bin"] = pd.cut(g["omega"], bins=edges, include_lowest=True, labels=False)
                 agg = (g.dropna(subset=["omega_bin"])
-                    .groupby("omega_bin", as_index=False)
-                    .agg(mean=("y","mean"),
-                        count=("y","count"),
-                        std=("y","std"),
-                        omega_mean=("omega","mean")))
-                
+                        .groupby("omega_bin", as_index=False)
+                        .agg(mean=("y","mean"),
+                            count=("y","count"),
+                            std=("y","std"),
+                            omega_mean=("omega","mean")))
                 if len(agg):
                     agg["model_type"] = mt
-                    agg["omega_mid"] = [np.mean(edges[i:i+2]) for i in agg["omega_bin"]] #remove this for omega mean?
                     agg["se"] = agg["std"] / np.sqrt(agg["count"].clip(lower=1))
                     binned.append(agg[["model_type","omega_bin","omega_mean","mean","se","count"]])
 
             if binned:
                 bdf = pd.concat(binned, ignore_index=True)
-                plt.figure(figsize=(6.4, 4.5))
-                for mt, g in bdf.groupby("model_type"):
-                    plt.errorbar(g["omega_mean"], g["mean"], yerr=g["se"],
-                                 marker="o", linestyle="-", capsize=3, label=f"{mt}")
-                plt.xlabel("Spectral predictability (Ω) — within-bin mean")
-                plt.ylabel("Mean sMAPE (±1 SE)")
-                plt.title("Binned trend of sMAPE vs Ω by model type")
-                plt.legend(frameon=False, ncol=2)
-                plt.tight_layout()
-                plt.savefig(figdir / "binned_smape_vs_omega_by_modeltype.png", dpi=300)
-                plt.close()
+
+                # (Safety) If user requested types but none present, bail gracefully
+                if plot_keep_modeltypes is not None and bdf.empty:
+                    print("[binned] no data matched the requested --plot-modeltypes; skipping binned plot.")
+                else:
+                    plt.figure(figsize=(6.4, 4.5))
+                    for mt, g in bdf.groupby("model_type"):
+                        plt.errorbar(g["omega_mean"], g["mean"], yerr=g["se"],
+                                    marker="o", linestyle="-", capsize=3, label=f"{mt}")
+                    plt.xlabel("Spectral predictability (Ω) — within-bin mean")
+                    plt.ylabel("Mean sMAPE (±1 SE)")
+                    ttl = "Binned trend of sMAPE vs Ω by model type"
+                    if plot_keep_modeltypes:
+                        ttl += " (filtered)"
+                    plt.title(ttl)
+                    plt.legend(frameon=False, ncol=2)
+                    plt.tight_layout()
+                    plt.savefig(figdir / "binned_smape_vs_omega_by_modeltype.png", dpi=300)
+                    plt.close()
+
 
     print(f"[OK] Wrote figures to {figdir} and tables to {outdir}")
 

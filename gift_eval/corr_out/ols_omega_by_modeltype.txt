@@ -1,34 +1,34 @@
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:                      y   R-squared:                       0.304
-Model:                            OLS   Adj. R-squared:                  0.255
-Method:                 Least Squares   F-statistic:                     6.200
-Date:                Sat, 18 Oct 2025   Prob (F-statistic):           2.04e-08
-Time:                        08:43:27   Log-Likelihood:                -72.950
-No. Observations:                 168   AIC:                             169.9
-Df Residuals:                     156   BIC:                             207.4
+Dep. Variable:                      y   R-squared:                       0.023
+Model:                            OLS   Adj. R-squared:                 -0.025
+Method:                 Least Squares   F-statistic:                    0.4762
+Date:                Tue, 21 Oct 2025   Prob (F-statistic):              0.917
+Time:                        12:29:54   Log-Likelihood:                -85.916
+No. Observations:                 234   AIC:                             195.8
+Df Residuals:                     222   BIC:                             237.3
 Df Model:                          11                                         
 Covariance Type:            nonrobust                                         
 ========================================================================================================
                                            coef    std err          t      P>|t|      [0.025      0.975]
 --------------------------------------------------------------------------------------------------------
-Intercept                                0.8128      0.137      5.951      0.000       0.543       1.083
-C(model_type)[T.deep-learning]           0.1045      0.193      0.541      0.589      -0.277       0.486
-C(model_type)[T.fine-tuned]              0.0144      0.193      0.075      0.940      -0.367       0.396
-C(model_type)[T.pretrained]              0.0281      0.193      0.145      0.885      -0.353       0.410
-C(model_type)[T.statistical]            -0.0126      0.193     -0.065      0.948      -0.394       0.369
-C(model_type)[T.zero-shot]              -0.0002      0.193     -0.001      0.999      -0.382       0.381
-omega                                   -0.9977      0.290     -3.437      0.001      -1.571      -0.424
-omega:C(model_type)[T.deep-learning]    -0.0066      0.411     -0.016      0.987      -0.818       0.804
-omega:C(model_type)[T.fine-tuned]       -0.0050      0.411     -0.012      0.990      -0.816       0.806
-omega:C(model_type)[T.pretrained]        0.0358      0.411      0.087      0.931      -0.775       0.847
-omega:C(model_type)[T.statistical]       0.1390      0.411      0.338      0.735      -0.672       0.950
-omega:C(model_type)[T.zero-shot]         0.0161      0.411      0.039      0.969      -0.795       0.827
+Intercept                                0.4365      0.115      3.803      0.000       0.210       0.663
+C(model_type)[T.deep-learning]           0.1651      0.162      1.017      0.310      -0.155       0.485
+C(model_type)[T.fine-tuned]              0.0063      0.162      0.039      0.969      -0.314       0.326
+C(model_type)[T.pretrained]              0.0237      0.162      0.146      0.884      -0.296       0.344
+C(model_type)[T.statistical]             0.0099      0.162      0.061      0.951      -0.310       0.330
+C(model_type)[T.zero-shot]               0.0135      0.162      0.083      0.934      -0.306       0.333
+omega                                   -0.1267      0.251     -0.506      0.613      -0.620       0.367
+omega:C(model_type)[T.deep-learning]    -0.0970      0.354     -0.274      0.785      -0.795       0.601
+omega:C(model_type)[T.fine-tuned]        0.0128      0.354      0.036      0.971      -0.685       0.711
+omega:C(model_type)[T.pretrained]        0.0499      0.354      0.141      0.888      -0.648       0.748
+omega:C(model_type)[T.statistical]       0.1605      0.354      0.453      0.651      -0.538       0.859
+omega:C(model_type)[T.zero-shot]        -0.0070      0.354     -0.020      0.984      -0.705       0.691
 ==============================================================================
-Omnibus:                       60.157   Durbin-Watson:                   0.369
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):              119.763
-Skew:                           1.719   Prob(JB):                     9.86e-27
-Kurtosis:                       5.299   Cond. No.                         31.7
+Omnibus:                       73.164   Durbin-Watson:                   0.334
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              153.368
+Skew:                           1.536   Prob(JB):                     4.97e-34
+Kurtosis:                       5.509   Cond. No.                         34.8
 ==============================================================================
 
 Notes:
