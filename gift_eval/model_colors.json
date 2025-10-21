@@ -1,0 +1,8 @@
+{
+  "pretrained": "green",
+  "zero-shot": "red",
+  "statistical": "orange",
+  "deep-learning": "blue",
+  "fine-tuned": "purple",
+  "agentic": "yellow"
+}
