@@ -357,6 +357,47 @@ def main():
 
             savefig_pdf(fig, pdfdir, f"scatter_color_error_vs_omega_by_{heat_y_col}")
             plt.close(fig)
+        
+            #now do LLE as the shading, sMAPE on the y axis, and omega on the x axis
+            # ---------- Plot 2 (NEW): x=Ω, y=sMAPE, color=LLE/ApEn ----------
+            # Here we flip: sMAPE is now on the y-axis, and the color encodes complexity metric.
+            # We'll build a new robust norm based on heat_y_col values.
+            v_comp = data[heat_y_col].to_numpy(float)
+            vmin_comp = np.nanpercentile(v_comp, 5)
+            vmax_comp = np.nanpercentile(v_comp, 95)
+            if not np.isfinite(vmin_comp): vmin_comp = np.nanmin(v_comp)
+            if not np.isfinite(vmax_comp): vmax_comp = np.nanmax(v_comp)
+            if (not np.isfinite(vmin_comp)) or (not np.isfinite(vmax_comp)) or (vmin_comp == vmax_comp):
+                vmin_comp = float(np.nanmin(v_comp))
+                vmax_comp = float(np.nanmax(v_comp))
+                if (not np.isfinite(vmin_comp)) or (not np.isfinite(vmax_comp)) or (vmin_comp == vmax_comp):
+                    vmin_comp, vmax_comp = 0.0, 1.0
+            print(f"[colored-scatter] color(norm for {heat_y_col}) vmin={vmin_comp}, vmax={vmax_comp}")
+
+            norm_comp = mpl.colors.Normalize(vmin=vmin_comp, vmax=vmax_comp)
+
+            fig2, ax2 = plt.subplots()
+            sc2 = ax2.scatter(
+                data["omega"], data["y"],
+                c=data[heat_y_col],    # color by LLE or ApEn
+                s=90,
+                alpha=0.95,
+                cmap=args.heat_cmap,
+                norm=norm_comp,
+                edgecolors="none"
+            )
+
+            cb2 = plt.colorbar(sc2, ax=ax2)
+            cb2.set_label("LLE" if heat_y_col == "lle" else "ApEn",
+                          fontsize=AXIS_FONTSIZE, fontweight="bold")
+
+            ax2.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+            ax2.set_ylabel("sMAPE", fontsize=AXIS_FONTSIZE, fontweight="bold")
+            ax2.set_title(f"Ω vs sMAPE (color = {('LLE' if heat_y_col=='lle' else 'ApEn')})")
+
+            savefig_pdf(fig2, pdfdir, f"scatter_color_{heat_y_col}_vs_omega_sMAPE_yaxis")
+            plt.close(fig2)
+
 
     # ----------------- RAW unbinned scatter (all points; colored by model_type) -----------------
     raw = joined.copy()
@@ -387,7 +428,7 @@ def main():
         ax.legend(frameon=False, ncol=2)
         smape_used = "sMAPE[0.5]" if "sMAPE[0.5]" in rdf.columns else pick_smape_column(rdf.columns)
         savefig_pdf(fig, pdfdir, f"scatter_omega_vs_{smape_used.replace('/', '_')}")
-        plt.close(fig)
+        plt.close(fig)        
     else:
         print("[scatter-all] empty after filtering finite omega/y; nothing to plot.")
 

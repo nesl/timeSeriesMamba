@@ -503,9 +503,9 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
         )
 
     # axes / labels / title
-    ax.set_xlabel(x_metric_label, labelpad=2)
-    ax.set_ylabel(y_label, labelpad=2)
-    ax.set_title(title, pad=2)
+    ax.set_xlabel(x_metric_label, labelpad=2,fontweight='bold')
+    ax.set_ylabel(y_label, labelpad=2,fontweight='bold')
+    ax.set_title(title, pad=2,fontweight='bold')
 
     # nice limits
     if x_vals.size:
@@ -866,7 +866,7 @@ def main():
     # Plot controls
     ap.add_argument("--omega-label", type=str, default="both",
                     choices=["greek", "text", "both"])
-    ap.add_argument("--fig-w", type=float, default=5.0)
+    ap.add_argument("--fig-w", type=float, default=5.2)
     ap.add_argument("--fig-h", type=float, default=3.5)
     ap.add_argument("--dpi", type=int, default=600)
     ap.add_argument("--font", type=int, default=19)
