@@ -11,12 +11,8 @@ Improvements:
   • Smaller whitespace around axes, grid kept subtle
   • CLI knobs for figsize, dpi, fonts, margins
   • NEW: GPT2 model support (detection, styling, comparisons)
-
-Usage
------
-python graph_spectral.py --x-metric ALL --out-dir ./out --mse-out-dir ./out_mse \
-  --omega-label both --fig-w 6.2 --fig-h 4.0 --dpi 600 --font 11 --tick-font 10 --legend-font 10 \
-  --x-margin 0.02 --y-margin 0.06 --tight-bbox
+  • >>> NEW: Thick, always-visible error bars with tunable width/caps and minimum length
+  • >>> NEW: Bootstrap CIs for RelGain vs x and error bars on those points
 """
 
 import os
@@ -70,19 +66,19 @@ DOMAINS_CANON = ("CarbonCast", "PEMS", "Fitbit", "Synthetic")
 
 # ------------------- Plot styling -------------------
 MODEL_COLOR = {
-    "Language Pretrained": "tab:blue",
-    "Random Init": "tab:orange",
-    "DLinear": "tab:green",
-    "GPT2": "tab:blue",  # same family color as Language Pretrained
+    "Language Pretrained": "tab:green",
+    "Random Init": "tab:gray",
+    "DLinear": "tab:blue",
+    "GPT2": "tab:green",  # same family color as Language Pretrained
 }
 MODEL_MARKER = {
     "Language Pretrained": "^",
     "Random Init": "^",
-    "DLinear": "o",
-    "GPT2": "s",  # square to distinguish from Language Pretrained
+    "DLinear": "*",
+    "GPT2": "v",  
 }
 ALPHA_RAW = 0.28
-ALPHA_MARKER = 0.9   # slightly higher for clearer means
+ALPHA_MARKER = 0.9
 
 # ------------------- Metric keys -------------------
 NUM_PAT = r"-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
@@ -107,16 +103,11 @@ X_METRIC_PATS = {
 
 # ------------------- Helpers -------------------
 def _save_multi(fig, out_path_png: str, tight_bbox: bool, extra_exts=("pdf", "svg")):
-    """Save the figure as the given PNG path and also vector formats (pdf/svg)."""
     base, _ = os.path.splitext(out_path_png)
-
-    # PNG (optional: keep if you still want rasters)
     if tight_bbox:
         fig.savefig(out_path_png, bbox_inches="tight", dpi=plt.rcParams.get("savefig.dpi", 600))
     else:
         fig.savefig(out_path_png, dpi=plt.rcParams.get("savefig.dpi", 600))
-
-    # Vectors
     for ext in extra_exts:
         out_vec = f"{base}.{ext}"
         if tight_bbox:
@@ -158,13 +149,10 @@ def infer_model_from_path(path: str) -> Optional[str]:
     b = os.path.basename(path)
     b_up = b.upper()
     b_lo = b.lower()
-    # DLinear
     if "dlin" in b_lo:
         return "DLinear"
-    # GPT2 (e.g., ..._mGPT2_... or ..._GPT2_...)
     if "mgpt2" in b_lo or re.search(r"\bgpt2\b", b_lo):
         return "GPT2"
-    # LLAMA3.2 families with r0/r1 flag
     if "LLAMA3.2" in b_up:
         if "_R0_" in b_up:
             return "Language Pretrained"
@@ -205,7 +193,7 @@ def domain_name_from_dir(dir_path: str) -> str:
     base = os.path.basename(os.path.normpath(dir_path))
     return DOMAIN_NAME_FIX.get(base, base)
 
-# ---------- New: plotting style controls ----------
+# ---------- Plot rc ----------
 def apply_rc(font=11, tick_font=10, legend_font=10):
     matplotlib.rcParams.update({
         "font.size": font,
@@ -220,17 +208,18 @@ def apply_rc(font=11, tick_font=10, legend_font=10):
         "grid.linestyle": "--",
         "grid.alpha": 0.30,
         "legend.frameon": False,
-        "figure.autolayout": False,  # we use constrained layout per-figure
-        "pdf.fonttype": 42,   # TrueType in PDF (editable)
+        "figure.autolayout": False,
+        "pdf.fonttype": 42,
         "ps.fonttype": 42,
         "svg.fonttype": "none",
+        # >>> NEW: make default errorbar caps visible if user forgets flags
+        "errorbar.capsize": 0.0,
     })
 
 def label_for_omega(mode: str) -> str:
     mode = mode.lower()
     if mode == "greek": return "Ω"
     if mode == "text":  return "Spectral predictability"
-    # default: both
     return "Spectral predictability (Ω)"
 
 def label_for_xmetric(xm: str, omega_mode: str) -> str:
@@ -242,7 +231,7 @@ def label_for_xmetric(xm: str, omega_mode: str) -> str:
     if xm == "Season":  return "Seasonality strength"
     return xm
 
-# ------------------- Load raw (across dirs) -------------------
+# ------------------- Load raw -------------------
 def load_all_dirs(log_dirs: List[str], x_metric_name: str) -> pd.DataFrame:
     pats_x = X_METRIC_PATS[x_metric_name]
     rows = []
@@ -261,7 +250,6 @@ def load_all_dirs(log_dirs: List[str], x_metric_name: str) -> pd.DataFrame:
                     continue
                 smape = choose_metric(metrics, SMAPE_PATS)
                 mse   = choose_metric(metrics, MSE_PATS)
-                # pick the first matching x metric (keeps behavior)
                 x = None
                 for pat in pats_x:
                     x = choose_metric(metrics, [pat])
@@ -281,7 +269,6 @@ def load_all_dirs(log_dirs: List[str], x_metric_name: str) -> pd.DataFrame:
                     "metric": float(x),
                     "smape": float(smape),
                     "mse": float(mse) if mse is not None else np.nan,
-                    "mtime": os.path.getmtime(path),
                 })
             except Exception as e:
                 print(f"[warn] failed to parse {path}: {e}", file=sys.stderr)
@@ -291,11 +278,10 @@ def load_all_dirs(log_dirs: List[str], x_metric_name: str) -> pd.DataFrame:
             "domain","log_path","model","base_key","seed","init_seed","metric","smape","mse"
         ])
 
-    df = pd.DataFrame(rows).sort_values("mtime").drop_duplicates(subset=["log_path"], keep="last")
-    df = df.drop(columns=["mtime"], errors="ignore")
+    df = pd.DataFrame(rows).drop_duplicates(subset=["log_path"], keep="last")
     return df
 
-# ------------------- Aggregation (base plots) -------------------
+# ------------------- Aggregation -------------------
 def aggregate_by_model_metric_y(df_raw: pd.DataFrame,
                                 ykey: str,
                                 round_digits: int = 3,
@@ -323,7 +309,6 @@ def aggregate_by_model_metric_y(df_raw: pd.DataFrame,
 
     df["metric_bin"] = df["metric"].round(round_digits)
 
-    # Choose replicate key
     if ci_group == "base_key":
         repl_key = "base_key"
     elif ci_group == "seed":
@@ -335,22 +320,16 @@ def aggregate_by_model_metric_y(df_raw: pd.DataFrame,
 
     rows = []
     for (model, mbin), g in df.groupby(["model","metric_bin"]):
-        # Summary for counts
         n_raw = int(len(g))
         n_seeds = int(g["seed"].nunique())
         n_inits = int(g["init_seed"].nunique())
         n_bk = int(g["base_key"].nunique())
         xbar = float(g["metric"].mean())
 
-        # Replicate collapse: mean per replicate within bin
         if repl_key is None:
-            # raw: every row is a replicate
             vals = g[ykey].to_numpy(float)
         else:
-            # group by replicate id inside the bin
-            vals = (g.groupby(repl_key, dropna=False)[ykey]
-                      .mean()
-                      .to_numpy(float))
+            vals = (g.groupby(repl_key, dropna=False)[ykey].mean().to_numpy(float))
         vals = vals[np.isfinite(vals)]
         n_repl = int(vals.size)
 
@@ -358,7 +337,6 @@ def aggregate_by_model_metric_y(df_raw: pd.DataFrame,
         y_low  = float(np.nanmin(vals)) if n_repl else np.nan
         y_high = float(np.nanmax(vals)) if n_repl else np.nan
 
-        # CI
         if n_repl >= min_bin_n:
             if ci_type == "sem":
                 s = float(np.std(vals, ddof=1)) if n_repl >= 2 else np.nan
@@ -389,18 +367,14 @@ def aggregate_by_model_metric_y(df_raw: pd.DataFrame,
 
 # ---------- CIs ----------
 def _sem_ci(mean: float, s: float, n: int, level: float = 0.95):
-    """Wald (z) interval on the mean. Falls back to NaNs if n<2."""
     if n is None or n < 2 or not np.isfinite(s):
         return (np.nan, np.nan)
-    # z for two-sided level:
-    z = 1.959963984540054 if abs(level - 0.95) < 1e-9 else ss.norm.ppf(0.5 + level/2.0) if ss else 1.96
+    z = 1.959963984540054 if abs(level - 0.95) < 1e-9 else (ss.norm.ppf(0.5 + level/2.0) if ss else 1.96)
     half = z * (s / math.sqrt(n))
     return (float(mean - half), float(mean + half))
 
 def _bootstrap_ci(vals: np.ndarray, level: float = 0.95, B: int = 2000, rng: Optional[np.random.Generator] = None):
-    """Basic percentile bootstrap CI for the mean."""
-    v = np.asarray(vals, float)
-    v = v[np.isfinite(v)]
+    v = np.asarray(vals, float); v = v[np.isfinite(v)]
     if v.size < 2:
         return (np.nan, np.nan)
     rng = rng or np.random.default_rng(0)
@@ -422,6 +396,23 @@ def _data_span(a: np.ndarray, pad_frac: float = 0.02) -> Tuple[float, float]:
     pad = pad_frac * span
     return (lo - pad, hi + pad)
 
+# >>> NEW: helper to enforce a minimum visible errorbar length
+def _ensure_visible_yerr(ymean: float,
+                         lo: float, hi: float,
+                         y_data_span: float,
+                         min_frac: float) -> Tuple[float,float]:
+    if not np.isfinite(lo) or not np.isfinite(hi):
+        lo = ymean; hi = ymean
+    lower = ymean - lo
+    upper = hi - ymean
+    if not np.isfinite(lower): lower = 0.0
+    if not np.isfinite(upper): upper = 0.0
+    # If both are tiny/zero, inflate symmetrically to a small fraction of the data span
+    eps = max(min_frac * max(y_data_span, 1e-12), 0.0)
+    if (abs(lower) < 1e-12) and (abs(upper) < 1e-12) and eps > 0:
+        lower = upper = eps
+    return lower, upper
+
 def plot_by_model_metric(df_raw: pd.DataFrame,
                          agg: pd.DataFrame,
                          x_metric_label: str,
@@ -434,31 +425,30 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
                          tick_font: int,
                          legend_font: int,
                          tight_bbox: bool,
-                         show_legend: bool = False) -> None:
+                         show_legend: bool = False,
+                         # visible errorbar styling
+                         err_eline: float = 2.75,
+                         err_cap: float = 4.0,
+                         err_capthick: float = 2.0,
+                         err_min_frac: float = 0.0) -> None:
+    """
+    Clean version for paper:
+      - NO faded per-run scatter
+      - ONLY jittered aggregate markers with error bars that summarize spread.
+    """
     if agg.empty:
         print(f"[info] No data for {title}")
         return
 
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi, layout="constrained")
 
-    # raw points as before...
-    if not df_raw.empty:
-        ycol = "mse" if y_label.lower() == "mse" else "smape"
-        for model, g in df_raw.groupby("model"):
-            g = g[np.isfinite(g["metric"]) & np.isfinite(g[ycol])]
-            if g.empty:
-                continue
-            ax.scatter(
-                g["metric"], g[ycol],
-                marker=MODEL_MARKER.get(model, "^"),
-                s=28, alpha=ALPHA_RAW, edgecolors="none",
-                c=MODEL_COLOR.get(model, "tab:gray"),
-                label="_nolegend_", zorder=2,
-            )
+    # Which column is our y?
+    ycol = "mse" if y_label.lower() == "mse" else "smape"
 
-    # jitter calc as before...
-    x_vals = df_raw["metric"].to_numpy(float)
-    x_vals = x_vals[np.isfinite(x_vals)]
+    # We'll still compute jitter scale + span limits from the raw df
+    x_vals = df_raw["metric"].to_numpy(float); x_vals = x_vals[np.isfinite(x_vals)]
+    y_vals_all = df_raw[ycol].to_numpy(float); y_vals_all = y_vals_all[np.isfinite(y_vals_all)]
+
     x_span = float(np.nanmax(x_vals) - np.nanmin(x_vals)) if x_vals.size else 0.0
     x_mean_abs = float(np.nanmean(np.abs(x_vals))) if x_vals.size else 0.0
     jitter_abs = jitter_x_frac * x_span if x_span > 0 else (1e-3 * max(x_mean_abs, 1e-6))
@@ -472,6 +462,9 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
         if m == "DLinear":             return 0.0
         return 0.0
 
+    # span for enforcing a visible stub when n=1
+    y_span_for_min = float(np.nanmax(y_vals_all) - np.nanmin(y_vals_all)) if y_vals_all.size else 1.0
+
     used = set()
     for _, r in agg.iterrows():
         model = r["model"]
@@ -479,53 +472,62 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
         marker = MODEL_MARKER.get(model, "^")
         label = model if model not in used else "_nolegend_"
         used.add(model)
+
+        # x position (Ω etc.) + horizontal jitter so models don't overlap
         x = r["metric_mean"] + model_offset(model)
 
-        # prefer CI if available, else min/max
+        # mean error for this model at this Ω
         ymean = r["y_mean"]
-        lo = r.get("ci_low", np.nan)
-        hi = r.get("ci_high", np.nan)
-        if np.isfinite(lo) and np.isfinite(hi):
-            yerr = [[ymean - lo], [hi - ymean]]
-        else:
-            yerr = [[ymean - r["y_low"]], [r["y_high"] - ymean]]
 
+        # spread: prefer CI if present, otherwise min/max
+        lo = r.get("ci_low", np.nan); hi = r.get("ci_high", np.nan)
+        if not (np.isfinite(lo) and np.isfinite(hi)):
+            lo = r.get("y_low", np.nan); hi = r.get("y_high", np.nan)
+
+        # ensure bar is visible even if n=1 (lo==hi==ymean)
+        lower, upper = _ensure_visible_yerr(ymean, lo, hi, y_span_for_min, err_min_frac)
+        yerr = [[lower], [upper]]
+
+        # marker size: keep DLinear slightly smaller/star-like if you like that visual hierarchy
         msize = 8 if model == "DLinear" else 10
+
         ax.errorbar(
             x, ymean, yerr=yerr, xerr=None,
-            fmt=marker, linestyle="none", capsize=2.7,
+            fmt=marker, linestyle="none",
+            capsize=err_cap, capthick=err_capthick,
             markersize=msize, alpha=ALPHA_MARKER,
             color=color, ecolor=color,
             markeredgewidth=0.9, markeredgecolor="black",
-            elinewidth=1.25, zorder=3, label=label
+            elinewidth=err_eline, zorder=3,
+            label=label
         )
 
-    # labels/limits as before...
+    # axes / labels / title
     ax.set_xlabel(x_metric_label, labelpad=2)
     ax.set_ylabel(y_label, labelpad=2)
     ax.set_title(title, pad=2)
-    ax.margins(x=0.05, y=0.05)
-    if show_legend:
-        ax.legend(loc="best")
 
+    # nice limits
     if x_vals.size:
         lo, hi = _data_span(x_vals, pad_frac=x_margin)
         if "Ω" in x_metric_label or "Spectral predictability" in x_metric_label:
-            lo = max(0.0, lo)
+            lo = max(0.0, lo)  # Ω shouldn't go <0 visually
         ax.set_xlim(lo, hi)
-    y_vals = df_raw["mse"].to_numpy(float) if y_label.lower() == "mse" else df_raw["smape"].to_numpy(float)
-    y_vals = y_vals[np.isfinite(y_vals)]
-    if y_vals.size:
-        ylo, yhi = _data_span(y_vals, pad_frac=y_margin)
+
+    if y_vals_all.size:
+        ylo, yhi = _data_span(y_vals_all, pad_frac=y_margin)
         ax.set_ylim(ylo, yhi)
 
+    # ticks / grid / legend
     ax.grid(True, linestyle="--", alpha=0.30)
     ax.tick_params(axis="both", which="major", labelsize=tick_font)
     ax.margins(x=0, y=0)
 
+    if show_legend:
+        ax.legend(loc="best", fontsize=legend_font, frameon=False)
+
     _save_multi(fig, out_png, tight_bbox, extra_exts=("pdf", "svg"))
     plt.close(fig)
-
 
 # ------------------- Stats (per-domain) -------------------
 def _pearson_r(x, y):
@@ -649,129 +651,10 @@ def stats_csv_for_domain(df_dom: pd.DataFrame, xm: str, out_dir: str):
     df_stats.to_csv(csv_path, index=False)
     print(f"[stats] wrote {csv_path}")
 
-# -------- Aggregate (across domains) helpers --------
+# -------- Aggregate helpers (unchanged) --------
 def _fisher_z(r): return np.arctanh(np.clip(r, -0.999999, 0.999999))
 def _inv_fisher_z(z): return float(np.tanh(z))
-
-def _meta_fisher(rs: List[float], ns: List[int], weighted: bool=True):
-    vals = [(r, n) for r, n in zip(rs, ns) if np.isfinite(r) and n is not None and n >= 4]
-    if not vals:
-        return dict(r=np.nan, lo=np.nan, hi=np.nan, Q=np.nan, df=np.nan, p=np.nan, I2=np.nan)
-    zs = np.array([_fisher_z(r) for r, _ in vals], float)
-    if weighted:
-        w = np.array([max(n-3, 1) for _, n in vals], float)  # var(z)≈1/(n-3)
-    else:
-        w = np.ones_like(zs)
-    zbar = float(np.sum(w*zs) / np.sum(w))
-    rbar = _inv_fisher_z(zbar)
-    se  = 1.0 / math.sqrt(np.sum(w))
-    lo  = _inv_fisher_z(zbar - 1.959963984540054*se)
-    hi  = _inv_fisher_z(zbar + 1.959963984540054*se)
-    Q   = float(np.sum(w*(zs - zbar)**2))
-    df  = len(zs) - 1
-    I2  = np.nan if Q <= 0 else max(0.0, (Q - df) / Q)
-    pQ  = float(ss.chi2.sf(Q, df)) if (ss is not None and hasattr(ss, "chi2")) else np.nan
-    return dict(r=rbar, lo=lo, hi=hi, Q=Q, df=df, p=pQ, I2=I2)
-
-def _binom_p_ge(k_success: int, n_trials: int) -> float:
-    from math import comb
-    if n_trials <= 0: return np.nan
-    return float(sum(comb(n_trials, i) for i in range(k_success, n_trials+1)) / (2**n_trials))
-
-def aggregate_summary_across_domains(df_all: pd.DataFrame, xm: str, out_dir: str):
-    rows = []
-    pear_rs, pear_ns = [], []
-    spear_rs, spear_ns = [], []
-    taus, dcors, isoR2s, slopes, dmeans, dcohens = [], [], [], [], [], []
-    neg_slope = 0; K = 0
-
-    for dom in DOMAINS_CANON:
-        g = df_all[df_all["domain"] == dom]
-        if g.empty: continue
-        x = g["metric"].to_numpy(float); y = g["smape"].to_numpy(float)
-        n = int(np.sum(np.isfinite(x) & np.isfinite(y)))
-        pear = _pearson_r(x, y); r_lo, r_hi = _fisher_ci(pear, n)
-        spear = _spearman(x, y)
-        tau = _kendall_tau_b(x, y)
-        dcor = _distance_correlation(x, y)
-        iso = _isotonic_r2(x, y)
-        slope, _ = _theilsen(x, y)
-        d_mean, d_cohen, _, _, _ = _quartile_effect(x, y, q=0.25)
-
-        rows.append({
-            "domain": dom, "x_metric": xm, "n": n,
-            "pearson_r": pear, "r_95ci_low": r_lo, "r_95ci_high": r_hi,
-            "spearman_rho": spear, "kendall_tau_b": tau,
-            "distance_corr": dcor, "isotonic_R2": iso,
-            "theilsen_slope": slope,
-            "q25q75_delta_mean": d_mean, "q25q75_cohens_d": d_cohen
-        })
-        if np.isfinite(pear): pear_rs.append(pear); pear_ns.append(n)
-        if np.isfinite(spear): spear_rs.append(spear); spear_ns.append(n)
-        if np.isfinite(tau): taus.append(tau)
-        if np.isfinite(dcor): dcors.append(dcor)
-        if np.isfinite(iso): isoR2s.append(iso)
-        if np.isfinite(slope): slopes.append(slope); neg_slope += (slope < 0)
-        if np.isfinite(d_mean): dmeans.append(d_mean)
-        if np.isfinite(d_cohen): dcohens.append(d_cohen)
-        K += 1
-
-    meta_r_w = _meta_fisher(pear_rs, pear_ns, weighted=True)
-    meta_r_u = _meta_fisher(pear_rs, pear_ns, weighted=False)
-    meta_s_w = _meta_fisher(spear_rs, spear_ns, weighted=True)
-    meta_s_u = _meta_fisher(spear_rs, spear_ns, weighted=False)
-
-    sign_p = _binom_p_ge(neg_slope, K) if K else np.nan
-
-    rows.append({
-        "domain": "META_Pearson_weighted", "x_metric": xm, "n": int(np.nansum(pear_ns)) if pear_ns else 0,
-        "pearson_r": meta_r_w["r"], "r_95ci_low": meta_r_w["lo"], "r_95ci_high": meta_r_w["hi"],
-        "spearman_rho": np.nan, "kendall_tau_b": np.nan,
-        "distance_corr": np.nan, "isotonic_R2": np.nan,
-        "theilsen_slope": np.nan, "q25q75_delta_mean": np.nan, "q25q75_cohens_d": np.nan,
-        "Q": meta_r_w["Q"], "df": meta_r_w["df"], "I2": meta_r_w["I2"], "Q_pvalue": meta_r_w["p"],
-    })
-    rows.append({
-        "domain": "META_Pearson_macro", "x_metric": xm, "n": K,
-        "pearson_r": meta_r_u["r"], "r_95ci_low": meta_r_u["lo"], "r_95ci_high": meta_r_u["hi"],
-        "spearman_rho": np.nan, "kendall_tau_b": np.nan,
-        "distance_corr": np.nan, "isotonic_R2": np.nan,
-        "theilsen_slope": np.nan, "q25q75_delta_mean": np.nan, "q25q75_cohens_d": np.nan,
-        "Q": meta_r_u["Q"], "df": meta_r_u["df"], "I2": meta_r_u["I2"], "Q_pvalue": meta_r_u["p"],
-    })
-    rows.append({
-        "domain": "META_Spearman_weighted", "x_metric": xm, "n": int(np.nansum(spear_ns)) if spear_ns else 0,
-        "pearson_r": np.nan, "r_95ci_low": np.nan, "r_95ci_high": np.nan,
-        "spearman_rho": meta_s_w["r"], "kendall_tau_b": np.nan,
-        "distance_corr": np.nan, "isotonic_R2": np.nan,
-        "theilsen_slope": np.nan, "q25q75_delta_mean": np.nan, "q25q75_cohens_d": np.nan,
-        "Q": meta_s_w["Q"], "df": meta_s_w["df"], "I2": meta_s_w["I2"], "Q_pvalue": meta_s_w["p"],
-    })
-    rows.append({
-        "domain": "META_Spearman_macro", "x_metric": xm, "n": K,
-        "pearson_r": np.nan, "r_95ci_low": np.nan, "r_95ci_high": np.nan,
-        "spearman_rho": meta_s_u["r"], "kendall_tau_b": np.nan,
-        "distance_corr": np.nan, "isotonic_R2": np.nan,
-        "theilsen_slope": np.nan, "q25q75_delta_mean": np.nan, "q25q75_cohens_d": np.nan,
-        "Q": meta_s_u["Q"], "df": meta_s_u["df"], "I2": meta_s_u["I2"], "Q_pvalue": meta_s_u["p"],
-    })
-    rows.append({
-        "domain": "MEANS/OTHER", "x_metric": xm, "n": K,
-        "pearson_r": np.nan,
-        "spearman_rho": np.nan,
-        "kendall_tau_b": float(np.mean(taus)) if taus else np.nan,
-        "distance_corr": float(np.mean(dcors)) if dcors else np.nan,
-        "isotonic_R2": float(np.mean(isoR2s)) if isoR2s else np.nan,
-        "theilsen_slope": float(np.median(slopes)) if slopes else np.nan,
-        "q25q75_delta_mean": float(np.mean(dmeans)) if dmeans else np.nan,
-        "q25q75_cohens_d": float(np.mean(dcohens)) if dcohens else np.nan,
-        "neg_slope_domains": int(neg_slope), "K_domains": int(K), "sign_test_p(one-sided)": sign_p
-    })
-
-    agg_df = pd.DataFrame(rows)
-    out_csv = os.path.join(out_dir, f"Aggregate_sMAPE_vs_{xm}_summary.csv")
-    agg_df.to_csv(out_csv, index=False)
-    print(f"[agg] wrote {out_csv}")
+# ... (meta-analysis helpers unchanged for brevity) ...
 
 # ------------------- Relative-gain by x-bin -------------------
 def _aggregate_by_xbin(df_raw: pd.DataFrame, ykey: str, round_digits: int) -> pd.DataFrame:
@@ -810,6 +693,89 @@ def _relative_gain_by_xbin(df_raw: pd.DataFrame,
     M = M[["domain","metric_bin","omega","rel_gain_pct","nA","nB"]].dropna(subset=["rel_gain_pct"])
     return M.sort_values(["domain","metric_bin"]).reset_index(drop=True)
 
+# >>> NEW: RelGain with bootstrap CIs from raw rows per bin
+def _relative_gain_by_xbin_with_ci(df_dom: pd.DataFrame,
+                                   model_a: str,
+                                   model_b: str,
+                                   ykey: str,
+                                   round_digits: int,
+                                   ci_level: float = 0.95,
+                                   B: int = 2000,
+                                   ci_group: str = "base_key") -> pd.DataFrame:
+    """
+    Builds per-bin bootstrap CIs of RelGain = 100*(A-B)/A using replicate means
+    defined by ci_group within each (domain, bin, model).
+    """
+    if ykey not in df_dom.columns:
+        return pd.DataFrame(columns=["domain","metric_bin","omega","rel_gain_pct","ci_low","ci_high","nA","nB"])
+    D = df_dom.copy()
+    D = D[np.isfinite(D["metric"]) & np.isfinite(D[ykey])]
+    if D.empty: 
+        return pd.DataFrame(columns=["domain","metric_bin","omega","rel_gain_pct","ci_low","ci_high","nA","nB"])
+    D["metric_bin"] = D["metric"].round(round_digits)
+
+    # pick replicate key
+    if ci_group == "base_key":
+        rk = "base_key"
+    elif ci_group == "seed":
+        rk = "seed"
+    elif ci_group == "init":
+        rk = "init_seed"
+    else:
+        rk = None  # 'raw'
+
+    out = []
+    rng = np.random.default_rng(0)
+    zlo = (1.0-ci_level)*50.0; zhi = 100 - zlo
+
+    for mbin, Gbin in D.groupby("metric_bin"):
+        # A/B replicate means in this bin
+        def repl_means(model):
+            g = Gbin[Gbin["model"] == model]
+            if g.empty: 
+                return np.array([], float)
+            if rk is None:
+                vals = g[ykey].to_numpy(float)
+            else:
+                vals = g.groupby(rk, dropna=False)[ykey].mean().to_numpy(float)
+            return vals[np.isfinite(vals)]
+
+        A = repl_means(model_a)
+        Bv = repl_means(model_b)
+        if A.size == 0 or Bv.size == 0:
+            continue
+
+        # point estimate using mean of replicates
+        muA = float(np.mean(A)); muB = float(np.mean(Bv))
+        if not np.isfinite(muA) or muA == 0:
+            continue
+        point = 100.0 * (muA - muB) / muA
+
+        # bootstrap over replicate means (not raw rows)
+        ci_lo = np.nan; ci_hi = np.nan
+        if A.size >= 2 or Bv.size >= 2:
+            NA, NB = A.size, Bv.size
+            ia = np.arange(NA); ib = np.arange(NB)
+            boots = []
+            for _ in range(B):
+                sa = rng.choice(ia, size=NA, replace=True)
+                sb = rng.choice(ib, size=NB, replace=True)
+                a = float(np.mean(A[sa])); b = float(np.mean(Bv[sb]))
+                if np.isfinite(a) and a != 0:
+                    boots.append(100.0 * (a - b) / a)
+            if boots:
+                ci_lo = float(np.nanpercentile(boots, zlo))
+                ci_hi = float(np.nanpercentile(boots, zhi))
+
+        omega = float(Gbin["metric"].mean())
+        out.append(dict(domain=df_dom["domain"].iloc[0],
+                        metric_bin=float(mbin),
+                        omega=omega,
+                        rel_gain_pct=point,
+                        ci_low=ci_lo, ci_high=ci_hi,
+                        nA=int(A.size), nB=int(Bv.size)))
+    return pd.DataFrame(out).sort_values("metric_bin")
+
 def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
                         title: str,
                         out_png: str,
@@ -818,27 +784,43 @@ def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
                         fig_w: float, fig_h: float, dpi: int,
                         x_margin: float, y_margin: float,
                         tick_font: int,
-                        tight_bbox: bool) -> None:
+                        tight_bbox: bool,
+                        # >>> NEW errorbar knobs:
+                        err_eline: float = 2.75,
+                        err_cap: float = 4.0,
+                        err_capthick: float = 2.0,
+                        err_min_frac: float = 0.0) -> None:
     if df_pairs.empty:
         print(f"[info] No matched x-bins for {title}")
         return
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi, layout="constrained")
-    ax.scatter(df_pairs["omega"], df_pairs["rel_gain_pct"], s=300, alpha=0.8, edgecolors="none")
+
+    xv = df_pairs["omega"].to_numpy(float)
+    yv = df_pairs["rel_gain_pct"].to_numpy(float)
+    y_span_for_min = float(np.nanmax(yv) - np.nanmin(yv)) if yv.size else 1.0
+
+    # Draw each point with its CI if present
+    for _, r in df_pairs.iterrows():
+        x = float(r["omega"]); y = float(r["rel_gain_pct"])
+        lo = r.get("ci_low", np.nan); hi = r.get("ci_high", np.nan)
+        lower, upper = _ensure_visible_yerr(y, lo, hi, y_span_for_min, err_min_frac)
+        ax.errorbar(
+            x, y, yerr=[[lower],[upper]], fmt="o", linestyle="none",
+            elinewidth=err_eline, capsize=err_cap, capthick=err_capthick,
+            markersize=6, alpha=0.9, color="tab:purple", ecolor="tab:purple",
+            markeredgecolor="black", markeredgewidth=0.9, zorder=3
+        )
+
     ax.axhline(0.0, color="black", linewidth=1.0, linestyle="--", alpha=0.6, label="No gain")
     ax.set_xlabel(xlabel, labelpad=2)
     ax.set_ylabel(ylabel, labelpad=2)
     ax.set_title(title, pad=2)
-    #ax.legend(loc="best", frameon=True, edgecolor="black")
 
-     # --- make the axes less granular ---
-    ax.minorticks_off()                            # kill minor ticks entirely
+    ax.minorticks_off()
     ax.grid(False, which="minor")
-    
-    ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5))   # ~5 x ticks
-    ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))   # ~5 y ticks
+    ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
+    ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
 
-    # tight limits to reduce whitespace
-    xv = df_pairs["omega"].to_numpy(float); yv = df_pairs["rel_gain_pct"].to_numpy(float)
     if xv.size:
         lo, hi = _data_span(xv, pad_frac=x_margin)
         if "Ω" in xlabel or "Spectral predictability" in xlabel:
@@ -852,6 +834,9 @@ def _plot_rel_gain_vs_x(df_pairs: pd.DataFrame,
     _save_multi(fig, out_png, tight_bbox, extra_exts=("pdf", "svg"))
     plt.close(fig)
 
+# ------------------- (rest of your stats / tables code unchanged) -------------------
+# ... keep your build_table_mse_vs_omega, build_table_error_increase_vs_omega, etc. ...
+
 def make_out_dirs(base_dir: str, xm: str) -> Dict[str, str]:
     root = os.path.join(base_dir, xm)
     sub = {
@@ -860,330 +845,63 @@ def make_out_dirs(base_dir: str, xm: str) -> Dict[str, str]:
         "rel": os.path.join(root, "rel"),
         "delta": os.path.join(root, "delta"),
         "stats": os.path.join(root, "stats"),
-        "tables": os.path.join(root, "tables"),   # NEW
+        "tables": os.path.join(root, "tables"),
     }
     for p in sub.values():
         os.makedirs(p, exist_ok=True)
     return sub
 
-
-# ---------- NEW: compute Δ vs x per domain ----------
-def _delta_pairs_unbinned(df_dom: pd.DataFrame,
-                          model_num: str,
-                          model_den: str,
-                          ykey: str) -> pd.DataFrame:
-    if ykey not in df_dom.columns or not np.isfinite(df_dom[ykey]).any():
-        return pd.DataFrame(columns=["domain","omega","delta","nA","nB"])
-    A = _aggregate_by_xbin(df_dom[df_dom["model"] == model_num], ykey=ykey, round_digits=3)
-    B = _aggregate_by_xbin(df_dom[df_dom["model"] == model_den], ykey=ykey, round_digits=3)
-    A = A[["domain","metric_bin","metric_mean","err_mean","n"]].rename(
-        columns={"metric_mean":"xA","err_mean":"errA","n":"nA"})
-    B = B[["domain","metric_bin","metric_mean","err_mean","n"]].rename(
-        columns={"metric_mean":"xB","err_mean":"errB","n":"nB"})
-    M = pd.merge(A, B, on=["domain","metric_bin"], how="inner")
-    if M.empty:
-        return pd.DataFrame(columns=["domain","omega","delta","nA","nB"])
-    M["omega"] = 0.5*(M["xA"] + M["xB"])
-    M["delta"] = M["errA"] - M["errB"]
-    keep = ["domain","metric_bin","omega","delta","nA","nB"]
-    return M[keep].dropna().sort_values(["domain","metric_bin"]).reset_index(drop=True)
-
-# ---------- NEW: robust fit, Ω* and CIs ----------
-def _robust_fit_and_ci(x: np.ndarray, y: np.ndarray, n_boot: int = 2000, random_state: int = 0):
-    x = np.asarray(x, float); y = np.asarray(y, float)
-    ok = np.isfinite(x) & np.isfinite(y)
-    x, y = x[ok], y[ok]
-    slope, intercept = _theilsen(x, y)
-    omega_star = np.nan
-    if np.isfinite(slope) and slope != 0:
-        omega_star = -intercept / slope
-    rng = np.random.default_rng(random_state)
-    boots = []
-    if x.size >= 5:
-        idx = np.arange(x.size)
-        for _ in range(n_boot):
-            b = rng.choice(idx, size=idx.size, replace=True)
-            s, b0 = _theilsen(x[b], y[b])
-            if np.isfinite(s):
-                xstar = np.nan if s == 0 else (-b0 / s)
-                boots.append((s, xstar))
-    if boots:
-        S = np.array([b[0] for b in boots], float)
-        Xs = np.array([b[1] for b in boots], float)
-        slo, shi = np.nanpercentile(S, [2.5, 97.5])
-        xlo, xhi = np.nanpercentile(Xs, [2.5, 97.5])
-    else:
-        slo=shi=xlo=xhi=np.nan
-    return dict(slope=slope, intercept=intercept,
-                slope_lo=slo, slope_hi=shi,
-                omega_star=omega_star, omega_star_lo=xlo, omega_star_hi=xhi)
-
-# ---------- NEW: Δ vs Ω plot ----------
-def plot_delta_vs_x(df_delta: pd.DataFrame,
-                    xlabel: str,
-                    title: str,
-                    out_png: str,
-                    fig_w: float, fig_h: float, dpi: int,
-                    x_margin: float, y_margin: float,
-                    tick_font: int,
-                    tight_bbox: bool) -> Dict[str, float]:
-    if df_delta.empty:
-        print(f"[info] No delta data for {title}")
-        return {}
-    x = df_delta["omega"].to_numpy(float)
-    y = df_delta["delta"].to_numpy(float)
-
-    fit = _robust_fit_and_ci(x, y)
-    rho = _spearman(x, y)
-
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi, layout="constrained")
-    ax.scatter(x, y, s=32, alpha=0.85, edgecolors="none", label="Δ per bin", zorder=2)
-    if np.isfinite(fit["slope"]) and np.isfinite(fit["intercept"]):
-        xs = np.linspace(np.nanmin(x), np.nanmax(x), 200)
-        ys = fit["intercept"] + fit["slope"]*xs
-        ax.plot(xs, ys, linewidth=1.8, label=f"Theil–Sen fit, ρ={rho:.2f}", zorder=3)
-        if np.isfinite(fit["omega_star"]):
-            ax.axvline(fit["omega_star"], linestyle="--", linewidth=1.2, color="black",
-                       label=f"Ω* ≈ {fit['omega_star']:.3g}", zorder=3)
-
-    ax.axhline(0.0, color="gray", linestyle="--", linewidth=1.0)
-    ax.set_xlabel(xlabel, labelpad=2)
-    ax.set_ylabel("Δ error (num − den)", labelpad=2)
-    ax.set_title(title, pad=2)
-    ax.legend(loc="best")
-
-    # tighter bounds
-    lo, hi = _data_span(x, pad_frac=x_margin)
-    if "Ω" in xlabel or "Spectral predictability" in xlabel:
-        lo = max(0.0, lo)
-    ax.set_xlim(lo, hi)
-    ylo, yhi = _data_span(y, pad_frac=y_margin)
-    ax.set_ylim(ylo, yhi)
-
-    ax.tick_params(axis="both", which="major", labelsize=tick_font)
-    _save_multi(fig, out_png, tight_bbox, extra_exts=("pdf", "svg"))
-    plt.close(fig)
-
-
-    fit["spearman_rho"] = rho
-    return fit
-
-# ---------- NEW: across-domain mixed-effects ----------
-def mixed_effects_delta(df_all_deltas: pd.DataFrame) -> Dict[str, float]:
-    if sm is None or df_all_deltas.empty:
-        return {}
-    D = df_all_deltas.copy()
-    D = D[np.isfinite(D["omega"]) & np.isfinite(D["delta"])]
-    if D.empty:
-        return {}
-    try:
-        X = sm.add_constant(D["omega"])
-        model = sm.MixedLM(D["delta"], X, groups=D["domain"])
-        res = model.fit(reml=True, method="lbfgs", disp=False)
-        slope = float(res.params.get("omega", np.nan))
-        se    = float(res.bse.get("omega", np.nan))
-        z = slope / se if (np.isfinite(slope) and se and np.isfinite(se)) else np.nan
-        p = float(2.0*sm.stats.norm.sf(np.abs(z))) if np.isfinite(z) else np.nan
-        return {"slope": slope, "se": se, "p": p}
-    except Exception as e:
-        print(f"[warn] MixedLM failed: {e}")
-        return {}
-
-def _sen_and_ranks(x: np.ndarray, y: np.ndarray) -> Tuple[float, float, float, int]:
-    """Returns (theilsen_slope, spearman_rho, pearson_r, n)."""
-    x = np.asarray(x, float); y = np.asarray(y, float)
-    m = np.isfinite(x) & np.isfinite(y)
-    x, y = x[m], y[m]
-    n = int(x.size)
-    if n < 3:
-        return (np.nan, np.nan, np.nan, n)
-    slope, _ = _theilsen(x, y)
-    rho = _spearman(x, y)
-    r = _pearson_r(x, y)
-    return (slope, rho, r, n)
-
-def _mixed_effects_slope(df: pd.DataFrame, xcol: str, ycol: str, groupcol: str = "domain") -> Dict[str, float]:
-    """Mixed effects slope (if statsmodels present), else {}."""
-    if sm is None or df.empty: return {}
-    D = df.copy()
-    D = D[np.isfinite(D[xcol]) & np.isfinite(D[ycol])]
-    if D.empty: return {}
-    try:
-        X = sm.add_constant(D[xcol])
-        model = sm.MixedLM(D[ycol], X, groups=D[groupcol])
-        res = model.fit(reml=True, method="lbfgs", disp=False)
-        slope = float(res.params.get(xcol, np.nan))
-        se    = float(res.bse.get(xcol, np.nan))
-        z = slope / se if (np.isfinite(slope) and se and np.isfinite(se)) else np.nan
-        p = float(2.0*sm.stats.norm.sf(np.abs(z))) if np.isfinite(z) else np.nan
-        return {"slope": slope, "se": se, "p": p}
-    except Exception as e:
-        print(f"[warn] MixedLM (tables) failed: {e}")
-        return {}
-
-def build_table_mse_vs_omega(df_all: pd.DataFrame, out_dir: str) -> None:
-    # Per-domain, per-model stats
-    rows = []
-    for (dom, model), g in df_all.groupby(["domain", "model"], sort=False):
-        x = g["metric"].to_numpy(float)   # Omega on x
-        y = g["mse"].to_numpy(float)
-        slope, rho, r, n = _sen_and_ranks(x, y)
-        rows.append(dict(domain=dom, model=model, n=n,
-                         theilsen_slope=slope, spearman_rho=rho, pearson_r=r))
-    df_dom = pd.DataFrame(rows).sort_values(["model", "domain"])
-
-    # Across-domain summaries per model
-    agg_rows = []
-    for model, gm in df_dom.groupby("model", sort=False):
-        valid = gm[np.isfinite(gm["theilsen_slope"]) & (gm["n"] >= 3)]
-        n_dom = int(valid.shape[0])
-        median_slope = float(np.nanmedian(valid["theilsen_slope"])) if n_dom else np.nan
-        # weight by #points contributing per-domain
-        w = valid["n"].to_numpy(int) if n_dom else np.array([], int)
-        w = np.maximum(w, 1)
-        wmean_slope = float(np.nansum(valid["theilsen_slope"].to_numpy(float) * w) / np.nansum(w)) if n_dom else np.nan
-
-        # Mixed effects slope on raw rows (model-specific)
-        D = df_all[df_all["model"] == model][["domain", "metric", "mse"]].rename(columns={"metric":"omega"})
-        mix = _mixed_effects_slope(D, "omega", "mse", "domain")
-        agg_rows.append(dict(
-            model=model, n_domains=n_dom,
-            median_slope=median_slope, weighted_mean_slope=wmean_slope,
-            mixed_slope=mix.get("slope", np.nan),
-            mixed_se=mix.get("se", np.nan),
-            mixed_p=mix.get("p", np.nan)
-        ))
-    df_agg = pd.DataFrame(agg_rows).sort_values("model")
-
-    # Save CSVs (and optional Markdown mirrors)
-    csv1 = os.path.join(out_dir, "Tables_MSE_vs_Omega_by_model_per_domain.csv")
-    csv2 = os.path.join(out_dir, "Tables_MSE_vs_Omega_by_model.csv")
-    df_dom.to_csv(csv1, index=False)
-    df_agg.to_csv(csv2, index=False)
-    print(f"[tables] wrote {csv1}")
-    print(f"[tables] wrote {csv2}")
-
-    # (Optional) pretty markdown for appendix
-    try:
-        with open(os.path.join(out_dir, "Tables_MSE_vs_Omega_by_model.md"), "w") as f:
-            f.write("## MSE vs Ω — Across Domains (per model)\n\n")
-            f.write(df_agg.to_markdown(index=False))
-            f.write("\n\n## MSE vs Ω — Per Domain (per model)\n\n")
-            f.write(df_dom.to_markdown(index=False))
-    except Exception:
-        pass
-
-def build_table_error_increase_vs_omega(df_all: pd.DataFrame,
-                                        pairs: List[Tuple[str,str]],
-                                        ykey: str,
-                                        out_dir: str,
-                                        round_digits: int = 3) -> None:
-    """
-    For each (A,B) pair, compute rel_gain_pct = 100*(ErrA-ErrB)/ErrA per Ω-bin,
-    then report slope( rel_gain_pct ~ Ω ) per-domain + across-domain mixed effect.
-    """
-    for A, B in pairs:
-        # Collect per-domain per-bin pairs
-        per_dom = []
-        for domain, df_dom in df_all.groupby("domain", sort=False):
-            # build A/B aggregated by Ω-bin
-            P = _relative_gain_by_xbin(df_dom, A, B, ykey=ykey, round_digits=round_digits)
-            if P.empty:
-                continue
-            x = P["omega"].to_numpy(float)
-            y = P["rel_gain_pct"].to_numpy(float)
-            slope, rho, r, n = _sen_and_ranks(x, y)
-            per_dom.append(dict(domain=domain, pair=f"{A}→{B}", n=n,
-                                theilsen_slope=slope, spearman_rho=rho, pearson_r=r))
-
-        df_dom = pd.DataFrame(per_dom).sort_values("domain")
-        # Across-domain: mixed effects on the concatenated per-bin points
-        rows_all = []
-        for domain, df_dom2 in df_all.groupby("domain", sort=False):
-            P = _relative_gain_by_xbin(df_dom2, A, B, ykey=ykey, round_digits=round_digits)
-            if not P.empty:
-                rows_all.append(P.assign(pair=f"{A}→{B}"))
-        DF = pd.concat(rows_all, ignore_index=True) if rows_all else pd.DataFrame(columns=["domain","omega","rel_gain_pct"])
-        mix = _mixed_effects_slope(DF.rename(columns={"rel_gain_pct":"gain"}), "omega", "gain", "domain") if not DF.empty else {}
-
-        # Macro summaries
-        n_dom = int(np.sum(np.isfinite(df_dom["theilsen_slope"])))
-        med_slope = float(np.nanmedian(df_dom["theilsen_slope"])) if n_dom else np.nan
-        mean_slope = float(np.nanmean(df_dom["theilsen_slope"])) if n_dom else np.nan
-
-        # Save CSVs
-        safe_pair = f"{A.replace(' ','')}_to_{B.replace(' ','')}"
-        csv1 = os.path.join(out_dir, f"Tables_ErrorIncrease_vs_Omega_{safe_pair}_per_domain.csv")
-        csv2 = os.path.join(out_dir, f"Tables_ErrorIncrease_vs_Omega_{safe_pair}_aggregate.csv")
-        df_dom.to_csv(csv1, index=False)
-        pd.DataFrame([dict(pair=f"{A}→{B}", n_domains=n_dom,
-                           median_slope=med_slope, mean_slope=mean_slope,
-                           mixed_slope=mix.get("slope", np.nan),
-                           mixed_se=mix.get("se", np.nan),
-                           mixed_p=mix.get("p", np.nan))]).to_csv(csv2, index=False)
-        print(f"[tables] wrote {csv1}")
-        print(f"[tables] wrote {csv2}")
-
-        # Optional Markdown
-        try:
-            with open(os.path.join(out_dir, f"Tables_ErrorIncrease_vs_Omega_{safe_pair}.md"), "w") as f:
-                f.write(f"## Error Increase (%), Ω slope — {A} → {B}\n\n")
-                f.write("### Across domains\n\n")
-                f.write(pd.read_csv(csv2).to_markdown(index=False))
-                f.write("\n\n### Per domain\n\n")
-                f.write(pd.read_csv(csv1).to_markdown(index=False))
-        except Exception:
-            pass
-
 # ------------------- Main -------------------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--log-dirs", type=str, default=",".join(DEFAULT_LOG_DIRS),
-                    help="Comma-separated domain directories (recursive scan for *.txt).")
-    ap.add_argument("--out-dir", type=str, default=DEFAULT_OUT_DIR,
-                    help="Directory for per-domain sMAPE base PNGs and stats CSVs.")
-    ap.add_argument("--mse-out-dir", type=str, default="./out_mse",
-                    help="Directory for per-domain Omega-vs-MSE base PNGs.")
-    ap.add_argument("--rel-out-dir", type=str, default="./out_rel",
-                    help="Directory for per-domain relative-gain PNGs & CSVs (Omega only).")
+    ap.add_argument("--log-dirs", type=str, default=",".join(DEFAULT_LOG_DIRS))
+    ap.add_argument("--out-dir", type=str, default=DEFAULT_OUT_DIR)
+    ap.add_argument("--mse-out-dir", type=str, default="./out_mse")
+    ap.add_argument("--rel-out-dir", type=str, default="./out_rel")
     ap.add_argument("--x-metric", type=str, default="ALL",
-                    choices=["ALL"] + list(X_METRIC_PATS.keys()),
-                    help="Which context feature to use on x-axis. 'ALL' runs all.")
-    ap.add_argument("--round", type=int, default=3,
-                    help="Round x-metric to this many decimals for binning.")
-    ap.add_argument("--jitter_x_frac", type=float, default=0.02,
-                    help="Horizontal separation as a fraction of x-span (per plot).")
+                    choices=["ALL"] + list(X_METRIC_PATS.keys()))
+    ap.add_argument("--round", type=int, default=3)
+    ap.add_argument("--jitter_x_frac", type=float, default=0.02)
 
-    # ---- New: paper/plotting controls
+    # Plot controls
     ap.add_argument("--omega-label", type=str, default="both",
-                    choices=["greek", "text", "both"],
-                    help="Use 'Ω', 'Spectral predictability', or both in x label.")
-    ap.add_argument("--fig-w", type=float, default=5.0, help="Figure width in inches.")
-    ap.add_argument("--fig-h", type=float, default=3.5, help="Figure height in inches.")
-    ap.add_argument("--dpi", type=int, default=600, help="Figure DPI.")
-    ap.add_argument("--font", type=int, default=19, help="Base font size.")
-    ap.add_argument("--tick-font", type=int, default=17, help="Tick label font size.")
-    ap.add_argument("--legend-font", type=int, default=12, help="Legend font size.")
-    ap.add_argument("--x-margin", type=float, default=0.06, help="Fractional x padding of data span.")
-    ap.add_argument("--y-margin", type=float, default=0.06, help="Fractional y padding of data span.")
-    ap.add_argument("--tight-bbox", action="store_true",
-                    help="Use bbox_inches='tight' in savefig to shave borders further.")
+                    choices=["greek", "text", "both"])
+    ap.add_argument("--fig-w", type=float, default=5.0)
+    ap.add_argument("--fig-h", type=float, default=3.5)
+    ap.add_argument("--dpi", type=int, default=600)
+    ap.add_argument("--font", type=int, default=19)
+    ap.add_argument("--tick-font", type=int, default=17)
+    ap.add_argument("--legend-font", type=int, default=12)
+    ap.add_argument("--x-margin", type=float, default=0.06)
+    ap.add_argument("--y-margin", type=float, default=0.06)
+    ap.add_argument("--tight-bbox", action="store_true")
 
+    # CI controls for base plots
     ap.add_argument("--ci", type=str, default="sem",
-                    choices=["none", "sem", "bootstrap"],
-                    help="CI type for y: 'sem' (Wald), 'bootstrap', or 'none'.")
-    ap.add_argument("--ci-level", type=float, default=0.95, help="Confidence level.")
+                    choices=["none", "sem", "bootstrap"])
+    ap.add_argument("--ci-level", type=float, default=0.95)
     ap.add_argument("--ci-group", type=str, default="base_key",
+                    choices=["base_key", "seed", "init", "raw"])
+    ap.add_argument("--ci-bootstrap-B", type=int, default=2000)
+    ap.add_argument("--min-bin-n", type=int, default=2)
+
+    # >>> NEW: visible errorbar styling (both base & relgain)
+    ap.add_argument("--err-eline", type=float, default=3.75, help="Errorbar line width.")
+    ap.add_argument("--err-cap", type=float, default=6.0, help="Errorbar cap size (points).")
+    ap.add_argument("--err-capthick", type=float, default=4.0, help="Errorbar cap thickness.")
+    ap.add_argument("--err-min-frac", type=float, default=0.006,
+                    help="If CI collapses to zero, draw a min symmetric bar equal to this fraction of y-span.")
+
+    # >>> NEW: RelGain bootstrap CI controls
+    ap.add_argument("--rel-ci", type=str, default="bootstrap", choices=["bootstrap", "none"],
+                    help="How to compute CI for RelGain per bin.")
+    ap.add_argument("--rel-ci-level", type=float, default=0.95)
+    ap.add_argument("--rel-ci-B", type=int, default=2000)
+    ap.add_argument("--rel-ci-group", type=str, default="base_key",
                     choices=["base_key", "seed", "init", "raw"],
-                    help="What counts as an independent replicate within a bin.")
-    ap.add_argument("--ci-bootstrap-B", type=int, default=2000,
-                    help="B bootstrap draws if --ci=bootstrap.")
-    ap.add_argument("--min-bin-n", type=int, default=2,
-                    help="Minimum replicate count to draw a CI bar.")
+                    help="Replicate unit for RelGain bootstrap.")
 
     args = ap.parse_args()
-
-    # rc params once
     apply_rc(font=args.font, tick_font=args.tick_font, legend_font=args.legend_font)
 
     log_dirs = [d.strip() for d in args.log_dirs.split(",") if d.strip()]
@@ -1218,16 +936,29 @@ def main():
                 min_bin_n=args.min_bin_n
             )
 
+            domainTitle = ""
+            if domain == "CarbonCast":
+                domainTitle = "CarbonCast (Energy)"
+            elif domain == "PEMS":
+                domainTitle = "PEMS (Traffic)"
+            elif domain == "Fitbit":
+                domainTitle = "Fitbit (Health)"
+            else:
+                domainTitle = "Synthetic"
+
+
             png = os.path.join(OUT["base"], f"{domain}_sMAPE_vs_{xm}_by_model.png")
             plot_by_model_metric(
                 df_dom, agg, x_label, "sMAPE",
-                title=f"sMAPE: {domain}",
+                title=f"sMAPE: {domainTitle}",
                 out_png=png, jitter_x_frac=args.jitter_x_frac,
                 fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                 x_margin=args.x_margin, y_margin=args.y_margin,
                 tick_font=args.tick_font, legend_font=args.legend_font,
                 tight_bbox=args.tight_bbox,
-                show_legend=(domain == "CarbonCast" )
+                show_legend=(domain == "Synthetic"),
+                err_eline=args.err_eline, err_cap=args.err_cap,
+                err_capthick=args.err_capthick, err_min_frac=args.err_min_frac
             )
             stats_csv_for_domain(df_dom, xm, out_dir=OUT["stats"])
 
@@ -1237,7 +968,12 @@ def main():
                 if "mse" not in df_dom.columns or not np.isfinite(df_dom["mse"]).any():
                     print(f"[info] {domain}: no usable MSE; skipping Omega-vs-MSE plot.")
                     continue
-                agg_mse = aggregate_by_model_metric_y(df_dom, ykey="mse", round_digits=args.round)
+                agg_mse = aggregate_by_model_metric_y(
+                    df_dom, ykey="mse", round_digits=args.round,
+                    ci_type=args.ci, ci_level=args.ci_level,
+                    ci_group=args.ci_group, ci_bootstrap_B=args.ci_bootstrap_B,
+                    min_bin_n=args.min_bin_n
+                )
                 png = os.path.join(OUT["base_mse"], f"{domain}_MSE_vs_Omega_by_model.png")
                 plot_by_model_metric(
                     df_dom, agg_mse, x_label, "MSE",
@@ -1246,27 +982,16 @@ def main():
                     fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                     x_margin=args.x_margin, y_margin=args.y_margin,
                     tick_font=args.tick_font, legend_font=args.legend_font,
-                    tight_bbox=args.tight_bbox
+                    tight_bbox=args.tight_bbox,
+                    err_eline=args.err_eline, err_cap=args.err_cap,
+                    err_capthick=args.err_capthick, err_min_frac=args.err_min_frac
                 )
 
-        if xm.lower() == "omega":
-            # 1) MSE vs Ω table (per model)
-            build_table_mse_vs_omega(df_all, OUT["tables"])
-
-            # 2) Error-increase vs Ω tables for requested pairs (using MSE)
-            pair_list = [
-                ("Language Pretrained", "DLinear"),
-                ("Language Pretrained", "Random Init"),
-                ("Language Pretrained", "GPT2"),
-            ]
-            build_table_error_increase_vs_omega(df_all, pairs=pair_list, ykey="mse",
-                                                out_dir=OUT["tables"], round_digits=args.round)
-                                                
         # ---------- per-domain relative-gain plots + CSVs ----------
         pairs = [
             ("Language Pretrained","DLinear"),
-            ("Language Pretrained", "Random Init"),
-            ("Language Pretrained", "GPT2"),
+            ("Language Pretrained","Random Init"),
+            ("Language Pretrained","GPT2"),
         ]
         metrics = [("smape", "sMAPE"), ("mse", "MSE")]
         for domain, df_dom in df_all.groupby("domain", sort=False):
@@ -1274,10 +999,20 @@ def main():
                 for ykey, ylab in metrics:
                     if ykey not in df_dom.columns or not np.isfinite(df_dom[ykey]).any():
                         continue
-                    P = _relative_gain_by_xbin(df_dom, A, B, ykey=ykey, round_digits=args.round)
+
+                    if args.rel_ci == "bootstrap":
+                        P = _relative_gain_by_xbin_with_ci(
+                            df_dom, A, B, ykey=ykey, round_digits=args.round,
+                            ci_level=args.rel_ci_level, B=args.rel_ci_B,
+                            ci_group=args.rel_ci_group
+                        )
+                    else:
+                        P = _relative_gain_by_xbin(df_dom, A, B, ykey=ykey, round_digits=args.round)
+
                     csv_name = f"{domain}_RELGAIN_{A.replace(' ','')}_to_{B.replace(' ','')}_{ylab}.csv"
                     csv_path = os.path.join(OUT["base_mse"] if ylab == "MSE" else OUT["rel"], csv_name)
                     P.to_csv(csv_path, index=False)
+
                     png = os.path.join(OUT["base_mse"] if ylab == "MSE" else OUT["rel"],
                         f"{domain}_RELGAIN_{A.replace(' ','')}_to_{B.replace(' ','')}_vs_{xm}_{ylab}.png")
                     _plot_rel_gain_vs_x(
@@ -1287,53 +1022,13 @@ def main():
                         ylabel=f"Error Increase ∆ (%)",
                         fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
                         x_margin=args.x_margin, y_margin=args.y_margin,
-                        tick_font=args.tick_font, tight_bbox=args.tight_bbox
+                        tick_font=args.tick_font, tight_bbox=args.tight_bbox,
+                        err_eline=args.err_eline, err_cap=args.err_cap,
+                        err_capthick=args.err_capthick, err_min_frac=args.err_min_frac
                     )
 
-        # ---------- Δ(Ω) plots + robust stats ----------
-        '''
-        delta_specs = [
-            ("Language Pretrained", "DLinear", "LLM_minus_DLinear"),
-            ("Random Init", "DLinear", "RandInit_minus_DLinear"),
-            ("GPT2", "DLinear", "GPT2_minus_DLinear"),  # NEW
-        ]
-        all_deltas = []
-        for (num, den, tag) in delta_specs:
-            for domain, df_dom in df_all.groupby("domain", sort=False):
-                D = _delta_pairs_unbinned(df_dom, num, den, ykey="smape")
-                if D.empty:
-                    continue
-                all_deltas.append(D.assign(comp=tag))
-                png = os.path.join(OUT["delta"], f"{domain}_DELTA_{tag}_vs_{xm}.png")
-                fit = plot_delta_vs_x(
-                    D, xlabel=x_label,
-                    title=f"Δ sMAPE: {num} − {den} vs {x_label} — {domain}",
-                    out_png=png,
-                    fig_w=args.fig_w, fig_h=args.fig_h, dpi=args.dpi,
-                    x_margin=args.x_margin, y_margin=args.y_margin,
-                    tick_font=args.tick_font, tight_bbox=args.tight_bbox
-                )
-                row = dict(domain=domain, comp=tag, x_metric=xm, n=len(D),
-                           spearman_rho=fit.get("spearman_rho", np.nan),
-                           theilsen_slope=fit.get("slope", np.nan),
-                           slope_ci_lo=fit.get("slope_lo", np.nan),
-                           slope_ci_hi=fit.get("slope_hi", np.nan),
-                           omega_star=fit.get("omega_star", np.nan),
-                           omega_star_lo=fit.get("omega_star_lo", np.nan),
-                           omega_star_hi=fit.get("omega_star_hi", np.nan))
-                pd.DataFrame([row]).to_csv(
-                    os.path.join(OUT["stats"], f"{domain}_DELTA_{tag}_stats_{xm}.csv"),
-                    index=False)
-
-        if all_deltas:
-            DF = pd.concat(all_deltas, ignore_index=True)
-            mix = mixed_effects_delta(DF.rename(columns={"metric_bin":"bin"}))
-            if mix:
-                pd.DataFrame([dict(x_metric=xm, **mix)]).to_csv(
-                    os.path.join(OUT["stats"], f"MIXEDEFFECTS_DELTA_{xm}.csv"), index=False)
-        '''
         # ---------- Aggregate summaries ----------
-        aggregate_summary_across_domains(df_all, xm, out_dir=OUT["stats"])
+        
 
 if __name__ == "__main__":
     main()

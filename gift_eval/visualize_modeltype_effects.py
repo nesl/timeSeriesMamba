@@ -180,7 +180,7 @@ def savefig_pdf(fig: plt.Figure, outdir: Path, stem: str):
     outdir.mkdir(parents=True, exist_ok=True)
     path = outdir / f"{stem}.pdf"
     fig.savefig(path, format="pdf")
-    print(f"[savefig] wrote {path}")
+    #print(f"[savefig] wrote {path}")
 
 # ----------------- main -----------------
 def main():
@@ -194,13 +194,17 @@ def main():
     ap.add_argument("--bins", type=int, default=6)
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--plot_modeltypes", nargs="+", default=None)
-    ap.add_argument("--rel_pairs", nargs="+", default=[])
+    ap.add_argument("--rel_pairs", nargs="+", default=None)
     ap.add_argument("--rel_bins", type=int, default=6)
     ap.add_argument("--granularity", choices=["base", "label"], default="base",
                     help="Use 'label' to keep LOOP_SEATTLE/H separate.")
     ap.add_argument("--debug_keys", action="store_true")
     ap.add_argument("--colors_json", default=None,
                     help='JSON mapping of model_type -> color, e.g. {"pretrained":"#1f77b4"}')
+    ap.add_argument("--heat_y", choices=["lle", "apen"], default="lle",
+                help="Colored scatter Y-axis: LLE or ApEn.")
+    ap.add_argument("--heat_cmap", default="viridis",
+                help="Matplotlib colormap for colored scatter.")
     args = ap.parse_args()
 
     outdir = Path(args.outdir)
@@ -245,7 +249,9 @@ def main():
     if "omega" not in mdf.columns:
         raise ValueError("metrics CSV must include 'omega'")
 
-    met_agg = (mdf.groupby("dataset_id", as_index=False)[["omega"]].mean(numeric_only=True))
+    metric_cols = ["omega"] + [c for c in ["lle", "apen"] if c in mdf.columns]
+    met_agg = (mdf.groupby("dataset_id", as_index=False)[metric_cols].mean(numeric_only=True))
+    #met_agg = (mdf.groupby("dataset_id", as_index=False)[["omega"]].mean(numeric_only=True))
     if "domain" in mdf.columns:
         dom_map = (mdf.groupby("dataset_id", as_index=True)["domain"].agg(first_nonnull).rename("domain").reset_index())
         met_agg = met_agg.merge(dom_map, on="dataset_id", how="left")
@@ -273,6 +279,84 @@ def main():
 
     joined = met_agg.merge(err_agg, on="dataset_id", how="inner")
     joined = joined[np.isfinite(joined["omega"]) & np.isfinite(joined["y"])]
+
+        # ----------------- Colored scatter: Ω vs LLE/ApEn, color = error -----------------
+    heat_y_col = args.heat_y  # "lle" or "apen"
+    print(f"[colored-scatter] Requested heat_y_col = {heat_y_col}")
+
+    if heat_y_col not in met_agg.columns:
+        print(f"[colored-scatter] '{heat_y_col}' not found in met_agg.columns={list(met_agg.columns)}; skipping.")
+    else:
+        # ensure that column exists in joined
+        if heat_y_col not in joined.columns:
+            print(f"[colored-scatter] '{heat_y_col}' not in joined yet. merging it in from met_agg...")
+            joined = joined.merge(
+                met_agg[["dataset_id", heat_y_col]],
+                on="dataset_id",
+                how="left",
+                validate="m:1"
+            )
+
+        print("[colored-scatter] joined columns now:", list(joined.columns))
+        # Dump some samples for sanity
+        print("[colored-scatter] head:\n", joined[["dataset_id","omega",heat_y_col,"y"]].head())
+
+        # finite mask
+        m = (
+            np.isfinite(joined["omega"]) &
+            np.isfinite(joined[heat_y_col]) &
+            np.isfinite(joined["y"])
+        )
+        data = joined.loc[m].copy()
+        print(f"[colored-scatter] usable points = {len(data)} / {len(joined)} total after finite mask")
+
+        if data.empty:
+            print("[colored-scatter] No finite rows; skipping plot.")
+        else:
+            # Show ranges to confirm we're not all NaN/constant
+            print("[colored-scatter] omega range:", float(data["omega"].min()), "to", float(data["omega"].max()))
+            print(f"[colored-scatter] {heat_y_col} range:",
+                  float(data[heat_y_col].min()), "to", float(data[heat_y_col].max()))
+            print("[colored-scatter] y(sMAPE) range:",
+                  float(data["y"].min()), "to", float(data["y"].max()))
+
+            # Color normalization, robust-ish
+            v = data["y"].to_numpy(float)
+            vmin = np.nanpercentile(v, 5)
+            vmax = np.nanpercentile(v, 95)
+            if not np.isfinite(vmin): vmin = np.nanmin(v)
+            if not np.isfinite(vmax): vmax = np.nanmax(v)
+            if (not np.isfinite(vmin)) or (not np.isfinite(vmax)) or (vmin == vmax):
+                # fallback
+                vmin = float(np.nanmin(v))
+                vmax = float(np.nanmax(v))
+                if (not np.isfinite(vmin)) or (not np.isfinite(vmax)) or (vmin == vmax):
+                    vmin, vmax = 0.0, 1.0
+            print(f"[colored-scatter] color norm vmin={vmin}, vmax={vmax}")
+
+            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+
+            fig, ax = plt.subplots()
+            sc = ax.scatter(
+                data["omega"], data[heat_y_col],
+                c=data["y"],
+                s=90,
+                alpha=0.95,
+                cmap=args.heat_cmap,
+                norm=norm,
+                edgecolors="none"
+            )
+
+            cb = plt.colorbar(sc, ax=ax)
+            cb.set_label("sMAPE", fontsize=AXIS_FONTSIZE, fontweight="bold")
+
+            ax.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+            ax.set_ylabel("LLE" if heat_y_col == "lle" else "ApEn",
+                          fontsize=AXIS_FONTSIZE, fontweight="bold")
+            ax.set_title(f"sMAPE vs Ω and {('LLE' if heat_y_col=='lle' else 'ApEn')}")
+
+            savefig_pdf(fig, pdfdir, f"scatter_color_error_vs_omega_by_{heat_y_col}")
+            plt.close(fig)
 
     # ----------------- RAW unbinned scatter (all points; colored by model_type) -----------------
     raw = joined.copy()
@@ -363,14 +447,16 @@ def main():
         pd.DataFrame([stats_all]).to_csv(outdir / "correlation_alltypes_grouped.csv", index=False)
 
     # ----------------- Defaults for rel-gain pairs if none provided -----------------
-    if not args.rel_pairs:
+    if args.rel_pairs == None:
         WANT = ["pretrained", "statistical", "deep-learning", "zero-shot"]
         present = {mt.lower(): mt for mt in joined["model_type"].dropna().unique()}
         have = [present[w] for w in WANT if w in present]
         def _mk(a, b_list): return [f"{a}:{b}" for b in b_list if b in have and a in have and b != a]
         args.rel_pairs = (
             _mk(present.get("pretrained",""), ["statistical","deep-learning","zero-shot"]) +
-            _mk(present.get("zero-shot",""),  ["statistical","deep-learning","pretrained"])
+            _mk(present.get("zero-shot",""),  ["statistical","deep-learning","pretrained"]) +
+            _mk(present.get("deep-learning",""),  ["statistical","zero-shot","pretrained"]) +
+            _mk(present.get("statistical",""),  ["zero-shot","deep-learning","pretrained"])
         )
 
     # ----------------- Interaction lines (Ω vs sMAPE by model_type) -----------------
@@ -442,29 +528,67 @@ def main():
             keep_types = _resolve_modeltypes(args.plot_modeltypes)
 
             for mt, g in joined.groupby("model_type"):
-                if keep_types is not None and mt not in keep_types: continue
+                if keep_types is not None and mt not in keep_types:
+                    continue
                 g = g.copy()
                 g["omega_bin"] = pd.cut(g["omega"], bins=edges, include_lowest=True, labels=False)
-                agg = (g.dropna(subset=["omega_bin"])
-                        .groupby("omega_bin", as_index=False)
-                        .agg(mean=("y","mean"), count=("y","count"), std=("y","std"),
-                             omega_mean=("omega","mean")))
+                agg = (
+                    g.dropna(subset=["omega_bin"])
+                    .groupby("omega_bin", as_index=False)
+                    .agg(mean=("y","mean"),
+                        count=("y","count"),
+                        std=("y","std"),
+                        omega_mean=("omega","mean"))
+                )
                 if len(agg):
                     agg["model_type"] = mt
                     agg["se"] = agg["std"] / np.sqrt(agg["count"].clip(lower=1))
                     binned.append(agg[["model_type","omega_bin","omega_mean","mean","se","count"]])
+
             if binned:
                 bdf = pd.concat(binned, ignore_index=True)
+
+                # --- x-dodge within bins ---
+                # Use bin centers + symmetric offsets scaled by bin width.
+                centers = 0.5 * (edges[:-1] + edges[1:])
+                widths  = (edges[1:] - edges[:-1])
+                jitter_frac = getattr(args, "bin_jitter_frac", 0.18)  # fraction of bin width for full spread
+
+                # Assign per-bin offsets deterministically by model_type order present in that bin
+                # (sorted for stability).
+                x_positions = []
+                for _, row in bdf.iterrows():
+                    b = int(row["omega_bin"])
+                    # model_types present in this bin, sorted for stable ordering
+                    mts_in_bin = sorted(bdf.loc[bdf["omega_bin"] == b, "model_type"].unique().tolist())
+                    n = len(mts_in_bin)
+                    if n == 1:
+                        offset = 0.0
+                    else:
+                        # index of this model_type among those present in the bin
+                        k = mts_in_bin.index(row["model_type"])
+                        # symmetric positions in [-0.5, 0.5]
+                        pos = (k - (n - 1) / 2.0) / max(1, (n - 1))
+                        # scale by half the jitter span and bin width
+                        offset = pos * (jitter_frac*0.1)
+                    x_positions.append(centers[b] + offset)
+
+                bdf = bdf.assign(x=np.array(x_positions))
+
                 fig, ax = plt.subplots()
                 for mt, g in bdf.groupby("model_type"):
-                    ax.errorbar(g["omega_mean"], g["mean"], yerr=g["se"],
-                                marker="o", linestyle="-", capsize=3, label=f"{mt}")
-                ax.set_xlabel("Spectral predictability (Ω)",fontsize=AXIS_FONTSIZE, fontweight="bold")
-                ax.set_ylabel("Mean sMAPE (±1 SE)",fontsize=AXIS_FONTSIZE, fontweight="bold")
-                ax.set_title("Binned trend of sMAPE vs Ω by model type" + (" (filtered)" if keep_types else ""))
+                    ax.errorbar(
+                        g["x"], g["mean"], yerr=g["se"],
+                        marker="o", linestyle="", capsize=3, label=f"{mt}"
+                    )
+
+                ax.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+                ax.set_ylabel("Mean sMAPE (±1 SE)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+                ax.set_title("Binned trend of sMAPE vs Ω by model type")
                 ax.legend(frameon=False, ncol=2)
                 savefig_pdf(fig, pdfdir, "binned_smape_vs_omega_by_modeltype")
                 plt.close(fig)
+
 
     # ----------------- Relative-gain curves -----------------
     if not args.rel_pairs:
@@ -496,7 +620,128 @@ def main():
             savefig_pdf(fig, pdfdir, f"RELGAIN_{safeA}_to_{safeB}_vs_Omega_sMAPE")
             plt.close(fig)
 
-    print(f"[OK] Wrote PDFs to {pdfdir} and tables to {outdir}")
+    #print(f"[OK] Wrote PDFs to {pdfdir} and tables to {outdir}")
+
+        # ----------------- Unbinned relative-gain scatter with LOWESS + CI band -----------------
+    if args.rel_pairs:
+        for spec in args.rel_pairs:
+            try:
+                A, B = _parse_pair(spec)
+            except ValueError as e:
+                #print(f"[relgain-unbinned] {e}")
+                continue
+
+            # Per-dataset errors for both model types
+            tbl = (
+                err_agg.pivot(index="dataset_id", columns="model_type", values="y")
+                [[A, B]].dropna()
+            )
+            if tbl.empty:
+                #print(f"[relgain-unbinned] No overlap for {A} vs {B}")
+                continue
+
+            # Attach omega
+            tbl["omega"] = met_agg.set_index("dataset_id").loc[tbl.index, "omega"]
+            tbl["rel_gain_pct"] = 100.0 * (tbl[A] - tbl[B]) / tbl[A]
+
+            # Finite mask to avoid NaNs
+            m_fin = np.isfinite(tbl["omega"]) & np.isfinite(tbl["rel_gain_pct"])
+            dd = tbl.loc[m_fin].copy()
+            print(f"[relgain-unbinned] {A}->{B} usable points = {len(dd)} (of {len(tbl)})")
+            if dd.empty:
+                print(f"[relgain-unbinned] No finite rows for {A}->{B}; skipping plot.")
+                continue
+
+            fig, ax = plt.subplots()
+            ax.scatter(dd["omega"], dd["rel_gain_pct"], s=90, alpha=0.75)
+
+            # Horizontal 0% reference
+            ax.axhline(0, ls="--", lw=1.0, color="black")
+
+            # Try LOWESS
+            xs_main = None
+            ys_main = None
+            try:
+                import statsmodels.api as sm
+
+                # 1. Fit LOWESS on the actual observed data
+                low_main = sm.nonparametric.lowess(
+                    dd["rel_gain_pct"].to_numpy(float),
+                    dd["omega"].to_numpy(float),
+                    frac=0.4,
+                    return_sorted=True
+                )
+                xs_main = low_main[:, 0]
+                ys_main = low_main[:, 1]
+
+                # 2. Build a smooth common x-grid to evaluate bootstrap curves on
+                x_grid = np.linspace(xs_main.min(), xs_main.max(), 200)
+
+                # Helper: fit LOWESS and interpolate to x_grid
+                def _fit_lowess_interp(x, y, frac, x_grid):
+                    low = sm.nonparametric.lowess(y, x, frac=frac, return_sorted=True)
+                    # LOWESS returns sorted x; we'll do 1D linear interp over that
+                    x_low = low[:, 0]
+                    y_low = low[:, 1]
+                    # guard against duplicates
+                    uniq_mask = np.isfinite(x_low) & np.isfinite(y_low)
+                    x_low = x_low[uniq_mask]
+                    y_low = y_low[uniq_mask]
+                    if len(x_low) < 2:
+                        return np.full_like(x_grid, np.nan, dtype=float)
+                    # np.interp requires ascending x
+                    order = np.argsort(x_low)
+                    x_low = x_low[order]
+                    y_low = y_low[order]
+                    return np.interp(x_grid, x_low, y_low, left=np.nan, right=np.nan)
+
+                # 3. Bootstrap LOWESS curves
+                Boot = 300  # number of bootstrap resamples for CI band
+                curves = []
+                rng = np.random.default_rng(0)
+                x_arr = dd["omega"].to_numpy(float)
+                y_arr = dd["rel_gain_pct"].to_numpy(float)
+                n = len(dd)
+                for _ in range(Boot):
+                    idx = rng.integers(0, n, size=n)  # sample datasets w/ replacement
+                    xb = x_arr[idx]
+                    yb = y_arr[idx]
+                    c = _fit_lowess_interp(xb, yb, frac=0.4, x_grid=x_grid)
+                    curves.append(c)
+
+                curves = np.vstack(curves)  # shape: (Boot, len(x_grid))
+
+                # 4. Compute pointwise percentile band
+                band_lo = np.nanpercentile(curves, 2.5, axis=0)
+                band_hi = np.nanpercentile(curves, 97.5, axis=0)
+
+                # 5. Plot shaded CI band first (so line draws on top)
+                ax.fill_between(
+                    x_grid, band_lo, band_hi,
+                    color="red", alpha=0.15, linewidth=0, edgecolor=None
+                )
+
+                # 6. Plot the main LOWESS fit line
+                ax.plot(xs_main, ys_main, lw=2.0, color="red", alpha=0.9)
+
+            except Exception as e:
+                print(f"[relgain-unbinned] LOWESS or CI failed ({e}); skipping smooth/CI.")
+                # (scatter + baseline 0% line still shown)
+
+            # Axis labels / title
+            ax.set_xlabel("Spectral predictability (Ω)",
+                          fontsize=AXIS_FONTSIZE, fontweight="bold")
+            ax.set_ylabel(f"RelGain (%)",
+                          fontsize=AXIS_FONTSIZE, fontweight="bold")
+            ax.set_title(f"Unbinned Relative Gain: {A} → {B}")
+
+            # Save
+            safeA = re.sub(r"[^A-Za-z0-9]+", "", A)
+            safeB = re.sub(r"[^A-Za-z0-9]+", "", B)
+            savefig_pdf(fig, pdfdir, f"relgain_unbinned_{safeA}_to_{safeB}_withCI")
+            plt.close(fig)
+
+
 
 if __name__ == "__main__":
     main()

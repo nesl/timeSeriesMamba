@@ -206,6 +206,7 @@ def lle_rosenstein(x: np.ndarray, m: int = 8, tau: int = 1, fit_max_steps: int =
     N = len(x)
     emb_len = N - (m - 1) * tau
     if emb_len <= 2 or m < 2:
+        print("emblen < 2")
         return np.nan
     X = np.column_stack([x[i:i+emb_len] for i in range(0, m*tau, tau)])
     theiler = tau * 2
@@ -217,6 +218,8 @@ def lle_rosenstein(x: np.ndarray, m: int = 8, tau: int = 1, fit_max_steps: int =
     nn = np.argmin(dists, axis=1)
     max_t = min(fit_max_steps, emb_len - 1)
     if max_t < 2:
+        print("max_t < 2")
+
         return np.nan
     div = []
     for t in range(1, max_t + 1):
@@ -225,16 +228,20 @@ def lle_rosenstein(x: np.ndarray, m: int = 8, tau: int = 1, fit_max_steps: int =
         valid = jdx + t < emb_len
         idx = idx[valid]; jdx = jdx[valid]
         if idx.size == 0:
+            print("idx size 0")
             div.append(np.nan); continue
         d = np.linalg.norm(X[idx + t] - X[jdx + t], axis=1)
         d = d[d > 0]
         if d.size == 0:
+            print("d size 0")
             div.append(np.nan); continue
         div.append(np.log(d).mean())
     div = np.array(div)
     t = np.arange(1, len(div) + 1, dtype=float)
     mask = np.isfinite(div)
     if mask.sum() < 3:
+        print("mask.sum < 3")
+
         return np.nan
     slope = np.polyfit(t[mask], div[mask], 1)[0]
     return float(slope)
