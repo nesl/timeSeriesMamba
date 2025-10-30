@@ -733,7 +733,7 @@ def main():
                           fontsize=AXIS_FONTSIZE, fontweight="bold")
             ax.set_ylabel(f"RelGain (%)",
                           fontsize=AXIS_FONTSIZE, fontweight="bold")
-            ax.set_title(f"Unbinned Relative Gain: {A} → {B}")
+            ax.set_title(f"Relative Gain: {A} → {B}")
 
             # Save
             safeA = re.sub(r"[^A-Za-z0-9]+", "", A)
