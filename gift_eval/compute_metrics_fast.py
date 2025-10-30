@@ -87,24 +87,51 @@ def is_multivariate_target(target: Any) -> bool:
 
 
 # -------------------- Core FFT-based metrics --------------------
-
-def _safe_rfft_power(x: np.ndarray) -> np.ndarray:
+def _safe_rfft_power(x: np.ndarray) -> np.ndarray | None:
     x = np.asarray(x, dtype=float).ravel()
-    if x.size < 4 or np.allclose(x.std(), 0.0):
-        return np.array([1.0], dtype=float)
+
+    # not enough points to trust FFT shape
+    if x.size < 4:
+        print(f"[DEBUG] Series too short: {x.size}")
+        return None
+
+    std = x.std()
+    if np.allclose(std, 0.0):
+        # perfectly (or near) constant -> treat as pure DC spike
+        # we'll special-case this later instead of faking uniform
+        print(f"[DEBUG] Zero variance detected: std={std}, mean={x.mean()}, min={x.min()}, max={x.max()}")
+        return np.array([1.0], dtype=float)  # meaning "all DC"
+
     x = x - x.mean()
     spec = np.fft.rfft(x, n=x.size)
     power = (spec.real**2 + spec.imag**2)
     power = np.clip(power, 0.0, None)
-    return power if power.sum() > 0 else np.array([1.0], dtype=float)
+
+    if power.sum() == 0:
+        print(f"[DEBUG] Zero total power after FFT")
+        return None
+
+    return power
 
 def spectral_entropy(x: np.ndarray) -> float:
     pwr = _safe_rfft_power(x)
+
+    # Case 1: unusable / too short / numerical trash
+    if pwr is None:
+        return np.nan  # don't hallucinate 1.0
+
+    # Case 2: pure DC or near-constant -> expect all mass in one bin
+    if pwr.size == 1:
+        # all energy in a single frequency bin => entropy 0
+        return 0.0
+
+    # Normal path
     p = pwr / pwr.sum()
     p = np.clip(p, 1e-12, 1.0)
     H = -np.sum(p * np.log(p))
     Hmax = np.log(len(p))
-    return float(H / Hmax) if Hmax > 0 else 1.0
+    return float(H / Hmax) if Hmax > 0 else np.nan
+
 
 def omega_from_arr(x: np.ndarray) -> float:
     return 1.0 - spectral_entropy(x)
@@ -206,7 +233,7 @@ def lle_rosenstein(x: np.ndarray, m: int = 8, tau: int = 1, fit_max_steps: int =
     N = len(x)
     emb_len = N - (m - 1) * tau
     if emb_len <= 2 or m < 2:
-        print("emblen < 2")
+        #print("emblen < 2")
         return np.nan
     X = np.column_stack([x[i:i+emb_len] for i in range(0, m*tau, tau)])
     theiler = tau * 2
@@ -218,7 +245,7 @@ def lle_rosenstein(x: np.ndarray, m: int = 8, tau: int = 1, fit_max_steps: int =
     nn = np.argmin(dists, axis=1)
     max_t = min(fit_max_steps, emb_len - 1)
     if max_t < 2:
-        print("max_t < 2")
+        #print("max_t < 2")
 
         return np.nan
     div = []
@@ -228,19 +255,19 @@ def lle_rosenstein(x: np.ndarray, m: int = 8, tau: int = 1, fit_max_steps: int =
         valid = jdx + t < emb_len
         idx = idx[valid]; jdx = jdx[valid]
         if idx.size == 0:
-            print("idx size 0")
+            #print("idx size 0")
             div.append(np.nan); continue
         d = np.linalg.norm(X[idx + t] - X[jdx + t], axis=1)
         d = d[d > 0]
         if d.size == 0:
-            print("d size 0")
+            #print("d size 0")
             div.append(np.nan); continue
         div.append(np.log(d).mean())
     div = np.array(div)
     t = np.arange(1, len(div) + 1, dtype=float)
     mask = np.isfinite(div)
     if mask.sum() < 3:
-        print("mask.sum < 3")
+        #print("mask.sum < 3")
 
         return np.nan
     slope = np.polyfit(t[mask], div[mask], 1)[0]
@@ -262,6 +289,10 @@ def compute_metric_row(
     permen_m=3, permen_tau=1, lle_m=8, lle_tau=1, lle_steps=15
 ) -> dict:
     out = {}
+    if arr.std() < 1e-6:
+        print(f"[SKIP] Near-constant series: std={arr.std()}")
+        return {m: np.nan for m in metrics}
+
     if "omega" in metrics or "spectral_entropy" in metrics:
         se = spectral_entropy(arr)
         out["spectral_entropy"] = se
@@ -339,6 +370,8 @@ def compute_split_fast(
                 vals = []
                 for arr in iter_dims:
                     arr = prepare_series(np.asarray(arr, dtype=float), truncate, downsample)
+                    if arr.std() < 1e-6:
+                        print(f"[WARN] {label}/{split_name} series {i}: near-constant (std={arr.std():.2e}, mean={arr.mean():.2f})")
                     vals.append(compute_metric_row(arr, metrics, **metric_kwargs))
                 # average across dims
                 merged = {
@@ -440,9 +473,9 @@ def main():
     ap.add_argument("--sampen-r", type=float, default=0.2)
     ap.add_argument("--permen-m", type=int, default=3)
     ap.add_argument("--permen-tau", type=int, default=1)
-    ap.add_argument("--lle-m", type=int, default=8)
+    ap.add_argument("--lle-m", type=int, default=4)
     ap.add_argument("--lle-tau", type=int, default=1)
-    ap.add_argument("--lle-steps", type=int, default=15)
+    ap.add_argument("--lle-steps", type=int, default=10)
     ap.add_argument("--write-series", action="store_true", help="Also write per-series wide CSV (large)")
     ap.add_argument("--strict-domains", action="store_true", help="Raise if any dataset fails to map to domain")
     args = ap.parse_args()

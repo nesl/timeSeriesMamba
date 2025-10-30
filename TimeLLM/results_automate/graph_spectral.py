@@ -67,10 +67,11 @@ DOMAINS_CANON = ("CarbonCast", "PEMS", "Fitbit", "Synthetic")
 # ------------------- Plot styling -------------------
 MODEL_COLOR = {
     "Language Pretrained": "tab:green",
-    "Random Init": "tab:gray",
-    "DLinear": "tab:blue",
+    "Random Init": "tab:brown",
+    "DLinear": "tab:cyan",
     "GPT2": "tab:green",  # same family color as Language Pretrained
 }
+
 MODEL_MARKER = {
     "Language Pretrained": "^",
     "Random Init": "^",
@@ -488,8 +489,7 @@ def plot_by_model_metric(df_raw: pd.DataFrame,
         lower, upper = _ensure_visible_yerr(ymean, lo, hi, y_span_for_min, err_min_frac)
         yerr = [[lower], [upper]]
 
-        # marker size: keep DLinear slightly smaller/star-like if you like that visual hierarchy
-        msize = 8 if model == "DLinear" else 10
+        msize = 10
 
         ax.errorbar(
             x, ymean, yerr=yerr, xerr=None,
@@ -880,7 +880,7 @@ def main():
     ap.add_argument("--ci", type=str, default="sem",
                     choices=["none", "sem", "bootstrap"])
     ap.add_argument("--ci-level", type=float, default=0.95)
-    ap.add_argument("--ci-group", type=str, default="base_key",
+    ap.add_argument("--ci-group", type=str, default="raw",
                     choices=["base_key", "seed", "init", "raw"])
     ap.add_argument("--ci-bootstrap-B", type=int, default=2000)
     ap.add_argument("--min-bin-n", type=int, default=2)
@@ -889,7 +889,7 @@ def main():
     ap.add_argument("--err-eline", type=float, default=3.75, help="Errorbar line width.")
     ap.add_argument("--err-cap", type=float, default=6.0, help="Errorbar cap size (points).")
     ap.add_argument("--err-capthick", type=float, default=4.0, help="Errorbar cap thickness.")
-    ap.add_argument("--err-min-frac", type=float, default=0.006,
+    ap.add_argument("--err-min-frac", type=float, default=0,
                     help="If CI collapses to zero, draw a min symmetric bar equal to this fraction of y-span.")
 
     # >>> NEW: RelGain bootstrap CI controls

@@ -185,8 +185,8 @@ def savefig_pdf(fig: plt.Figure, outdir: Path, stem: str):
 # ----------------- main -----------------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--metrics_csv", default="metrics_summary_wide.csv")
-    ap.add_argument("--results_csv", default="merged_gift_results.csv")
+    ap.add_argument("--metrics_csv", default="metrics_summary_wide_cleaned.csv")
+    ap.add_argument("--results_csv", default="merged_gift_results_cleaned.csv")
     ap.add_argument("--modeltype_json", dest="modeltype_json", default="model_types.json")
     ap.add_argument("--aliases_json", dest="aliases_json", default=None)
     ap.add_argument("--outdir", default="corr_out")
