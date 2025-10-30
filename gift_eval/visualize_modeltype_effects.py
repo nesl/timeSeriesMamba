@@ -199,7 +199,7 @@ def main():
     ap.add_argument("--granularity", choices=["base", "label"], default="base",
                     help="Use 'label' to keep LOOP_SEATTLE/H separate.")
     ap.add_argument("--debug_keys", action="store_true")
-    ap.add_argument("--colors_json", default=None,
+    ap.add_argument("--colors_json", default="model_colors.json",
                     help='JSON mapping of model_type -> color, e.g. {"pretrained":"#1f77b4"}')
     ap.add_argument("--heat_y", choices=["lle", "apen"], default="lle",
                 help="Colored scatter Y-axis: LLE or ApEn.")
@@ -215,7 +215,12 @@ def main():
     aliases = load_json(args.aliases_json)
     model_types = load_json(args.modeltype_json)
     colors_map = load_json(args.colors_json) if args.colors_json else {}
+    norm_colors_map = {k.strip().lower(): v for k, v in colors_map.items()}
 
+    def modeltype_color(mt: str) -> str:
+        if mt is None:
+            return "gray"
+        return norm_colors_map.get(mt.strip().lower(), "gray")
     ''' Test the plotting
     fig, ax = plt.subplots()
     ax.plot([0,1],[0,1])
@@ -502,16 +507,39 @@ def main():
 
     # ----------------- Interaction lines (Ω vs sMAPE by model_type) -----------------
     fig, ax = plt.subplots()
-    for mt, g in sorted(joined.groupby("model_type"), key=lambda kv: kv[0]):
-        if len(g) < 3: continue
+
+    for mt, g in sorted(joined.groupby("model_type"), key=lambda kv: kv[0] if kv[0] is not None else ""):
+        if len(g) < 3:
+            continue
+
+        c = modeltype_color(mt)
+
+        # fit line for this model_type
         m, b = fit_line(g["omega"], g["y"])
         xs = np.linspace(g["omega"].min(), g["omega"].max(), 100)
-        ax.scatter(g["omega"], g["y"], alpha=0.45, label=f"{mt} (n={len(g)})")
-        ax.plot(xs, m * xs + b)
-    ax.set_xlabel("Spectral predictability (Ω)",fontsize=AXIS_FONTSIZE, fontweight="bold")
-    ax.set_ylabel("sMAPE",fontsize=AXIS_FONTSIZE, fontweight="bold")
+
+        # scatter points
+        ax.scatter(
+            g["omega"], g["y"],
+            alpha=0.45,
+            label=f"{mt} (n={len(g)})",
+            color=c,
+            edgecolors="none",
+            s=50,
+        )
+
+        # regression line
+        ax.plot(
+            xs, m * xs + b,
+            color=c,
+            linewidth=2.0,
+        )
+
+    ax.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+    ax.set_ylabel("sMAPE", fontsize=AXIS_FONTSIZE, fontweight="bold")
     ax.set_title("Ω vs sMAPE by model type (mean over datasets)")
-    ax.legend(frameon=False, ncol=2)
+    ax.legend(frameon=False, ncol=2, fontsize=AXIS_FONTSIZE * 0.6)
+
     savefig_pdf(fig, pdfdir, "omega_vs_smape_by_modeltype_lines")
     plt.close(fig)
 
