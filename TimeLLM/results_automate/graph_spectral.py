@@ -69,14 +69,14 @@ MODEL_COLOR = {
     "Language Pretrained": "tab:green",
     "Random Init": "tab:brown",
     "DLinear": "tab:cyan",
-    "GPT2": "tab:green",  # same family color as Language Pretrained
+    "GPT2": "tab:purple",  # same family color as Language Pretrained
 }
 
 MODEL_MARKER = {
-    "Language Pretrained": "^",
+    "Language Pretrained": "v",
     "Random Init": "^",
-    "DLinear": "*",
-    "GPT2": "v",  
+    "DLinear": "X",
+    "GPT2": "o",  
 }
 ALPHA_RAW = 0.28
 ALPHA_MARKER = 0.9

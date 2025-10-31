@@ -61,7 +61,7 @@ mpl.rcParams.update({
     "xtick.major.size": 5,
     "ytick.major.size": 5,
 
-    "axes.grid": False,
+    "axes.grid": True,
 })
 AXIS_FONTSIZE = 20
 # ----------------- helpers -----------------
@@ -365,43 +365,59 @@ def main():
         
             #now do LLE as the shading, sMAPE on the y axis, and omega on the x axis
             # ---------- Plot 2 (NEW): x=Ω, y=sMAPE, color=LLE/ApEn ----------
-            # Here we flip: sMAPE is now on the y-axis, and the color encodes complexity metric.
-            # We'll build a new robust norm based on heat_y_col values.
-            v_comp = data[heat_y_col].to_numpy(float)
-            vmin_comp = np.nanpercentile(v_comp, 5)
-            vmax_comp = np.nanpercentile(v_comp, 95)
-            if not np.isfinite(vmin_comp): vmin_comp = np.nanmin(v_comp)
-            if not np.isfinite(vmax_comp): vmax_comp = np.nanmax(v_comp)
-            if (not np.isfinite(vmin_comp)) or (not np.isfinite(vmax_comp)) or (vmin_comp == vmax_comp):
-                vmin_comp = float(np.nanmin(v_comp))
-                vmax_comp = float(np.nanmax(v_comp))
-                if (not np.isfinite(vmin_comp)) or (not np.isfinite(vmax_comp)) or (vmin_comp == vmax_comp):
-                    vmin_comp, vmax_comp = 0.0, 1.0
-            print(f"[colored-scatter] color(norm for {heat_y_col}) vmin={vmin_comp}, vmax={vmax_comp}")
-
-            norm_comp = mpl.colors.Normalize(vmin=vmin_comp, vmax=vmax_comp)
-
-            fig2, ax2 = plt.subplots()
-            sc2 = ax2.scatter(
-                data["omega"], data["y"],
-                c=data[heat_y_col],    # color by LLE or ApEn
-                s=90,
-                alpha=0.95,
-                cmap=args.heat_cmap,
-                norm=norm_comp,
-                edgecolors="none"
+            collapsed_color = (
+                joined.groupby("dataset_id", as_index=False)
+                .agg(
+                    omega=("omega","mean"),
+                    y=("y","mean"),
+                    heat_val=(heat_y_col,"mean")
+                )
             )
+            # Drop rows with non-finite values
+            m_fin = (
+                np.isfinite(collapsed_color["omega"]) &
+                np.isfinite(collapsed_color["y"]) &
+                np.isfinite(collapsed_color["heat_val"])
+            )
+            collapsed_color = collapsed_color.loc[m_fin].copy()
 
-            cb2 = plt.colorbar(sc2, ax=ax2)
-            cb2.set_label("LLE" if heat_y_col == "lle" else "ApEn",
-                          fontsize=AXIS_FONTSIZE, fontweight="bold")
+            if not collapsed_color.empty:
+                v_comp = collapsed_color["heat_val"].to_numpy(float)
+                vmin_comp = np.nanpercentile(v_comp, 5)
+                vmax_comp = np.nanpercentile(v_comp, 95)
+                if not np.isfinite(vmin_comp): vmin_comp = np.nanmin(v_comp)
+                if not np.isfinite(vmax_comp): vmax_comp = np.nanmax(v_comp)
+                if (not np.isfinite(vmin_comp)) or (not np.isfinite(vmax_comp)) or (vmin_comp == vmax_comp):
+                    vmin_comp = float(np.nanmin(v_comp))
+                    vmax_comp = float(np.nanmax(v_comp))
+                    if (not np.isfinite(vmin_comp)) or (not np.isfinite(vmax_comp)) or (vmin_comp == vmax_comp):
+                        vmin_comp, vmax_comp = 0.0, 1.0
+                norm_comp = mpl.colors.Normalize(vmin=vmin_comp, vmax=vmax_comp)
 
-            ax2.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
-            ax2.set_ylabel("sMAPE", fontsize=AXIS_FONTSIZE, fontweight="bold")
-            ax2.set_title(f"Ω vs sMAPE (color = {('LLE' if heat_y_col=='lle' else 'ApEn')})")
+                fig2, ax2 = plt.subplots()
+                sc2 = ax2.scatter(
+                    collapsed_color["omega"],
+                    collapsed_color["y"],
+                    c=collapsed_color["heat_val"],    # color by dataset-avg LLE/ApEn
+                    s=90,
+                    alpha=0.95,
+                    cmap=args.heat_cmap,
+                    norm=norm_comp,
+                    edgecolors="none"
+                )
 
-            savefig_pdf(fig2, pdfdir, f"scatter_color_{heat_y_col}_vs_omega_sMAPE_yaxis")
-            plt.close(fig2)
+                cb2 = plt.colorbar(sc2, ax=ax2)
+                cb2.set_label("LLE" if heat_y_col == "lle" else "ApEn",
+                              fontsize=AXIS_FONTSIZE, fontweight="bold")
+
+                ax2.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+                ax2.set_ylabel("sMAPE", fontsize=AXIS_FONTSIZE, fontweight="bold")
+                ax2.set_title(f"sMAPE vs Ω (dataset means, color = "
+                              f"{'LLE' if heat_y_col=='lle' else 'ApEn'})")
+                ax2.grid(True, alpha=0.3)
+
+                savefig_pdf(fig2, pdfdir, f"scatter_color_{heat_y_col}_vs_omega_sMAPE_yaxis_datasetMeans")
+                plt.close(fig2)
 
 
     # ----------------- RAW unbinned scatter (all points; colored by model_type) -----------------
@@ -628,36 +644,55 @@ def main():
                 x_positions = []
                 for _, row in bdf.iterrows():
                     b = int(row["omega_bin"])
-                    # model_types present in this bin, sorted for stable ordering
-                    mts_in_bin = sorted(bdf.loc[bdf["omega_bin"] == b, "model_type"].unique().tolist())
+
+                    # All model types that appear in this same bin
+                    mts_in_bin = sorted(
+                        bdf.loc[bdf["omega_bin"] == b, "model_type"].unique().tolist()
+                    )
                     n = len(mts_in_bin)
+
                     if n == 1:
                         offset = 0.0
                     else:
-                        # index of this model_type among those present in the bin
+                        # index of this model_type within that bin's unique model_types
                         k = mts_in_bin.index(row["model_type"])
                         # symmetric positions in [-0.5, 0.5]
                         pos = (k - (n - 1) / 2.0) / max(1, (n - 1))
-                        # scale by half the jitter span and bin width
-                        offset = pos * (jitter_frac*0.1)
+                        # NOTE: You had jitter_frac*0.1, which is actually tiny.
+                        # If you *intended* full jitter_frac span, use jitter_frac/2.
+                        # I'll keep your behavior but make it explicit.
+                        offset = pos * (jitter_frac * 0.1)
+
                     x_positions.append(centers[b] + offset)
 
                 bdf = bdf.assign(x=np.array(x_positions))
 
                 fig, ax = plt.subplots()
+
                 for mt, g in bdf.groupby("model_type"):
+                    c = modeltype_color(mt)
+
                     ax.errorbar(
-                        g["x"], g["mean"], yerr=g["se"],
-                        marker="o", linestyle="", capsize=3, label=f"{mt}"
+                        g["x"],
+                        g["mean"],
+                        yerr=g["se"],                 # if this is 95% CI half-width, rename upstream
+                        marker="o",
+                        linestyle="",
+                        capsize=3,
+                        elinewidth=2.0,
+                        markeredgecolor=c,
+                        markerfacecolor=c,
+                        color=c,
+                        label=f"{mt}",
                     )
 
                 ax.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
                 ax.set_ylabel("Mean sMAPE (±1 SE)", fontsize=AXIS_FONTSIZE, fontweight="bold")
                 ax.set_title("Binned trend of sMAPE vs Ω by model type")
-                ax.legend(frameon=False, ncol=2)
+                ax.legend(frameon=False, ncol=2, fontsize=AXIS_FONTSIZE * 0.5)
+
                 savefig_pdf(fig, pdfdir, "binned_smape_vs_omega_by_modeltype")
                 plt.close(fig)
-
 
     # ----------------- Relative-gain curves -----------------
     if not args.rel_pairs:
@@ -682,7 +717,7 @@ def main():
             ax.set_xlabel("Spectral predictability (Ω)",fontsize=AXIS_FONTSIZE, fontweight="bold")
             ax.set_ylabel(f"Relative Error Gain",fontsize=AXIS_FONTSIZE, fontweight="bold")
             ax.set_title(f"Relative Error Gain Δ (%): {A} → {B}")
-            ax.minorticks_off(); ax.grid(False, which="minor")
+            #ax.minorticks_off(); #ax.grid(False, which="minor")
             ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
             ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins=5))
             ax.legend(frameon=False, loc="best")
