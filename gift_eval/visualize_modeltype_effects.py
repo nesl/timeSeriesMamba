@@ -394,6 +394,16 @@ def main():
                         vmin_comp, vmax_comp = 0.0, 1.0
                 norm_comp = mpl.colors.Normalize(vmin=vmin_comp, vmax=vmax_comp)
 
+                 # --- fit OLS line y = m*x + b over dataset-level means ---
+                m_fit, b_fit = fit_line(collapsed_color["omega"], collapsed_color["y"])
+                xs_line = None
+                if np.isfinite(m_fit) and np.isfinite(b_fit):
+                    xs_line = np.linspace(collapsed_color["omega"].min(),
+                                        collapsed_color["omega"].max(),
+                                        200)
+                    ys_line = m_fit * xs_line + b_fit
+
+
                 fig2, ax2 = plt.subplots()
                 sc2 = ax2.scatter(
                     collapsed_color["omega"],
@@ -406,6 +416,12 @@ def main():
                     edgecolors="none"
                 )
 
+                 # overlay regression line in black
+                if xs_line is not None:
+                    ax2.plot(xs_line, ys_line,
+                            color="black",
+                            linewidth=2.0,
+                            alpha=0.9)
                 cb2 = plt.colorbar(sc2, ax=ax2)
                 cb2.set_label("LLE" if heat_y_col == "lle" else "ApEn",
                               fontsize=AXIS_FONTSIZE, fontweight="bold")
@@ -418,6 +434,13 @@ def main():
 
                 savefig_pdf(fig2, pdfdir, f"scatter_color_{heat_y_col}_vs_omega_sMAPE_yaxis_datasetMeans")
                 plt.close(fig2)
+                pearson_r, pearson_p, spearman_rho, spearman_p = _corrs(
+                    collapsed_color["omega"].values,
+                    collapsed_color["y"].values
+                )
+                print(f"[corr-collapsed-color] n={len(collapsed_color)} | "
+                    f"Pearson r={pearson_r:.4f}, Spearman ρ={spearman_rho:.4f}, slope={m_fit:.4f}")
+                    
 
 
     # ----------------- RAW unbinned scatter (all points; colored by model_type) -----------------
