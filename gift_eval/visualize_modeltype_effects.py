@@ -68,6 +68,48 @@ AXIS_FONTSIZE = 20
 def ensure_dirs(*paths: Path):
     for p in paths: p.mkdir(parents=True, exist_ok=True)
 
+def line_with_ci(x, y, x_grid=None, alpha=0.05):
+    """
+    Fit y ~ x (with intercept) using OLS.
+    Return sorted x_grid, y_pred, lo, hi for the mean prediction (not PI).
+
+    x, y: 1D arrays
+    x_grid: optional array of x positions to evaluate. If None, will span [min(x), max(x)] with 200 pts.
+    alpha: significance level. alpha=0.05 -> 95% CI.
+
+    Returns:
+        xg (np.ndarray), yhat (np.ndarray), lo (np.ndarray), hi (np.ndarray)
+        or (None, None, None, None) if not enough data.
+    """
+    x = np.asarray(x, float)
+    y = np.asarray(y, float)
+    m = np.isfinite(x) & np.isfinite(y)
+    x = x[m]; y = y[m]
+    if x.size < 3:
+        return None, None, None, None
+
+    # build dataframe for statsmodels
+    df_tmp = pd.DataFrame({"x": x, "y": y})
+
+    try:
+        import statsmodels.api as sm
+        X = sm.add_constant(df_tmp["x"].to_numpy())  # [1, x]
+        model = sm.OLS(df_tmp["y"].to_numpy(), X).fit()
+
+        if x_grid is None:
+            x_grid = np.linspace(np.min(x), np.max(x), 200)
+
+        Xg = sm.add_constant(x_grid)
+        pred = model.get_prediction(Xg).summary_frame(alpha=alpha)
+        # mean prediction and its CI:
+        yhat = pred["mean"].to_numpy()
+        lo   = pred["mean_ci_lower"].to_numpy()
+        hi   = pred["mean_ci_upper"].to_numpy()
+        return x_grid, yhat, lo, hi
+    except Exception:
+        return None, None, None, None
+
+
 def canon(s: str) -> str:
     return str(s).strip().lower().replace(" ", "_").replace("-", "_")
 
@@ -394,27 +436,41 @@ def main():
                         vmin_comp, vmax_comp = 0.0, 1.0
                 norm_comp = mpl.colors.Normalize(vmin=vmin_comp, vmax=vmax_comp)
 
-                 # --- fit OLS line y = m*x + b over dataset-level means ---
-                m_fit, b_fit = fit_line(collapsed_color["omega"], collapsed_color["y"])
-                xs_line = None
-                if np.isfinite(m_fit) and np.isfinite(b_fit):
-                    xs_line = np.linspace(collapsed_color["omega"].min(),
-                                        collapsed_color["omega"].max(),
-                                        200)
-                    ys_line = m_fit * xs_line + b_fit
-
+                # --- OLS line + 95% CI band over dataset-level means ---
+                xs_line, ys_line, lo_line, hi_line = line_with_ci(
+                    collapsed_color["omega"].to_numpy(float),
+                    collapsed_color["y"].to_numpy(float),
+                    x_grid=None,         # auto-generate grid
+                    alpha=0.05           # 95% CI
+                )
 
                 fig2, ax2 = plt.subplots()
                 sc2 = ax2.scatter(
                     collapsed_color["omega"],
                     collapsed_color["y"],
-                    c=collapsed_color["heat_val"],    # color by dataset-avg LLE/ApEn
+                    c=collapsed_color["heat_val"],
                     s=90,
                     alpha=0.95,
                     cmap=args.heat_cmap,
                     norm=norm_comp,
                     edgecolors="none"
                 )
+
+                # shaded CI band first (so it's behind the line)
+                if xs_line is not None:
+                    ax2.fill_between(
+                        xs_line, lo_line, hi_line,
+                        alpha=0.2,
+                        color="black",
+                        linewidth=0
+                    )
+                    ax2.plot(
+                        xs_line, ys_line,
+                        color="black",
+                        linewidth=2.0,
+                        alpha=0.9
+                    )
+
 
                  # overlay regression line in black
                 if xs_line is not None:
@@ -438,8 +494,8 @@ def main():
                     collapsed_color["omega"].values,
                     collapsed_color["y"].values
                 )
-                print(f"[corr-collapsed-color] n={len(collapsed_color)} | "
-                    f"Pearson r={pearson_r:.4f}, Spearman ρ={spearman_rho:.4f}, slope={m_fit:.4f}")
+                #print(f"[corr-collapsed-color] n={len(collapsed_color)} | "
+                #    f"Pearson r={pearson_r:.4f}, Spearman ρ={spearman_rho:.4f}, slope={m_fit:.4f}")
                     
 
 
@@ -485,27 +541,68 @@ def main():
         return m, b, resid
 
     def _plot_group(ax, data, title, color=None, label_outliers=False):
+        # correlations for logging / CSV
         pr, pp, sr, sp = _corrs(data["omega"].values, data["y"].values)
         print(f"[corr-{title}] n={len(data)} | Pearson r={pr:.4f}, p={pp if np.isfinite(pp) else 'NA'} | "
-              f"Spearman ρ={sr:.4f}, p={sp if np.isfinite(sp) else 'NA'}")
+            f"Spearman ρ={sr:.4f}, p={sp if np.isfinite(sp) else 'NA'}")
+
+        # slope/intercept just for stats output
         m, b, resid = _fit_line_and_residuals(data)
-        ax.scatter(data["omega"], data["y"], alpha=0.70, color=color)
-        if np.isfinite(m) and np.isfinite(b):
-            xs = np.linspace(np.nanmin(data["omega"]), np.nanmax(data["omega"]), 200)
-            ax.plot(xs, m * xs + b, alpha=0.95, color=(color if color else "black"))
-        if label_outliers:
-            # optional: label furthest 5 points (OFF for requested graph; leave available)
-            d = data.copy(); d["resid"] = resid
+
+        # scatter points
+        ax.scatter(
+            data["omega"], data["y"],
+            alpha=0.70,
+            color=color if color is not None else "black"
+        )
+
+        # regression line + CI ribbon
+        xs_ci, ys_ci, lo_ci, hi_ci = line_with_ci(
+            data["omega"].to_numpy(float),
+            data["y"].to_numpy(float),
+            x_grid=None,
+            alpha=0.05
+        )
+        if xs_ci is not None:
+            # CI band
+            ax.fill_between(
+                xs_ci, lo_ci, hi_ci,
+                alpha=0.2,
+                color=color if color is not None else "black",
+                linewidth=0
+            )
+            # mean line
+            ax.plot(
+                xs_ci, ys_ci,
+                color=color if color is not None else "black",
+                linewidth=2.0,
+                alpha=0.95
+            )
+
+        # optional outlier labels
+        if label_outliers and np.isfinite(m) and np.isfinite(b):
+            d = data.copy()
+            d["resid"] = resid
             top5 = d.sort_values("resid", ascending=False).head(5)
             for _, r in top5.iterrows():
-                ax.annotate(r["dataset_id"], (r["omega"], r["y"]),
-                            xytext=(4, 4), textcoords="offset points",
-                            fontsize=9, bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"))
-        ax.set_xlabel("Spectral predictability (Ω)",fontsize=AXIS_FONTSIZE, fontweight="bold")
-        ax.set_ylabel("sMAPE",fontsize=AXIS_FONTSIZE, fontweight="bold")
+                ax.annotate(
+                    r["dataset_id"],
+                    (r["omega"], r["y"]),
+                    xytext=(4, 4),
+                    textcoords="offset points",
+                    fontsize=9,
+                    bbox=dict(facecolor="white", alpha=0.7, edgecolor="none")
+                )
+
+        ax.set_xlabel("Spectral predictability (Ω)", fontsize=AXIS_FONTSIZE, fontweight="bold")
+        ax.set_ylabel("sMAPE", fontsize=AXIS_FONTSIZE, fontweight="bold")
         ax.set_title(title)
-        return {"pearson_r": pr, "pearson_p": pp, "spearman_rho": sr, "spearman_p": sp,
-                "m": m, "b": b}
+
+        return {
+            "pearson_r": pr, "pearson_p": pp,
+            "spearman_rho": sr, "spearman_p": sp,
+            "m": m, "b": b
+        }
 
     # (A) Per-model_type (points are dataset_id means) — NO labels
     per_type_stats = []
