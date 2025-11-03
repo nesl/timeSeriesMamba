@@ -1,0 +1,2 @@
+pair,n,spearman_rho,ci_lo,ci_hi,p_two_sided,p_one_sided_greater
+deep-learning->pretrained,27,0.18681318681318682,-0.2744055319645475,0.6303853180157417,0.3508059748767256,0.17216556688662268

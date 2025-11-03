@@ -109,6 +109,54 @@ def line_with_ci(x, y, x_grid=None, alpha=0.05):
     except Exception:
         return None, None, None, None
 
+from scipy import stats
+
+def spearman_with_ci(x, y, B: int = 5000, rng=None):
+    """
+    Spearman rho with bootstrap 95% CI (percentile) and two-sided p (from scipy).
+    Returns: rho, p_two_sided, (ci_lo, ci_hi)
+    """
+    rng = np.random.default_rng(rng)
+    x = np.asarray(x, float); y = np.asarray(y, float)
+    m = np.isfinite(x) & np.isfinite(y)
+    x, y = x[m], y[m]
+    if len(x) < 3:
+        return np.nan, np.nan, (np.nan, np.nan)
+
+    rho, p = stats.spearmanr(x, y)
+
+    # Bootstrap CI (resample pairs)
+    n = len(x)
+    boots = np.empty(B, dtype=float)
+    for b in range(B):
+        idx = rng.integers(0, n, size=n)
+        boots[b] = stats.spearmanr(x[idx], y[idx]).correlation
+    lo, hi = np.nanpercentile(boots, [2.5, 97.5])
+    return float(rho), float(p), (float(lo), float(hi))
+
+def spearman_one_sided_perm_p(x, y, alt: str = "greater", R: int = 5000, rng=None):
+    """
+    One-sided permutation test for Spearman rho.
+    alt in {"greater","less"} tests H1: rho > 0 or rho < 0.
+    Returns: p_one_sided
+    """
+    rng = np.random.default_rng(rng)
+    x = np.asarray(x, float); y = np.asarray(y, float)
+    m = np.isfinite(x) & np.isfinite(y)
+    x, y = x[m], y[m]
+    if len(x) < 3:
+        return np.nan
+    rho_obs = stats.spearmanr(x, y).correlation
+    cnt = 0
+    for _ in range(R):
+        y_perm = rng.permutation(y)
+        rho_perm = stats.spearmanr(x, y_perm).correlation
+        if alt == "greater":
+            cnt += (rho_perm >= rho_obs)
+        else:  # "less"
+            cnt += (rho_perm <= rho_obs)
+    p = (cnt + 1) / (R + 1)  # add-1 smoothing
+    return float(p)
 
 def canon(s: str) -> str:
     return str(s).strip().lower().replace(" ", "_").replace("-", "_")
@@ -355,7 +403,7 @@ def main():
             np.isfinite(joined["y"])
         )
         data = joined.loc[m].copy()
-        print(f"[colored-scatter] usable points = {len(data)} / {len(joined)} total after finite mask")
+        #print(f"[colored-scatter] usable points = {len(data)} / {len(joined)} total after finite mask")
 
         if data.empty:
             print("[colored-scatter] No finite rows; skipping plot.")
@@ -871,10 +919,36 @@ def main():
             # Finite mask to avoid NaNs
             m_fin = np.isfinite(tbl["omega"]) & np.isfinite(tbl["rel_gain_pct"])
             dd = tbl.loc[m_fin].copy()
-            print(f"[relgain-unbinned] {A}->{B} usable points = {len(dd)} (of {len(tbl)})")
+            #print(f"[relgain-unbinned] {A}->{B} usable points = {len(dd)} (of {len(tbl)})")
             if dd.empty:
                 print(f"[relgain-unbinned] No finite rows for {A}->{B}; skipping plot.")
                 continue
+
+            # --- Spearman on unbinned points
+            rho, p_two, (ci_lo, ci_hi) = spearman_with_ci(dd["omega"], dd["rel_gain_pct"], B=5000, rng=0)
+
+            # Choose direction for one-sided test based on observed sign
+            alt = "greater" if rho > 0 else "less"
+            p_one = spearman_one_sided_perm_p(dd["omega"], dd["rel_gain_pct"], alt=alt, R=5000, rng=1)
+
+            print(f"[relgain-unbinned] {A}->{B} Spearman ρ={rho:.3f} "
+                f"[95% CI {ci_lo:.3f},{ci_hi:.3f}], p_two={p_two:.3g}, p_one({alt})={p_one:.3g}")
+
+            # Save a small CSV per pair
+            pd.DataFrame([{
+                "pair": f"{A}->{B}",
+                "n": len(dd),
+                "spearman_rho": rho,
+                "ci_lo": ci_lo,
+                "ci_hi": ci_hi,
+                "p_two_sided": p_two,
+                f"p_one_sided_{alt}": p_one
+            }]).to_csv(outdir / f"SPEARMAN_{safeA}_to_{safeB}_unbinned.csv", index=False)
+
+            # (optional) annotate figure
+            ax.text(0.02, 0.98,
+                    f"ρ={rho:.2f} [{ci_lo:.2f},{ci_hi:.2f}], p₁={p_one:.3g}",
+                    transform=ax.transAxes, va="top", ha="left", fontsize=11)
 
             fig, ax = plt.subplots()
             ax.scatter(dd["omega"], dd["rel_gain_pct"], s=90, alpha=0.75)

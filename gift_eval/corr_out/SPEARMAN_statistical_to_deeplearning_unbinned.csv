@@ -1,0 +1,2 @@
+pair,n,spearman_rho,ci_lo,ci_hi,p_two_sided,p_one_sided_greater
+statistical->pretrained,27,0.1288156288156288,-0.28705241520795993,0.4857515142832214,0.521945342839079,0.2601479704059188

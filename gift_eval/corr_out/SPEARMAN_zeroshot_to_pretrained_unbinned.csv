@@ -1,0 +1,2 @@
+pair,n,spearman_rho,ci_lo,ci_hi,p_two_sided,p_one_sided_greater
+deep-learning->statistical,27,0.152014652014652,-0.2781506323183414,0.5681023475878931,0.4490917605633382,0.23135372925414918

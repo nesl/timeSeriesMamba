@@ -1,0 +1,2 @@
+pair,n,spearman_rho,ci_lo,ci_hi,p_two_sided,p_one_sided_greater
+statistical->zero-shot,27,0.2344322344322344,-0.1954618996886234,0.585890619644285,0.2391973468273224,0.11617676464707058
